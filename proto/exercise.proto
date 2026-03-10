@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "/shared/exercise";
+//
+service ExerciseService {
+    //
+    rpc ExerciseExistsReturnId(SendExerciseName) returns (ExerciseExistsReturnIdResp) {};
+}
+//
+message SendExerciseName {
+    // 
+    string exercise_name = 1;  
+}
+
+//
+message  ExerciseExitsResp {
+    //
+    bool exists = 1;  
+}
+
+message GetExerciseIdResp {
+    int32 exercise_id = 1;  
+}
+//
+message ExerciseExistsReturnIdResp {
+    bool exists = 1;    
+    int32 exercise_id = 2;
+}

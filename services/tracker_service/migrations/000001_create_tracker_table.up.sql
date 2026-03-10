@@ -1,0 +1,15 @@
+CREATE TABLE tracker (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	plan_id INTEGER NOT NULL,
+	STARTED_AT TIMESTAMPTZ NOT NULL,
+	ENDED_AT TIMESTAMPTZ	
+);
+
+-- CREATE TABLE workout (
+-- 	tracker_id INTEGER NOT NULL,
+-- 	exercise_id INTEGER NOT NULL,
+-- 	set_number INTEGER NOT NULL,
+-- 	weight INTEGER NOT NULL,
+-- 	reps INTEGER NOT NULL
+-- )

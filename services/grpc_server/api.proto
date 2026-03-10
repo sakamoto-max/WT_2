@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package grpc_server;
+
+option go_package = "/proto";
+//
+service WorkoutTracker {
+    //
+  rpc CreateEmptyPlan(CreateEmptyPlanReq) returns (GeneralResp) {};
+  //
+  rpc CheckIfExerciseExists(ExerciseExistsReq) returns (GeneralResp) {};
+}
+
+
+//
+message CreateEmptyPlanReq {
+    string user_id = 1;
+}
+
+//
+message GeneralResp {
+    // 
+    string message = 1; 
+}
+
+//
+message ExerciseExistsReq {
+    //
+    repeated string exercise_name = 1;
+}
+
+
+
+

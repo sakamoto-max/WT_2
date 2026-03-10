@@ -1,0 +1,8 @@
+CREATE TABLE users(
+	id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	hashed_pass TEXT NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL, 
+	updated_at TIMESTAMPTZ
+)
