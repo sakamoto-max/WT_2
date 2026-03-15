@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"plan_service/internal/models"
+	"plan_service/internal/user"
 )
 
 func OkResponseWriter(w http.ResponseWriter, resp any) {
@@ -25,12 +26,14 @@ func BadReqErrorWriter(w http.ResponseWriter, err string) {
 	json.NewEncoder(w).Encode(err)
 
 }
-func BadReqErrorWriterResp(w http.ResponseWriter, err string) {
 
+func DeletedRespWriter(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+}
+func BadReqErrorWriterResp(w http.ResponseWriter, err string) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
 	json.NewEncoder(w).Encode(err)
-
 }
 
 func InternalServerErrorWriter(w http.ResponseWriter, err string) {
@@ -48,4 +51,10 @@ func MakeJSON(msg models.MqMsg) ([]byte, error) {
 
 	return dataInBytes, nil
 
+}
+
+func ValidationErrWriter(w http.ResponseWriter, errs *[]user.ValidationErr) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(errs)
 }

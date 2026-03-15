@@ -1,15 +1,22 @@
 package handlers
 
 import (
-	"auth_service/internal/middleware"
-	"auth_service/internal/models"
+	// customerrors "auth_service/internal/custom_errors"
+	"auth_service/internal/responses"
 	"auth_service/internal/services"
+	"auth_service/internal/user"
 	"auth_service/internal/utils"
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 	"time"
+	myErrs "wt/pkg/my_errors"
+
+	// myerrors "wt/pkg/my_errors"
+	pkg "wt/pkg/shared"
+	myutils "wt/pkg/utils"
 )
 
 // the user should only get error code and
@@ -27,45 +34,81 @@ func NewHandler(s *services.Service) *Handler {
 }
 
 // needs validation
-// name, email, password
 func (h *Handler) UserSignUp(w http.ResponseWriter, r *http.Request) {
-
-	userDetails := r.Context().Value(middleware.UserSignUp).(*models.Signup)
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	resp, err := h.service.SignUp(ctx, userDetails.Name, userDetails.Email, userDetails.Password)
-	if err != nil {
-		fmt.Printf("error occured : %v\n", err)
-		utils.ErrorWriter(w, err, http.StatusBadRequest)
+	var userInput user.Signup
+
+	json.NewDecoder(r.Body).Decode(&userInput)
+
+	validationErrs, errOccured := userInput.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErrs)
 		return
 	}
 
-	utils.ResponseWriter(w, resp, http.StatusCreated)
+	createdAt, err := h.service.SignUp(ctx, userInput.Name, userInput.Email, userInput.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, myErrs.ErrNameAlreadyExits):
+			myutils.BadReq(w, err)
+		case errors.Is(err, myErrs.ErrEmailAlreadyExits):
+			myutils.BadReq(w, err)
+		default:
+			log.Printf("server encountered an err : %v", err)
+			myutils.InternalServerErr(w, err)
+		}
+		return
+	}
+
+	resp := responses.SignUpResp{
+		Name:      userInput.Name,
+		Email:     userInput.Email,
+		Role:      "user",
+		CreatedAt: createdAt,
+	}
+
+	utils.CreatedRespWriter(w, resp)
 }
 
 // needs validation
 func (h *Handler) UserLogin(w http.ResponseWriter, r *http.Request) {
 
-	userDetails := r.Context().Value(middleware.UserLogin).(*models.Login)
+	var userInput user.Login
+
+	json.NewDecoder(r.Body).Decode(&userInput)
+
+	validationErrs, errOccured := userInput.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErrs)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	resp, err := h.service.Login(ctx, userDetails.Email, userDetails.Password)
+	resp, err := h.service.Login(ctx, userInput.Email, userInput.Password)
 
 	if err != nil {
-		utils.ErrorWriter(w, err, http.StatusBadRequest)
+		switch {
+		case errors.Is(err, myErrs.ErrEmailNotFound):
+			myutils.BadReq(w, err)
+		case errors.Is(err, myErrs.ErrIncorrectPassword):
+			myutils.BadReq(w, err)
+		default:
+			myutils.InternalServerErr(w, err)
+		}
+		// utils.ErrorWriter(w, err, http.StatusBadRequest)
 		return
 	}
 
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }
-
 func (h *Handler) UserLogOut(w http.ResponseWriter, r *http.Request) {
 
-	t := utils.JwtToken{}
+	t := pkg.JwtToken{}
 	claims, ok := t.GetClaimsFromContext(r.Context())
 
 	if !ok {
@@ -99,15 +142,26 @@ func (h *Handler) UserLogOut(w http.ResponseWriter, r *http.Request) {
 // needs validation
 func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 
-	uuid := r.Context().Value(middleware.RefreshTokenUUID).(*models.UUIDReader)
-
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
+	var uuid user.UUIDReader
+	json.NewDecoder(r.Body).Decode(&uuid)
+
+	validationErrs, errOccured := uuid.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErrs)
+	}
+
 	accessToken, err := h.service.GetNewAccessTokenSer(ctx, uuid.UUID)
 	if err != nil {
-		fmt.Printf("error making the token : %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		switch {
+		case errors.Is(err, myErrs.ErrTokenExpired):
+			err := myErrs.NewAppErr(myErrs.ErrTokenExpired, http.StatusBadRequest)
+			err.AppErrWriter(w)
+		default:
+			utils.InternalServerErr(w, err)
+		}
 		return
 	}
 

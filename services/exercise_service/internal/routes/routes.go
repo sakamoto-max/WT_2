@@ -18,9 +18,9 @@ func Routes(h *handlers.Handler) *chi.Mux {
 	r.Use(middleware.Logger)
 
 	r.Get("/exercise", h.GetAllExercises)
-	r.Get("/exercise/{exerciseName}", h.GetExerciseByName)
+	r.Get("/exercise/single", h.GetExerciseByName)
 	r.Post("/exercise", h.CreateExercise)
-	r.Delete("/exercise/{exerciseName}", h.DeleteExecise)
+	r.Delete("/exercise", h.DeleteExecise)
 
 	return r
 }

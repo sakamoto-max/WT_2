@@ -4,27 +4,12 @@ import (
 	"errors"
 )
 
-// type MyErrors struct{
-// 	ErrType string
-// 	ErrName error
-// 	StatusCode int
-// 	Resp any
-// }
-
 type myErrors string
-
-// var (
-// 	errNoClaims myErrors = "ERROR_GETTING_CLAIMS"
-// 	errUserNotFound myErrors = "ERROR_USER_NOT_FOUND"
-// 	errUserAlreadyExists2 myErrors = "ERROR_USER_ALREADY_EXISTS"
-// )
-
 
 type MyErrors struct{
 	ErrCode myErrors `json:"error code"` 
 	Message string `json:"message"`
 }
-
 
 
 var (
@@ -34,8 +19,10 @@ var (
 	ErrRefreshTokenExp = errors.New("the refresh token is expired. please login again")
 )
 
+// db errors
+var (
+	ErrUserNotfound      = errors.New("User not found")
+	ErrNameAlreadyExits  = errors.New("user with this name already exits")
+	ErrEmailAlreadyExits = errors.New("user with this email already exits")
+)
 
-// var (
-// 	ErrGettingClaims = MyErrors{ErrCode: ErrNoClaims, Message: "error getting claims from context"}
-// 	UserAlrExists = MyErrors{ErrCode: ErrUserAlreadyExists2, Message: "user already exists."}
-// )

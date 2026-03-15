@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
+	"tracker_service/internal/user"
 )
 
 func OkResponseWriter(w http.ResponseWriter, resp any) {
@@ -36,4 +37,10 @@ func InternalServerErrorWriter(w http.ResponseWriter, err string) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 	json.NewEncoder(w).Encode(err)
+}
+
+func ValidationErrWriter(w http.ResponseWriter, errs *[]user.ValidationErr) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(errs)
 }

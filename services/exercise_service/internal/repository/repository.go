@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"exercise_service/internal/models"
+	"exercise_service/internal/user"
 	"fmt"
 	"time"
 
@@ -113,7 +114,7 @@ func (r *Repo) DeleteExecise(ctx context.Context, exerciseName string) error {
 	return nil
 }
 
-func (r *Repo) CreateExercise(ctx context.Context, exercise *models.Exercise) error {
+func (r *Repo) CreateExercise(ctx context.Context, exercise *user.Exercise) error {
 
 	var bodyPartId int
 	var equipmentId int
@@ -172,4 +173,19 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, exerciseName string) 
 	}
 
 	return true, id, nil
+}
+
+func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId int) (string, error) {
+
+	var exerciseName string
+
+	err := r.PDB.QueryRow(ctx, `
+		SELECT name from exercises
+		where id = $1	
+	`, exerciseId).Scan(&exerciseName)
+	if err != nil{
+		return exerciseName, fmt.Errorf("error getting execise name for id %v : %w", exerciseId, err )
+	}
+
+	return exerciseName, nil
 }

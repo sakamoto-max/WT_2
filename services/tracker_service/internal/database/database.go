@@ -10,7 +10,7 @@ import (
 )
 
 func initializePostgres(ctx context.Context) (*pgxpool.Pool, error) {
-	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_CONN_STR"))
+	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_CONN"))
 	if err != nil {
 		return pool, err
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -46,18 +45,22 @@ func initializeRedis(ctx context.Context) (*redis.Client, error) {
 	return rdb, nil
 }
 
-func OpenDBs(ctx context.Context) (*pgxpool.Pool, *redis.Client) {
+func InitializeDBs(ctx context.Context) (*pgxpool.Pool, *redis.Client, error) {
+
+	var pool *pgxpool.Pool
+	var client *redis.Client
 
 	pool, err := initializePostgres(ctx)
 	if err != nil {
-		log.Fatalf("error opening postgres pool : %v\n", err)
-	}
-	client, err := initializeRedis(ctx)
-	if err != nil {
-		log.Fatalf("error opening redis client : %v\n", err)
+		return pool, client, err
 	}
 
-	return pool, client
+	client, err = initializeRedis(ctx)
+	if err != nil {
+		return pool, client, err
+	}
+
+	return pool, client, nil
 }
 
 func CloseDBs(pool *pgxpool.Pool, client *redis.Client) {

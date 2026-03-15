@@ -1,17 +1,17 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 	"os"
+	"time"
 
+	"exercise_service/internal/database"
 	"exercise_service/internal/handlers"
 	"exercise_service/internal/repository"
 	"exercise_service/internal/services"
 	exercisepb "workout-tracker/proto/shared/exercise"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 )
 
@@ -25,7 +25,15 @@ func NewgrpcServer(addr string) *grpcServer {
 	}
 }
 
-func (g *grpcServer) Run(pool *pgxpool.Pool, client *redis.Client) {
+func (g *grpcServer) Run() {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	pool, redisClient, err := database.InitializeDBs(ctx)
+	if err != nil {
+		log.Fatalf("error opening the dbs for plan http server : %v", err)
+	}
 
 	lis, err := net.Listen("tcp", os.Getenv("GRPC_SERVER_ADDR"))
 
@@ -35,7 +43,7 @@ func (g *grpcServer) Run(pool *pgxpool.Pool, client *redis.Client) {
 
 	grpcServer := grpc.NewServer()
 
-	repo := repository.NewRepo(pool, client)
+	repo := repository.NewRepo(pool, redisClient)
 	service := services.NewExerciseService(repo)
 	handler := handlers.NewExerciseHandler(service)
 

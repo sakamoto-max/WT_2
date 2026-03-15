@@ -7,7 +7,9 @@ import (
 	"time"
 	"tracker_service/internal/models"
 	"tracker_service/internal/services"
+	"tracker_service/internal/user"
 	"tracker_service/internal/utils"
+	token "wt/pkg/shared"
 )
 
 type Handler struct {
@@ -28,14 +30,19 @@ func NewHandler(s *services.Service) *Handler {
 
 func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
-	ctx, cancel := context.WithTimeout(r.Context(), time.Second * 3)
-	defer cancel()	
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
+	defer cancel()
 
-	userId := 1
+	t := token.JwtToken{}
 
-	err := h.service.StartEmptyWorkoutSer(ctx, userId)
+	claims, ok := t.GetClaimsFromContext(ctx)
+	if !ok {
+
+	}
+
+	err := h.service.StartEmptyWorkoutSer(ctx, claims.UserId)
 	if err != nil {
-		utils.BadReqErrorWriter(w, err.Error())	
+		utils.BadReqErrorWriter(w, err.Error())
 		return
 	}
 
@@ -43,7 +50,7 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 	resp.Message = "an empty workout has started"
 
 	utils.CreatedResponseWriter(w, resp)
-}	
+}
 
 // req :
 // {
@@ -57,16 +64,35 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
-	var planName models.PlanName
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
+	defer cancel()
+
+	var planName user.PlanName
 
 	json.NewDecoder(r.Body).Decode(&planName)
 
+	validationErr, errOccured := planName.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErr)
+		return
+	}
+
+	t := token.JwtToken{}
+	claims, ok := t.GetClaimsFromContext(ctx)
+	if !ok {
+
+	}
+	resp, err := h.service.StartWorkoutWithPlanSer(ctx, claims.UserId, planName.PlanName)
+	if err != nil {
+		utils.BadReqErrorWriter(w, err.Error())
+		return
+	}
+	utils.OkResponseWriter(w, resp)
 
 }
 
 // req :
 // {
-// 	"plan_id" : 1,
 // 	"workout" : [{
 // 		"exercise_id" : 23,
 // 		"tracker"  : [
@@ -123,12 +149,36 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 // {
 // 	"message" : "hurray, workout has ended successfully."
 // }
- 
+
 func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
-	var req models.Tracker
+
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
+	defer cancel()
+	var req user.Tracker
 
 	json.NewDecoder(r.Body).Decode(&req)
+
+	validationErr, errOccured := req.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErr)
+		return
+	}
+
+	t := token.JwtToken{}
+	claims, ok := t.GetClaimsFromContext(ctx)
+	if !ok {
+
+	}
+
+	err := h.service.EndWorkoutSer(ctx, claims.UserId, &req)
+	if err != nil{
+		utils.BadReqErrorWriter(w, err.Error())
+		return
+	}
+
+	resp := map[string]string{
+		"message" : "workout ended successfully",
+	}
+
+	utils.OkResponseWriter(w, resp)
 }
-
-
-

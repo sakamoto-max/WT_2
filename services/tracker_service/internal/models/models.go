@@ -11,14 +11,20 @@ type Reps struct {
 
 type Workout struct {
 	ExerciseId int `json:"exercise_id"`
-	Tracker []Reps `json:"tracker"`
+	RepsWeight []Reps `json:"tracker"`
 }
 
 type Tracker struct {
-	PlanId int `json:"plan_id"`
+	// PlanId int `json:"plan_id"`
 	Workout []Workout `json:"workout"`
 }
 
 type GeneralResp struct {
 	Message string `json:"message"`
+}
+
+type Plan struct{
+	Message string `json:"message"`
+	PlanName string `json:"plan_name"`
+	Exercises []string `json:"exercises_in_plan"`
 }

@@ -16,6 +16,11 @@ func NewExerciseService(repo *repository.Repo) *ExerciseService {
 	}
 }
 
-func (o *ExerciseService) ExerciseExistsReturnId(ctx context.Context, exerciseName string) (bool, int32, error) {
-	return o.DB.ExerciseExistsReturnId(ctx, exerciseName)
+func (e *ExerciseService) ExerciseExistsReturnId(ctx context.Context, exerciseName string) (bool, int32, error) {
+	return e.DB.ExerciseExistsReturnId(ctx, exerciseName)
+}
+
+
+func (e *ExerciseService) GetExerciseName(ctx context.Context, exerciseId int) (string, error) {
+	return e.DB.GetExerciseNameByID(ctx, exerciseId)
 }

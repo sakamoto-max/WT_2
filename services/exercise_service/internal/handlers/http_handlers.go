@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"exercise_service/internal/models"
 	"exercise_service/internal/services"
+	"exercise_service/internal/user"
 	"exercise_service/internal/utils"
 	"fmt"
 	"net/http"
@@ -22,7 +23,6 @@ func NewHandler(s *services.Service) *Handler {
 }
 
 
-
 func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
@@ -37,10 +37,22 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }
 
+
+
 func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
-	// pathvalue to json
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
+
+	var exercise user.ExerciseName
+
+	json.NewDecoder(r.Body).Decode(&exercise)
+
+	validationErr, errOccured := exercise.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErr)
+		return
+	}
 
 	exerciseName := r.PathValue("exerciseName")
 
@@ -53,15 +65,20 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }
 
-// needs validation
 func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 	
-	var exercise models.Exercise
+	var exercise user.Exercise
 
 	json.NewDecoder(r.Body).Decode(&exercise)
+
+	validationErrs, errOccured := exercise.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErrs)
+		return
+	}
 
 	resp, err := h.service.CreateExerciseSer(ctx, &exercise)
 	if err != nil {
@@ -78,18 +95,22 @@ func (h *Handler) UpdateExercise(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// pathvalue to json
-// needs validation
 func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
-	defer cancel()
+	defer cancel()	
 
-	exerciseName := r.PathValue("exerciseName")
+	var exercise user.ExerciseName
 
-	// exerciseName := r.PathValue("exerciseName")
+	json.NewDecoder(r.Body).Decode(&exercise)
 
-	err := h.service.DeleteExeciseSer(ctx, exerciseName)
+	validationErrs, errOccured := exercise.Validate()
+	if errOccured {
+		utils.ValidationErrWriter(w, validationErrs)
+		return
+	}
+
+	err := h.service.DeleteExeciseSer(ctx, exercise.Name)
 	if err != nil {
 		utils.ErrorWriter(w, err, http.StatusBadRequest)
 		return
@@ -97,7 +118,7 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 
 	resp := models.DelExerciseResp{}
 
-	resp.Message = fmt.Sprintf("exercise deleted successfully : %v", exerciseName)
+	resp.Message = fmt.Sprintf("exercise deleted successfully : %v", exercise.Name)
 
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }

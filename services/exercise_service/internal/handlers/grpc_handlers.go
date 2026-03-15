@@ -35,3 +35,15 @@ func (e *ExerciseHandler) ExerciseExistsReturnId(ctx context.Context, req *exerc
 
 	return &resp, nil
 }
+
+func (e *ExerciseHandler) GetExerciseName(ctx context.Context, req *exercisepb.SendExerciseID) (*exercisepb.GetExerciseNameResp, error) {
+	var resp exercisepb.GetExerciseNameResp
+	exerciseName, err := e.service.GetExerciseName(ctx, int(req.ExerciseId))
+	if err != nil{
+		return &resp, err
+	}
+
+	resp.ExerciseName = exerciseName
+
+	return &resp, nil
+}

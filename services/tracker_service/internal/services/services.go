@@ -2,52 +2,111 @@ package services
 
 import (
 	"context"
+	"fmt"
+
+	// customerrors "tracker_service/internal/custom_errors"
+	"tracker_service/internal/models"
 	"tracker_service/internal/repository"
+	"tracker_service/internal/user"
+	exerpb "workout-tracker/proto/shared/exercise"
+	planpb "workout-tracker/proto/shared/plan"
 )
 
 type Service struct {
-	Db *repository.DBs
+	Db      *repository.DBs
+	PClient planpb.PlanServiceClient
+	EClient exerpb.ExerciseServiceClient
 }
 
-func NewService(Db *repository.DBs) *Service {
-	return &Service{Db: Db}
+func NewService(Db *repository.DBs, planClient planpb.PlanServiceClient, exerClient exerpb.ExerciseServiceClient) *Service {
+	return &Service{Db: Db, PClient: planClient, EClient: exerClient}
 }
 
-
-func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) (error) {
+func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
 	// get empty plan_id of user
-	planID := 1
 
-	trackerId, err := s.Db.StartWorkout(ctx, userID, planID)
-	if err != nil{
-		return err
-
+	r, err := s.PClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: int64(userID)})
+	if err != nil {
+		return fmt.Errorf("error getting data from plan server : %w", err)
 	}
+
+	trackerId, err := s.Db.StartWorkout(ctx, userID, int(r.EmptyPlanId))
+	if err != nil {
+		return err
+	}
+
 	err = s.Db.SetTrackerId(ctx, userID, trackerId)
-	if err != nil{
+	if err != nil {
 		err := s.Db.RevertStartWorkout(ctx, trackerId)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 		return err
 	}
-
 	return nil
 }
 
-func StartWorkoutWithPlanSer(ctx context.Context, userId int, planName string) {
+func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planName string) (*models.Plan, error) {
 	// check if plan Name exists
 	// if exists get the plan_id
 
-	// if not 
+	var resp models.Plan
 
+	r, err := s.PClient.PlanExistsReturnPlan(ctx, &planpb.SendPlanName{UserId: int64(userId), PlanName: planName})
+	if err != nil{
+		return &resp, fmt.Errorf("error getting data from plan server : %w", err)
+	}
+
+	if !r.Exists {
+		return &resp, fmt.Errorf("plan doesnt exist")
+	}
 	
+	for _, v := range r.ExerciseIds {
+		r, err := s.EClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: v})
+		if err != nil{
+			return &resp, fmt.Errorf("error getting data from exercise server : %w", err)
+		}
+
+		resp.Exercises = append(resp.Exercises, r.ExerciseName)
+	}
+
+	// do db operations
+	trackerId, err := s.Db.StartWorkout(ctx, userId, int(r.PlanId))
+	if err != nil{
+		return &resp, err
+	}
+
+	err = s.Db.SetTrackerId(ctx, userId, trackerId)
+	if err != nil{
+		err := s.Db.RevertStartWorkout(ctx, trackerId)
+		if err != nil{
+			return &resp, err
+		}
+	}
 	
+	resp.Message = fmt.Sprintf("workout with plan %v has started", planName)
+	resp.PlanName = planName
 
-
+	return &resp, nil
 }
 
-func EndWorkoutSer() {
-	
-}
+func (s *Service) EndWorkoutSer(ctx context.Context, userId int, data *user.Tracker) error {
 
+	// get tracker ID from redis
+	trackerId, err := s.Db.GetTrackerId(ctx, userId)
+	if err != nil{
+		return err
+	}
+	// do the db ops
+	err = s.Db.EndWorkout(ctx, trackerId, data)
+	if err != nil{
+		return err
+	}
+	// del the tracker ID
+	err = s.Db.DelTrackerId(ctx, userId)
+	if err != nil{
+		return err
+	}
+	
+	return nil
+}

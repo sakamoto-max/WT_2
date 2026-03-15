@@ -6,60 +6,57 @@ import (
 	"auth_service/internal/responses"
 	"auth_service/internal/utils"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
+	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	planpb "workout-tracker/proto/shared/plan"
+	myerrors "wt/pkg/my_errors"
+	token "wt/pkg/shared"
+
+	// "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
+// type action string
 
-type action string
-
-var (
-	userSignedUp action = "user_signed_up"
-)
-
+// var (
+// 	userSignedUp action = "user_signed_up"
+// )
 type Service struct {
-	repo      *repository.Repo
+	repo       *repository.Repo
+	planClient planpb.PlanServiceClient
 	// mqChannel *amqp.Channel
 }
 
-func NewService(r *repository.Repo) *Service {
-	return &Service{repo: r}
+func NewService(r *repository.Repo, planClient planpb.PlanServiceClient) *Service {
+	return &Service{repo: r, planClient: planClient}
 }
 
-func (s *Service) SignUp(ctx context.Context, name string, email string, password string) (*responses.SignUpResp, error) {
+func (s *Service) SignUp(ctx context.Context, name string, email string, password string) (time.Time, error) {
 
-	var resp *responses.SignUpResp
+	var CreatedAt time.Time
 
 	email = strings.ToLower(email)
-	exists, err := s.repo.EmailExists(ctx, email)
-	if err != nil {
-		return resp, err
-	}
-
-	if exists {
-		return resp, customerrors.ErrUserAlreadyExists
-	}
 
 	hashedPass, err := utils.HashThePassword(password)
 	if err != nil {
-		return resp, err
+		return CreatedAt, err
 	}
 
-	resp, err = s.repo.SignUp(ctx, name, email, hashedPass)
+	userId, CreatedAt, err := s.repo.CreateUser(ctx, name, email, hashedPass)
 	if err != nil {
-		return resp, err
+		return CreatedAt, err
 	}
 
-	resp.Role = "user"
+	_, err = s.planClient.CreateEmptyPlan(ctx, &planpb.SendUserID{UserId: int64(userId),})
 
-	// err = Produce(ctx, string(userSignedUp), userId, "plan", s.mqChannel)
-	// if err != nil {
-	// 	return resp, fmt.Errorf("error in producing to the queue : %w/n", err)
-	// }
+	if err != nil{
+		// try again
+		return CreatedAt, fmt.Errorf("error creating empty plan")
+	}
 
-	return resp, nil
+	return CreatedAt, nil
 }
 
 func (s *Service) Login(ctx context.Context, email string, password string) (*responses.LoginResp, error) {
@@ -78,7 +75,7 @@ func (s *Service) Login(ctx context.Context, email string, password string) (*re
 		return &resp, customerrors.PleaseSignUp
 	}
 
-	hashedPass, err := s.repo.FetchHashedPass(ctx, email)
+	hashedPass, err := s.repo.FetchUserPass(ctx, email)
 	if err != nil {
 		return &resp, err
 	}
@@ -93,7 +90,7 @@ func (s *Service) Login(ctx context.Context, email string, password string) (*re
 		return &resp, err
 	}
 
-	token := utils.JwtToken{}
+	token := token.JwtToken{}
 	AccessToken, err := token.GenerateAccessToken(userId, roleID)
 	if err != nil {
 		return &resp, err
@@ -140,7 +137,7 @@ func (s *Service) Logout(ctx context.Context, userId int) error {
 		return err
 	}
 
-	err = s.repo.Logout(ctx, userId, uuid)
+	err = s.repo.UserLogout(ctx, userId, uuid)
 	if err != nil {
 		return err
 	}
@@ -155,15 +152,14 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID uuid.UUID) (str
 		return "", fmt.Errorf("error getting token from repo : %w", err)
 	}
 
-	token := utils.JwtToken{}
+	token := token.JwtToken{}
 
 	claims, err := token.ValidateToken(refreshToken)
 	if err != nil {
-		if err == jwt.ErrTokenExpired {
-			return "", customerrors.ErrRefreshTokenExp
+		if errors.Is(err, myerrors.ErrTokenExpired){
+			return "", myerrors.ErrRefreshExpired
 		}
-		//
-		return "", fmt.Errorf("error validating the token : %w", err)
+		return "", err
 	}
 
 	accessToken, err := token.GenerateAccessToken(claims.UserId, claims.RoleId)

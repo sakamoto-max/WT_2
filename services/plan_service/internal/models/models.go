@@ -2,10 +2,7 @@ package models
 
 import "time"
 
-type Plan struct {
-	PlanName string `json:"plan_name"`
-	UserId   int    `json:"user_id"`
-}
+var EmptyPlan string = "empty"
 
 type Plan2 struct {
 	PlanName  string   `json:"plan_name"`
@@ -19,8 +16,8 @@ type Plan2Resp struct{
 }
 
 type Plan3 struct {
-	Id       int
 	PlanName string
+	Id       int
 }
 
 type AllPlansResp struct {

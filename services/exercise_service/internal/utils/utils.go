@@ -17,3 +17,9 @@ func ErrorWriter(w http.ResponseWriter, err error, statusCode int) {
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(err.Error())
 }
+
+func ValidationErrWriter(w http.ResponseWriter, resp any) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(resp)
+}

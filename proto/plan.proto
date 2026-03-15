@@ -2,3 +2,53 @@ syntax = "proto3";
 
 package proto;
 
+option go_package = "/shared/plan";
+
+//
+service PlanService {
+  // plan_name, user_id -> exists, plan_id
+  rpc PlanExistsReturnId(SendPlanName) returns (PlanExistsResp) {};
+  // plan_name, user_id -> exits, plan_id, exercise_ids
+  rpc PlanExistsReturnPlan(SendPlanName) returns (PlanExistsReturnPlanResp) {};
+  // user_id -> empty_plan_id
+  rpc GetEmptyPlanId(SendUserID) returns (EmptyPlanIdResp) {};
+  // 
+  rpc CreateEmptyPlan(SendUserID) returns (CreateEmptyPlanResp) {}; 
+}
+
+//
+message SendUserID {
+    // 
+    int64 user_id = 1;
+}
+
+message CreateEmptyPlanResp {
+    string message = 1;
+}
+
+message EmptyPlanIdResp {
+    int64 empty_plan_id = 1;
+}
+//
+message SendPlanName {
+    //
+    int64 user_id = 1;
+    string plan_name = 2;
+  
+}
+//
+message PlanExistsResp {
+    bool exists = 1;
+    int64 plan_id = 2;  
+}
+
+//
+message PlanExistsReturnPlanResp {
+    //
+    bool exists = 1;
+    //
+    int64 plan_id = 2;
+    //
+    repeated int64 exercise_ids = 3;
+}
+

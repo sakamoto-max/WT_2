@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ExerciseService_ExerciseExistsReturnId_FullMethodName = "/proto.ExerciseService/ExerciseExistsReturnId"
+	ExerciseService_GetExerciseName_FullMethodName        = "/proto.ExerciseService/GetExerciseName"
 )
 
 // ExerciseServiceClient is the client API for ExerciseService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExerciseServiceClient interface {
 	ExerciseExistsReturnId(ctx context.Context, in *SendExerciseName, opts ...grpc.CallOption) (*ExerciseExistsReturnIdResp, error)
+	GetExerciseName(ctx context.Context, in *SendExerciseID, opts ...grpc.CallOption) (*GetExerciseNameResp, error)
 }
 
 type exerciseServiceClient struct {
@@ -47,11 +49,22 @@ func (c *exerciseServiceClient) ExerciseExistsReturnId(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *exerciseServiceClient) GetExerciseName(ctx context.Context, in *SendExerciseID, opts ...grpc.CallOption) (*GetExerciseNameResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExerciseNameResp)
+	err := c.cc.Invoke(ctx, ExerciseService_GetExerciseName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExerciseServiceServer is the server API for ExerciseService service.
 // All implementations must embed UnimplementedExerciseServiceServer
 // for forward compatibility.
 type ExerciseServiceServer interface {
 	ExerciseExistsReturnId(context.Context, *SendExerciseName) (*ExerciseExistsReturnIdResp, error)
+	GetExerciseName(context.Context, *SendExerciseID) (*GetExerciseNameResp, error)
 	mustEmbedUnimplementedExerciseServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedExerciseServiceServer struct{}
 
 func (UnimplementedExerciseServiceServer) ExerciseExistsReturnId(context.Context, *SendExerciseName) (*ExerciseExistsReturnIdResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExerciseExistsReturnId not implemented")
+}
+func (UnimplementedExerciseServiceServer) GetExerciseName(context.Context, *SendExerciseID) (*GetExerciseNameResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetExerciseName not implemented")
 }
 func (UnimplementedExerciseServiceServer) mustEmbedUnimplementedExerciseServiceServer() {}
 func (UnimplementedExerciseServiceServer) testEmbeddedByValue()                         {}
@@ -104,6 +120,24 @@ func _ExerciseService_ExerciseExistsReturnId_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExerciseService_GetExerciseName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendExerciseID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExerciseServiceServer).GetExerciseName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExerciseService_GetExerciseName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExerciseServiceServer).GetExerciseName(ctx, req.(*SendExerciseID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExerciseService_ServiceDesc is the grpc.ServiceDesc for ExerciseService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var ExerciseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExerciseExistsReturnId",
 			Handler:    _ExerciseService_ExerciseExistsReturnId_Handler,
+		},
+		{
+			MethodName: "GetExerciseName",
+			Handler:    _ExerciseService_GetExerciseName_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

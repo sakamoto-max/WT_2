@@ -4,6 +4,8 @@ import (
 	"tracker_service/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
+	middleware "wt/pkg/middleware"
+	chimiddleware "github.com/go-chi/chi/middleware"
 )
 
 // think you have a front end
@@ -15,9 +17,13 @@ import (
 func Router(h *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Post("workout/empty", h.StartEmptyWorkout)
-	r.Post("workout/{planName}", h.EndWorkout)
-	r.Post("workout/end", h.EndWorkout)
+
+	r.Use(chimiddleware.Logger)
+	r.Use(middleware.JwtMiddleware)
+	
+	r.Post("/workout/empty", h.StartEmptyWorkout)
+	r.Post("/workout", h.StartWorkoutWithPlan)
+	r.Post("/workout/end", h.EndWorkout)
 
 	return r
 }

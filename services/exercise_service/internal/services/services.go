@@ -4,6 +4,7 @@ import (
 	"context"
 	"exercise_service/internal/models"
 	"exercise_service/internal/repository"
+	"exercise_service/internal/user"
 	"fmt"
 	"time"
 )
@@ -48,7 +49,7 @@ func (s *Service) DeleteExeciseSer(ctx context.Context, exerciseName string) err
 	return nil
 }
 
-func (s *Service) CreateExerciseSer(ctx context.Context, exercise *models.Exercise) (*models.CreateExerciseResp, error) {
+func (s *Service) CreateExerciseSer(ctx context.Context, exercise *user.Exercise) (*models.CreateExerciseResp, error) {
 	resp := models.CreateExerciseResp{}
 
 	err := s.DB.CreateExercise(ctx, exercise)
