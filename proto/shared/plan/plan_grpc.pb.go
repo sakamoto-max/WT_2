@@ -19,10 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlanService_PlanExistsReturnId_FullMethodName   = "/proto.PlanService/PlanExistsReturnId"
-	PlanService_PlanExistsReturnPlan_FullMethodName = "/proto.PlanService/PlanExistsReturnPlan"
-	PlanService_GetEmptyPlanId_FullMethodName       = "/proto.PlanService/GetEmptyPlanId"
-	PlanService_CreateEmptyPlan_FullMethodName      = "/proto.PlanService/CreateEmptyPlan"
+	PlanService_PlanExistsReturnId_FullMethodName      = "/proto.PlanService/PlanExistsReturnId"
+	PlanService_PlanExistsReturnPlan_FullMethodName    = "/proto.PlanService/PlanExistsReturnPlan"
+	PlanService_GetEmptyPlanId_FullMethodName          = "/proto.PlanService/GetEmptyPlanId"
+	PlanService_CreateEmptyPlan_FullMethodName         = "/proto.PlanService/CreateEmptyPlan"
+	PlanService_CheckHealth_FullMethodName             = "/proto.PlanService/CheckHealth"
+	PlanService_CreatePlan_FullMethodName              = "/proto.PlanService/CreatePlan"
+	PlanService_GetAllPlans_FullMethodName             = "/proto.PlanService/GetAllPlans"
+	PlanService_GetPlanByName_FullMethodName           = "/proto.PlanService/GetPlanByName"
+	PlanService_AddExercisesToPlan_FullMethodName      = "/proto.PlanService/AddExercisesToPlan"
+	PlanService_DeleteExercisesFromPlan_FullMethodName = "/proto.PlanService/DeleteExercisesFromPlan"
+	PlanService_DeletePlan_FullMethodName              = "/proto.PlanService/DeletePlan"
+	PlanService_PING_FullMethodName                    = "/proto.PlanService/PING"
 )
 
 // PlanServiceClient is the client API for PlanService service.
@@ -35,7 +43,23 @@ type PlanServiceClient interface {
 	PlanExistsReturnPlan(ctx context.Context, in *SendPlanName, opts ...grpc.CallOption) (*PlanExistsReturnPlanResp, error)
 	// user_id -> empty_plan_id
 	GetEmptyPlanId(ctx context.Context, in *SendUserID, opts ...grpc.CallOption) (*EmptyPlanIdResp, error)
+	// user_id -> msg
 	CreateEmptyPlan(ctx context.Context, in *SendUserID, opts ...grpc.CallOption) (*CreateEmptyPlanResp, error)
+	// {} -> msg
+	CheckHealth(ctx context.Context, in *CheckHealthReq, opts ...grpc.CallOption) (*CheckHealthResp, error)
+	// user_id, plan_name, exercises_names -> msg, plan_name, exercises_name
+	CreatePlan(ctx context.Context, in *CreatePlanReq, opts ...grpc.CallOption) (*CreatePlanResp, error)
+	// user_id -> number_of_plans, [{plan_name, exercise_names}]
+	GetAllPlans(ctx context.Context, in *GetAllPlansReq, opts ...grpc.CallOption) (*GetAllPlansResp, error)
+	// user_id, plan_name -> plan_name, exercise_names
+	GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*PlanResp, error)
+	// user_id, plan_name, exercise_names -> plan_names, exercise_names
+	AddExercisesToPlan(ctx context.Context, in *PlanReq, opts ...grpc.CallOption) (*PlanResp, error)
+	// user_id, plan_name, exercise_names -> plan_names, exercise_names
+	DeleteExercisesFromPlan(ctx context.Context, in *PlanReq, opts ...grpc.CallOption) (*PlanResp, error)
+	// user_id, plan_name -> {}
+	DeletePlan(ctx context.Context, in *DeletePlanReq, opts ...grpc.CallOption) (*DeletePlanResp, error)
+	PING(ctx context.Context, in *PingPlanReq, opts ...grpc.CallOption) (*PingPlanResp, error)
 }
 
 type planServiceClient struct {
@@ -86,6 +110,86 @@ func (c *planServiceClient) CreateEmptyPlan(ctx context.Context, in *SendUserID,
 	return out, nil
 }
 
+func (c *planServiceClient) CheckHealth(ctx context.Context, in *CheckHealthReq, opts ...grpc.CallOption) (*CheckHealthResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckHealthResp)
+	err := c.cc.Invoke(ctx, PlanService_CheckHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) CreatePlan(ctx context.Context, in *CreatePlanReq, opts ...grpc.CallOption) (*CreatePlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreatePlanResp)
+	err := c.cc.Invoke(ctx, PlanService_CreatePlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) GetAllPlans(ctx context.Context, in *GetAllPlansReq, opts ...grpc.CallOption) (*GetAllPlansResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllPlansResp)
+	err := c.cc.Invoke(ctx, PlanService_GetAllPlans_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*PlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanResp)
+	err := c.cc.Invoke(ctx, PlanService_GetPlanByName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) AddExercisesToPlan(ctx context.Context, in *PlanReq, opts ...grpc.CallOption) (*PlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanResp)
+	err := c.cc.Invoke(ctx, PlanService_AddExercisesToPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) DeleteExercisesFromPlan(ctx context.Context, in *PlanReq, opts ...grpc.CallOption) (*PlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanResp)
+	err := c.cc.Invoke(ctx, PlanService_DeleteExercisesFromPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) DeletePlan(ctx context.Context, in *DeletePlanReq, opts ...grpc.CallOption) (*DeletePlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeletePlanResp)
+	err := c.cc.Invoke(ctx, PlanService_DeletePlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *planServiceClient) PING(ctx context.Context, in *PingPlanReq, opts ...grpc.CallOption) (*PingPlanResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PingPlanResp)
+	err := c.cc.Invoke(ctx, PlanService_PING_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlanServiceServer is the server API for PlanService service.
 // All implementations must embed UnimplementedPlanServiceServer
 // for forward compatibility.
@@ -96,7 +200,23 @@ type PlanServiceServer interface {
 	PlanExistsReturnPlan(context.Context, *SendPlanName) (*PlanExistsReturnPlanResp, error)
 	// user_id -> empty_plan_id
 	GetEmptyPlanId(context.Context, *SendUserID) (*EmptyPlanIdResp, error)
+	// user_id -> msg
 	CreateEmptyPlan(context.Context, *SendUserID) (*CreateEmptyPlanResp, error)
+	// {} -> msg
+	CheckHealth(context.Context, *CheckHealthReq) (*CheckHealthResp, error)
+	// user_id, plan_name, exercises_names -> msg, plan_name, exercises_name
+	CreatePlan(context.Context, *CreatePlanReq) (*CreatePlanResp, error)
+	// user_id -> number_of_plans, [{plan_name, exercise_names}]
+	GetAllPlans(context.Context, *GetAllPlansReq) (*GetAllPlansResp, error)
+	// user_id, plan_name -> plan_name, exercise_names
+	GetPlanByName(context.Context, *GetPlanByNameReq) (*PlanResp, error)
+	// user_id, plan_name, exercise_names -> plan_names, exercise_names
+	AddExercisesToPlan(context.Context, *PlanReq) (*PlanResp, error)
+	// user_id, plan_name, exercise_names -> plan_names, exercise_names
+	DeleteExercisesFromPlan(context.Context, *PlanReq) (*PlanResp, error)
+	// user_id, plan_name -> {}
+	DeletePlan(context.Context, *DeletePlanReq) (*DeletePlanResp, error)
+	PING(context.Context, *PingPlanReq) (*PingPlanResp, error)
 	mustEmbedUnimplementedPlanServiceServer()
 }
 
@@ -118,6 +238,30 @@ func (UnimplementedPlanServiceServer) GetEmptyPlanId(context.Context, *SendUserI
 }
 func (UnimplementedPlanServiceServer) CreateEmptyPlan(context.Context, *SendUserID) (*CreateEmptyPlanResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateEmptyPlan not implemented")
+}
+func (UnimplementedPlanServiceServer) CheckHealth(context.Context, *CheckHealthReq) (*CheckHealthResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckHealth not implemented")
+}
+func (UnimplementedPlanServiceServer) CreatePlan(context.Context, *CreatePlanReq) (*CreatePlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePlan not implemented")
+}
+func (UnimplementedPlanServiceServer) GetAllPlans(context.Context, *GetAllPlansReq) (*GetAllPlansResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAllPlans not implemented")
+}
+func (UnimplementedPlanServiceServer) GetPlanByName(context.Context, *GetPlanByNameReq) (*PlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPlanByName not implemented")
+}
+func (UnimplementedPlanServiceServer) AddExercisesToPlan(context.Context, *PlanReq) (*PlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddExercisesToPlan not implemented")
+}
+func (UnimplementedPlanServiceServer) DeleteExercisesFromPlan(context.Context, *PlanReq) (*PlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteExercisesFromPlan not implemented")
+}
+func (UnimplementedPlanServiceServer) DeletePlan(context.Context, *DeletePlanReq) (*DeletePlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeletePlan not implemented")
+}
+func (UnimplementedPlanServiceServer) PING(context.Context, *PingPlanReq) (*PingPlanResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method PING not implemented")
 }
 func (UnimplementedPlanServiceServer) mustEmbedUnimplementedPlanServiceServer() {}
 func (UnimplementedPlanServiceServer) testEmbeddedByValue()                     {}
@@ -212,6 +356,150 @@ func _PlanService_CreateEmptyPlan_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlanService_CheckHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckHealthReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).CheckHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_CheckHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).CheckHealth(ctx, req.(*CheckHealthReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_CreatePlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlanReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).CreatePlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_CreatePlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).CreatePlan(ctx, req.(*CreatePlanReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_GetAllPlans_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllPlansReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).GetAllPlans(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_GetAllPlans_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).GetAllPlans(ctx, req.(*GetAllPlansReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_GetPlanByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlanByNameReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).GetPlanByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_GetPlanByName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).GetPlanByName(ctx, req.(*GetPlanByNameReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_AddExercisesToPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).AddExercisesToPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_AddExercisesToPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).AddExercisesToPlan(ctx, req.(*PlanReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_DeleteExercisesFromPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).DeleteExercisesFromPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_DeleteExercisesFromPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).DeleteExercisesFromPlan(ctx, req.(*PlanReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_DeletePlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlanReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).DeletePlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_DeletePlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).DeletePlan(ctx, req.(*DeletePlanReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlanService_PING_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingPlanReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).PING(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_PING_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).PING(ctx, req.(*PingPlanReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlanService_ServiceDesc is the grpc.ServiceDesc for PlanService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -234,6 +522,38 @@ var PlanService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateEmptyPlan",
 			Handler:    _PlanService_CreateEmptyPlan_Handler,
+		},
+		{
+			MethodName: "CheckHealth",
+			Handler:    _PlanService_CheckHealth_Handler,
+		},
+		{
+			MethodName: "CreatePlan",
+			Handler:    _PlanService_CreatePlan_Handler,
+		},
+		{
+			MethodName: "GetAllPlans",
+			Handler:    _PlanService_GetAllPlans_Handler,
+		},
+		{
+			MethodName: "GetPlanByName",
+			Handler:    _PlanService_GetPlanByName_Handler,
+		},
+		{
+			MethodName: "AddExercisesToPlan",
+			Handler:    _PlanService_AddExercisesToPlan_Handler,
+		},
+		{
+			MethodName: "DeleteExercisesFromPlan",
+			Handler:    _PlanService_DeleteExercisesFromPlan_Handler,
+		},
+		{
+			MethodName: "DeletePlan",
+			Handler:    _PlanService_DeletePlan_Handler,
+		},
+		{
+			MethodName: "PING",
+			Handler:    _PlanService_PING_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

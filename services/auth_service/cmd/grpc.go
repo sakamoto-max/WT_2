@@ -1,18 +1,17 @@
 package main
 
 import (
+	"auth_service/internal/controllers"
+	"auth_service/internal/database"
+	grpcclient "auth_service/internal/grpc_client"
+	"auth_service/internal/repository"
+	"auth_service/internal/services"
 	"context"
 	"log"
 	"net"
-	"os"
 	"time"
 
-	grpcclient "plan_service/grpc_client"
-	"plan_service/internal/controllers"
-	"plan_service/internal/database"
-	"plan_service/internal/repository"
-	"plan_service/internal/services"
-	pb "workout-tracker/proto/shared/plan"
+	pb "workout-tracker/proto/shared/auth"
 
 	"google.golang.org/grpc"
 )
@@ -37,22 +36,22 @@ func (g *grpcServer) Run() {
 		log.Fatalf("error opening the dbs for plan grpc server: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", os.Getenv("GRPC_SERVER_ADDR"))
+	lis, err := net.Listen("tcp", g.addr)
 
 	if err != nil {
 		log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	exerClient := grpcclient.NewExerciseServiceClient().Connect()
+	planClient := grpcclient.NewPlanClient().Connect()
 
-	repo := repository.NewDBs(pool, redisClient)
-	service := services.NewService(repo, exerClient)
-	controller := controllers.NewPlanController(service)
+	repo := repository.NewRepo(pool, redisClient)
+	service := services.NewService(repo, planClient)
+	controller := controllers.NewAuthController(service)
 
-	pb.RegisterPlanServiceServer(grpcServer, controller)
+	pb.RegisterAuthServiceServer(grpcServer, controller)
 
-	log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
+	log.Printf("grpc server has started at %v", g.addr)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("error listening to the grpc server : %v", err)
 	}

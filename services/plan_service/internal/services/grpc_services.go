@@ -12,7 +12,7 @@ import (
 )
 
 type PlanService struct {
-	dB     *repository.DBs
+	dB *repository.DBs
 }
 
 func NewPlanService(db *repository.DBs) *PlanService {
@@ -42,7 +42,7 @@ func (p *PlanService) PlanExistsReturnPlan(ctx context.Context, userId int, plan
 func (p *PlanService) GetEmptyPlanId(ctx context.Context, userId int) (*pb.EmptyPlanIdResp, error) {
 	var resp pb.EmptyPlanIdResp
 	emptyPlanId, err := p.dB.GetEmptyPlanID(ctx, userId)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 

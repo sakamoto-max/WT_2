@@ -2,8 +2,6 @@ package user
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type validatonErrs struct {
@@ -78,16 +76,16 @@ func (l *Login) Validate() (*[]validatonErrs, bool) {
 }
 
 type UUIDReader struct {
-	UUID uuid.UUID `json:"uuid"`
+	UUID string `json:"uuid"`
 }
 
 func (u *UUIDReader) Validate() (*[]validatonErrs, bool) {
 
 	var validationErrs []validatonErrs
 
-	uuid := u.UUID.String()
+	// uuid := u.UUID.String()
 
-	if uuid == "" {
+	if u.UUID == "" {
 		validationErrs = append(validationErrs, errUUIDReq)
 		return &validationErrs, true
 	}

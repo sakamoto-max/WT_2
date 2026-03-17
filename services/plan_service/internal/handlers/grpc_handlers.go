@@ -21,7 +21,7 @@ func (p *PlanHandler) PlanExistsReturnId(ctx context.Context, req *pb.SendPlanNa
 	var resp pb.PlanExistsResp
 
 	exists, planId, err := p.service.PlanExistsReturnId(ctx, int(req.UserId), req.PlanName)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 	resp.Exists = exists

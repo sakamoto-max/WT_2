@@ -7,11 +7,13 @@ import (
 	"os"
 	"time"
 
+	"exercise_service/internal/controllers"
 	"exercise_service/internal/database"
-	"exercise_service/internal/handlers"
+	// "exercise_service/internal/handlers"
 	"exercise_service/internal/repository"
 	"exercise_service/internal/services"
 	exercisepb "workout-tracker/proto/shared/exercise"
+
 	"google.golang.org/grpc"
 )
 
@@ -44,10 +46,12 @@ func (g *grpcServer) Run() {
 	grpcServer := grpc.NewServer()
 
 	repo := repository.NewRepo(pool, redisClient)
-	service := services.NewExerciseService(repo)
-	handler := handlers.NewExerciseHandler(service)
+	
+	service := services.NewService(repo)
 
-	exercisepb.RegisterExerciseServiceServer(grpcServer, handler)
+	controller := controllers.NewExerController(service)
+
+	exercisepb.RegisterExerciseServiceServer(grpcServer, controller)
 
 	log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
 	if err := grpcServer.Serve(lis); err != nil {

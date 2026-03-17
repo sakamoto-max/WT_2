@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	// customerrors "tracker_service/internal/custom_errors"
-	"tracker_service/internal/models"
+	// "tracker_service/internal/models"
 	"tracker_service/internal/repository"
 	"tracker_service/internal/user"
 	exerpb "workout-tracker/proto/shared/exercise"
@@ -46,48 +46,46 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
 	return nil
 }
 
-func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planName string) (*models.Plan, error) {
+func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planName string) (*[]string, error) {
 	// check if plan Name exists
 	// if exists get the plan_id
 
-	var resp models.Plan
+	var allExerNames []string
+	// var resp models.Plan
 
 	r, err := s.PClient.PlanExistsReturnPlan(ctx, &planpb.SendPlanName{UserId: int64(userId), PlanName: planName})
 	if err != nil{
-		return &resp, fmt.Errorf("error getting data from plan server : %w", err)
+		return &allExerNames, fmt.Errorf("error getting data from plan server : %w", err)
 	}
 
 	if !r.Exists {
-		return &resp, fmt.Errorf("plan doesnt exist")
+		return &allExerNames, fmt.Errorf("plan doesnt exist")
 	}
 	
 	for _, v := range r.ExerciseIds {
 		r, err := s.EClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: v})
 		if err != nil{
-			return &resp, fmt.Errorf("error getting data from exercise server : %w", err)
+			return &allExerNames, fmt.Errorf("error getting data from exercise server : %w", err)
 		}
 
-		resp.Exercises = append(resp.Exercises, r.ExerciseName)
+		allExerNames = append(allExerNames, r.ExerciseName)
 	}
 
 	// do db operations
 	trackerId, err := s.Db.StartWorkout(ctx, userId, int(r.PlanId))
 	if err != nil{
-		return &resp, err
+		return &allExerNames, err
 	}
 
 	err = s.Db.SetTrackerId(ctx, userId, trackerId)
 	if err != nil{
 		err := s.Db.RevertStartWorkout(ctx, trackerId)
 		if err != nil{
-			return &resp, err
+			return &allExerNames, err
 		}
 	}
-	
-	resp.Message = fmt.Sprintf("workout with plan %v has started", planName)
-	resp.PlanName = planName
 
-	return &resp, nil
+	return &allExerNames, nil
 }
 
 func (s *Service) EndWorkoutSer(ctx context.Context, userId int, data *user.Tracker) error {

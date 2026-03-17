@@ -34,8 +34,6 @@ func CreatedRespWriter(w http.ResponseWriter, resp any) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-
-
 func HashThePassword(password string) (string, error) {
 	passInBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

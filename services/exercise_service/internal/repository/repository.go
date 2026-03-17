@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"exercise_service/internal/models"
-	"exercise_service/internal/user"
+	// "exercise_service/internal/user"
 	"fmt"
 	"time"
 
@@ -114,7 +114,7 @@ func (r *Repo) DeleteExecise(ctx context.Context, exerciseName string) error {
 	return nil
 }
 
-func (r *Repo) CreateExercise(ctx context.Context, exercise *user.Exercise) error {
+func (r *Repo) CreateExercise(ctx context.Context, exerciseName string, bodyPartName string, equipmentName string, restTime int) error {
 
 	var bodyPartId int
 	var equipmentId int
@@ -128,7 +128,7 @@ func (r *Repo) CreateExercise(ctx context.Context, exercise *user.Exercise) erro
 	err = trnx.QueryRow(ctx, `
 		SELECT ID FROM BODY_PARTS
 		WHERE NAME = $1	
-	`, exercise.BodyPart).Scan(&bodyPartId)
+	`, bodyPartName).Scan(&bodyPartId)
 	if err != nil {
 		return fmt.Errorf("error getting id of body_part : %w\n", err)
 	}
@@ -136,17 +136,16 @@ func (r *Repo) CreateExercise(ctx context.Context, exercise *user.Exercise) erro
 	err = trnx.QueryRow(ctx, `
 		SELECT ID FROM EQUIPMENT
 		WHERE NAME = $1	
-	`, exercise.Equipment).Scan(&equipmentId)
+	`, equipmentName).Scan(&equipmentId)
 	if err != nil {
 		return fmt.Errorf("error getting id of equipment : %w\n", err)
 	}
-
 	_, err = trnx.Exec(ctx, `
 		INSERT INTO EXERCISES(name, body_part_id, rest_time_in_seconds, equipment_id, created_at)
 		VALUES($1, $2, $3, $4, NOW())	
-	`, exercise.Name, bodyPartId, exercise.RestTime, equipmentId)
+	`, exerciseName, bodyPartId, restTime, equipmentId)
 	if err != nil{
-		return fmt.Errorf("error inserting exercise %v : %w\n", exercise.Name, err)
+		return fmt.Errorf("error inserting exercise %v : %w\n", exerciseName, err)
 	}
 
 	err = trnx.Commit(ctx)

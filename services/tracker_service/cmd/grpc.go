@@ -7,12 +7,12 @@ import (
 	"os"
 	"time"
 
-	grpcclient "plan_service/grpc_client"
-	"plan_service/internal/controllers"
-	"plan_service/internal/database"
-	"plan_service/internal/repository"
-	"plan_service/internal/services"
-	pb "workout-tracker/proto/shared/plan"
+	grpcclient "tracker_service/grpc_client"
+	"tracker_service/internal/controllers"
+	"tracker_service/internal/database"
+	"tracker_service/internal/repository"
+	"tracker_service/internal/services"
+	trackerpb "workout-tracker/proto/shared/tracker"
 
 	"google.golang.org/grpc"
 )
@@ -44,14 +44,15 @@ func (g *grpcServer) Run() {
 	}
 
 	grpcServer := grpc.NewServer()
-	exerClient := grpcclient.NewExerciseServiceClient().Connect()
+	exerClient := grpcclient.NewExerClient().Connect()
+	planClient := grpcclient.NewPlanClient().Connect()
 
 	repo := repository.NewDBs(pool, redisClient)
-	service := services.NewService(repo, exerClient)
-	controller := controllers.NewPlanController(service)
+	service := services.NewService(repo, planClient, exerClient)
+	controller := controllers.NewTrackerController(service)
 
-	pb.RegisterPlanServiceServer(grpcServer, controller)
-
+	trackerpb.RegisterTrackerServiceServer(grpcServer, controller)
+	
 	log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("error listening to the grpc server : %v", err)

@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	customerrors "plan_service/internal/custom_errors"
+	"plan_service/internal/models"
 	"plan_service/internal/user"
 
 	// "plan_service/internal/middleware"
@@ -62,7 +64,7 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.service.CreatePlanSer(ctx, claims.UserId, &plan)
+	err := h.service.CreatePlan(ctx, claims.UserId, plan.PlanName, &plan.Exercises)
 	if err != nil {
 		if errors.Is(err, customerrors.ErrPlanAlreadyExists) {
 			customerrors.CustomErrorWriter(w, &customerrors.ErrPlanAlreadyExists2)
@@ -70,6 +72,12 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		}
 		utils.BadReqErrorWriter(w, err.Error())
 		return
+	}
+
+	resp := models.Plan2Resp{
+		Message:   fmt.Sprintf("%v created successfully", plan.PlanName),
+		PlanName:  plan.PlanName,
+		Exercises: plan.Exercises,
 	}
 
 	utils.CreatedResponseWriter(w, resp)
@@ -155,7 +163,7 @@ func (h *Handler) AddExercisesToPlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.service.AddExercisesToPlan(ctx, claims.UserId, &userInput)
+	resp, err := h.service.AddExercisesToPlan(ctx, claims.UserId, userInput.PlanName, &userInput.Exercises)
 	if err != nil {
 		utils.BadReqErrorWriter(w, err.Error())
 		return
@@ -193,7 +201,7 @@ func (h *Handler) DeleteExerciseFromPlan(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	resp, err := h.service.DeleteExerciseFromPlan(ctx, claims.UserId, &userInput)
+	resp, err := h.service.DeleteExerciseFromPlan(ctx, claims.UserId, userInput.PlanName, &userInput.Exercises)
 	if err != nil {
 		utils.BadReqErrorWriter(w, err.Error())
 		return

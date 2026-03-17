@@ -2,15 +2,50 @@ syntax = "proto3";
 
 package proto;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "/shared/exercise";
 //
 service ExerciseService {
-    //
+    // used by plan service
     rpc ExerciseExistsReturnId(SendExerciseName) returns (ExerciseExistsReturnIdResp) {};
-    //
+    // used by plan service
     rpc GetExerciseName(SendExerciseID) returns (GetExerciseNameResp) {};
+    //
+    rpc GetAllExercises(GetAllExercisesREq) returns (GetAllExercisesResp) {};
+    //  
+    rpc GetOneExercise(SendExerciseName) returns (OneExerciseResp) {};
     // 
+    rpc CreateExercise(CreateExerciseReq) returns (CreateExerciseResp) {};
+    //
+    // rpc UpdateExercise() returns () {};
+    // 
+    rpc DeleteExercise(SendExerciseName) returns (DeleteExerciseResp) {};
+//
+    rpc PING(PingExerReq) returns (PingExerResp) {};
 }
+
+message PingExerReq {}
+
+message PingExerResp {}
+
+// 
+message CreateExerciseReq {
+    string exercise_name = 1;
+    string body_part = 2;
+    string equipment = 3;
+    int64 rest_time = 4;
+}
+message CreateExerciseResp {
+    string message = 1;
+    OneExerciseResp exercise = 2;
+}
+
+message DeleteExerciseResp {
+    string message = 1;
+  
+}
+
 //
 message SendExerciseName {
     string exercise_name = 1;  
@@ -28,4 +63,23 @@ message SendExerciseID {
 message GetExerciseNameResp {
     string exercise_name = 1;
   
+}
+
+//
+message GetAllExercisesREq {
+    //
+}
+
+message GetAllExercisesResp {
+    repeated OneExerciseResp all_exericses = 1;
+}
+
+//
+message OneExerciseResp {
+    int64 id = 1;
+    string name = 2;
+    int64 rest_time = 3;
+    string body_part = 4;
+    string equipment = 5;
+    google.protobuf.Timestamp created_at = 6;
 }

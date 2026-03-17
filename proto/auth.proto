@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/shared/auth";
+//
+service AuthService {
+//
+    rpc UserSignUp(UserSignUpReq) returns (UserSignUpResp) {};
+//
+    rpc UserLogin(UserLoginReq) returns (UserLoginResp) {};
+// 
+    rpc UserLogOut(SendUserId) returns (UserLogOutResp) {};
+//
+    rpc GetNewAccessToken(SendUUID) returns (GetNewAccessTokenResp) {}
+//
+    rpc PING(PINGreq) returns (PINGresp) {};
+}
+
+message PINGreq {}
+
+message PINGresp{}
+
+message SendUUID {
+    string UUID = 1;
+}
+
+message GetNewAccessTokenResp {
+    string new_access_token = 1;
+}
+
+message SendUserId {
+    int64 user_id = 1;
+}
+
+message UserLogOutResp {
+    string message = 1;
+  
+}
+
+message UserLoginReq { 
+    string email = 1;
+    string password = 2;
+}
+
+message UserLoginResp {
+    string message = 1;
+    string name = 2;
+    string email = 3;
+    string access_token = 4;
+    string UUID = 5;
+}
+
+//
+message UserSignUpReq {
+    string name = 1;
+    string email = 2;
+    string password = 3; 
+}
+
+message UserSignUpResp {
+    string name = 1;
+    string email = 2;
+    string role = 3;
+    google.protobuf.Timestamp created_at = 4;
+}
+

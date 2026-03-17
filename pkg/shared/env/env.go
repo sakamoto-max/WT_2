@@ -15,6 +15,14 @@ func Load() {
 
 	lookup()	
 }
+func LoadGateway() {
+	err := godotenv.Load()
+	if err != nil{
+		log.Fatalf("error loading the env file : %v", err)
+	}
+
+	lookUpForGateway()
+}
 
 // -- POSTGRES_CONN
 // -- REDIS_ADDR
@@ -51,5 +59,27 @@ func lookup() {
 	_, ok = os.LookupEnv("SECRET_KEY")
 	if !ok {
 		log.Fatalf("SECRET_KEY env not found")
+	}
+}
+func lookUpForGateway() {
+	_, ok := os.LookupEnv("HTTP_SERVER_ADDR")
+	if !ok {
+		log.Fatalf("HTTP_SERVER_ADDR env not found")
+	}
+	_, ok = os.LookupEnv("AUTH_GRPC_CLIENT_ADDR")
+	if !ok {
+		log.Fatalf("AUTH_GRPC_CLIENT_ADDR env not found")
+	}
+	_, ok = os.LookupEnv("PLAN_GRPC_CLIENT_ADDR")
+	if !ok {
+		log.Fatalf("PLAN_GRPC_CLIENT_ADDR env not found")
+	}
+	_, ok = os.LookupEnv("EXER_GRPC_CLIENT_ADDR")
+	if !ok {
+		log.Fatalf("EXER_GRPC_CLIENT_ADDR env not found")
+	}
+	_, ok = os.LookupEnv("TRACKER_GRPC_CLIENT_ADDR")
+	if !ok {
+		log.Fatalf("TRACKER_GRPC_CLIENT_ADDR env not found")
 	}
 }

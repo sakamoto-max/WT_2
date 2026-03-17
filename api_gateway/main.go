@@ -1,36 +1,27 @@
 package main
 
-import "github.com/go-chi/chi/v5"
+import (
+	"os"
+	"wt/pkg/shared/env"
+)
 
 func main() {
-	// when gets hit with a route -> make grpc call to the particular service
-	// should be running in a server
-	//
 
-	// run a http server at 5000
-	// create clients for all the services
-	//
-
-	// r := chi.NewRouter()
-
-	// r.Post("/wt")
+	env.LoadGateway()
+	
+	// httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
+	httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
+	httpSer.Run()
 
 }
 
+// r.Post("/wt/user/login", handler.)
+
 // routes :
 // "/wt/" +
-
-// POST "/user/signup"
-// POST "/user/login"
-// POST "/user/logout"
-// POST "/user/refreshtoken"
 // PUT "/user/changepass"
 // PUT "/user/changeemail"
 
-// GET "/exercise"
-// GET "/exercise/single"
-// POST "/exercie"
-// DELETE "/exercise"
 // PUT "/exercise/{exercisename}"
 
 // GET "/plan/health"

@@ -17,7 +17,11 @@ import (
 
 	// "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	// "google.golang.org/grpc"
+	// "google.golang.org/grpc/codes"
+	// "google.golang.org/grpc/status"
 )
+
 // type action string
 
 // var (
@@ -50,10 +54,15 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 	}
 
 	_, err = s.planClient.CreateEmptyPlan(ctx, &planpb.SendUserID{UserId: int64(userId),})
-
 	if err != nil{
+		// st,  := status.FromError(err)
+
+		return CreatedAt, myerrors.PlanServerNotResponding
+		
 		// try again
-		return CreatedAt, fmt.Errorf("error creating empty plan")
+		// return CreatedAt, fmt.Errorf("error creating empty plan : %v", err)
+		// grpc.ErrClientConnClosing
+		// return CreatedAt, status.Newf(codes.Canceled, "plan server is not responding").Err()
 	}
 
 	return CreatedAt, nil
@@ -145,7 +154,7 @@ func (s *Service) Logout(ctx context.Context, userId int) error {
 	return nil
 }
 
-func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID uuid.UUID) (string, error) {
+func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string, error) {
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, UUID)
 	if err != nil {

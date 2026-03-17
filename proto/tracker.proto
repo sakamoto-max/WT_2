@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "shared/tracker";
+
+//
+service TrackerService {
+    //
+    rpc StartEmptyWorkout(StartEmptyWorkoutReq) returns (GeneralResp) {};
+    //
+    rpc StartWorkoutWithPlan(StartWorkoutWithPlanReq) returns (StartWorkoutWithPlanResp) {};
+    //
+    rpc EndWorkout(EndWorkoutReq) returns (EndWorkoutResp) {};
+//
+    rpc PING(PingTrackReq) returns (PingTrackResp) {};
+}
+
+message PingTrackReq {}
+
+message PingTrackResp{}
+
+message EndWorkoutReq {
+    int64 user_id = 1;
+  repeated TrackerForEachExer all_exerices = 2;
+}
+
+message TrackerForEachExer {
+    int64 exercise_id = 1;
+    repeated SetsAndReps sets_and_reps = 2;
+}
+
+message SetsAndReps {
+    int64 weight = 1;
+    int64 reps = 2; 
+}
+
+
+message EndWorkoutResp {
+    string message = 1;
+}
+
+
+message StartWorkoutWithPlanReq {
+    int64 user_id = 1;
+    string plan_name = 2;
+}
+message StartWorkoutWithPlanResp {
+    string message = 1;
+    string plan_name = 2;
+    repeated string exercises_in_plan = 3;
+}
+
+message StartEmptyWorkoutReq {
+    int64 user_id = 1;
+}
+
+message GeneralResp {
+    string message = 1;
+}
+
+
+

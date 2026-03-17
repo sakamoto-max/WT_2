@@ -36,9 +36,6 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }
-
-
-
 func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
@@ -64,7 +61,6 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 
 	utils.ResponseWriter(w, resp, http.StatusOK)
 }
-
 func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
@@ -80,7 +76,7 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.service.CreateExerciseSer(ctx, &exercise)
+	resp, err := h.service.CreateExerciseSer(ctx, exercise.Name, exercise.BodyPart, exercise.Equipment, exercise.RestTime)
 	if err != nil {
 		utils.ErrorWriter(w, err, http.StatusBadRequest)
 		return
@@ -88,13 +84,11 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	utils.ResponseWriter(w, resp, http.StatusCreated)
 }
-
 // complete the handler
 // needs validation
 func (h *Handler) UpdateExercise(w http.ResponseWriter, r *http.Request) {
 
 }
-
 func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)

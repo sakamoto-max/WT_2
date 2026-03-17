@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -49,7 +49,7 @@ func (r *Repo) GetUUID(ctx context.Context, userId int) (string, error) {
 	return uuid, nil
 }
 
-func (r *Repo) SetUUID(ctx context.Context, uuid uuid.UUID, userId int) error {
+func (r *Repo) SetUUID(ctx context.Context, uuid string, userId int) error {
 
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
 
@@ -79,7 +79,7 @@ func (r *Repo) SetRefreshTokenAndUUID(ctx context.Context, uuid string, Refresht
 }
 
 
-func (r *Repo) GetRefreshToken(ctx context.Context, uuid uuid.UUID) (string, error) {
+func (r *Repo) GetRefreshToken(ctx context.Context, uuid string) (string, error) {
 
 	var refreshToken string
 

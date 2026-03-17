@@ -6,14 +6,90 @@ option go_package = "/shared/plan";
 
 //
 service PlanService {
-  // plan_name, user_id -> exists, plan_id
-  rpc PlanExistsReturnId(SendPlanName) returns (PlanExistsResp) {};
-  // plan_name, user_id -> exits, plan_id, exercise_ids
-  rpc PlanExistsReturnPlan(SendPlanName) returns (PlanExistsReturnPlanResp) {};
-  // user_id -> empty_plan_id
-  rpc GetEmptyPlanId(SendUserID) returns (EmptyPlanIdResp) {};
-  // 
-  rpc CreateEmptyPlan(SendUserID) returns (CreateEmptyPlanResp) {}; 
+    // plan_name, user_id -> exists, plan_id
+    rpc PlanExistsReturnId(SendPlanName) returns (PlanExistsResp) {};
+    // plan_name, user_id -> exits, plan_id, exercise_ids
+    rpc PlanExistsReturnPlan(SendPlanName) returns (PlanExistsReturnPlanResp) {};
+    // user_id -> empty_plan_id
+    rpc GetEmptyPlanId(SendUserID) returns (EmptyPlanIdResp) {};
+    // user_id -> msg
+    rpc CreateEmptyPlan(SendUserID) returns (CreateEmptyPlanResp) {}; 
+    // {} -> msg
+    rpc CheckHealth(CheckHealthReq) returns (CheckHealthResp) {}; 
+    // user_id, plan_name, exercises_names -> msg, plan_name, exercises_name
+    rpc CreatePlan(CreatePlanReq) returns (CreatePlanResp) {};
+    // user_id -> number_of_plans, [{plan_name, exercise_names}]
+    rpc GetAllPlans(GetAllPlansReq) returns (GetAllPlansResp) {};
+    // user_id, plan_name -> plan_name, exercise_names
+    rpc GetPlanByName(GetPlanByNameReq) returns (PlanResp) {};
+    // user_id, plan_name, exercise_names -> plan_names, exercise_names
+    rpc AddExercisesToPlan(PlanReq) returns (PlanResp) {};
+    // user_id, plan_name, exercise_names -> plan_names, exercise_names
+    rpc DeleteExercisesFromPlan(PlanReq) returns (PlanResp) {};
+    // user_id, plan_name -> {}
+    rpc DeletePlan(DeletePlanReq) returns (DeletePlanResp) {};
+//
+    rpc PING(PingPlanReq) returns (PingPlanResp) {};
+}
+
+message PingPlanReq {}
+
+message PingPlanResp {}
+
+
+message DeletePlanReq {
+    int64 user_id = 1;
+    string plan_name = 2;
+}
+
+message DeletePlanResp {}
+
+message PlanReq{
+    int64 user_id = 1;
+    string plan_name = 2;
+    repeated string exercise_names = 3;
+}
+
+
+message GetPlanByNameReq{
+    int64 user_id = 1;
+    string plan_name = 2;
+}
+
+
+
+message GetAllPlansReq {
+    int64 user_id = 1;
+}
+message GetAllPlansResp {
+    int64 number_of_plans = 1;
+    repeated PlanResp all_plans = 2;
+}
+
+message PlanResp {
+    string plan_name = 1;
+    repeated string exercise_names = 2;
+}
+
+message CreatePlanReq {
+    int64 user_id = 1;
+    string plan_name = 2;
+    repeated string exercise_names = 3;
+}
+message CreatePlanResp {
+    string message = 1;
+    string plan_name = 2;
+    repeated string exercise_names = 3;
+}
+
+
+//
+message CheckHealthReq {}
+
+
+//
+message CheckHealthResp {
+    string message = 1;  
 }
 
 //
