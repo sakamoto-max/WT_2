@@ -17,6 +17,32 @@ service AuthService {
     rpc GetNewAccessToken(SendUUID) returns (GetNewAccessTokenResp) {}
 //
     rpc PING(PINGreq) returns (PINGresp) {};
+    //
+    rpc ChangePass(ChangePassReq) returns (ChangePassResp) {};
+    //
+    rpc ChangeEmail(ChangeEmailReq) returns (ChangeEmailResp) {};
+}
+
+message ChangeEmailReq {
+    int64 user_id = 1;
+    string old_email = 2;
+    string new_email = 3;  
+}
+message ChangeEmailResp {
+    string message = 1;  
+}
+
+
+
+
+message ChangePassReq{
+    int64 user_id = 1;
+    string old_pass = 2;
+    string new_pass = 3;
+}
+
+message ChangePassResp{
+    string message = 1; 
 }
 
 message PINGreq {}
@@ -58,6 +84,7 @@ message UserSignUpReq {
     string name = 1;
     string email = 2;
     string password = 3; 
+    string role = 4;
 }
 
 message UserSignUpResp {

@@ -5,8 +5,8 @@ import (
 	// "net/http"
 	"wt/pkg/middleware"
 
-	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
 )
 
 func NewRouter(h *handlers.Handler) *chi.Mux {
@@ -14,18 +14,21 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(chimiddleware.Logger)
+
 	r.Post("/wt/user/signup", h.SignUp)
 	r.Post("/wt/user/login", h.Login)
 	r.With(middleware.JwtMiddleware).Post("/wt/user/logout", h.Logout)
 	r.Post("/wt/user/refresh", h.GetNewAccessToken)
+	r.With(middleware.JwtMiddleware).Patch("/wt/user/password", h.ChangePassWord)
+	r.With(middleware.JwtMiddleware).Patch("/wt/user/email", h.ChangeEmail)
 
-	r.Get("/wt/exercise", h.GetAllExercises)
-	r.Get("/wt/exercise/single", h.GetExerciseByName)
-	r.Post("/wt/exercise", h.CreateExercise)
-	r.Delete("/wt/exercise", h.DeleteExecise)
+	r.Get("/wt/exercises", h.GetAllExercises)
+	r.Get("/wt/exercises/single", h.GetExerciseByName)
+	r.With(middleware.JwtMiddleware).Post("/wt/exercise", h.CreateExercise)
+	r.With(middleware.JwtMiddleware).Delete("/wt/exercise", h.DeleteExecise)
 
 	r.Get("/wt/plan/health", h.CheckHealthPlan)
-	r.With(middleware.JwtMiddleware).Get("/wt/plan/create", h.CreatePlan)
+	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plan/exercises", h.DeleteExerciseFromPlan)
 	r.With(middleware.JwtMiddleware).Get("/wt/plan/health", h.CheckHealthPlan)

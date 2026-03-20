@@ -55,9 +55,9 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 	TrackerClient := trackpb.NewTrackerServiceClient(connForTracker)
 
 	return &grpcClient{
-		AuthClient: authClient,
-		PlanClient: planClient,
-		ExerClient: ExerClient,
+		AuthClient:  authClient,
+		PlanClient:  planClient,
+		ExerClient:  ExerClient,
 		TrackClient: TrackerClient,
 	}
 

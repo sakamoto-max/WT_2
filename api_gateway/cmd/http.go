@@ -29,9 +29,9 @@ func (h *httpServer) Run() {
 
 	router := routes.NewRouter(handler)
 
-	fmt.Printf("gateway has started listening at %v", h.addr)
+	fmt.Printf("gateway has started listening at %v\n", h.addr)
 
 	if err := http.ListenAndServe(h.addr, router); err != nil {
-		log.Fatalf("error opening http server at %v : %v", h.addr, err)
+		log.Fatalf("error opening http server at %v : %v\n", h.addr, err)
 	}
 }

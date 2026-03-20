@@ -27,3 +27,31 @@ func (r *Repo) EmailExists(ctx context.Context, email string) (bool, error) {
 
 	return true, nil
 }
+
+func (r *Repo) GetEmail(ctx context.Context, userId int) (string, error) {
+	
+	var email string
+	
+	err := r.pDB.QueryRow(ctx, `
+		SELECT email FROM users
+		WHERE id = $1	
+	`, userId).Scan(&email)
+	if err != nil{
+		return email, fmt.Errorf("error getting email of user with id : %v : %w", userId, err)
+	}
+
+	return email, nil
+}
+
+func (r *Repo) ChangeEmail(ctx context.Context, userId int, newEmail string) error {
+	_, err := r.pDB.Exec(ctx, `
+		UPDATE users
+		SET email = $1
+		WHERE id = $2	
+	`, newEmail, userId)
+	if err != nil{
+		return fmt.Errorf("error changing the email in the db : %w",err)
+	}
+
+	return nil
+}

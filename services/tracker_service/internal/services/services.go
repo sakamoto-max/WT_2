@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	myerrors "wt/pkg/my_errors"
 
 	// customerrors "tracker_service/internal/custom_errors"
 	// "tracker_service/internal/models"
@@ -24,6 +25,17 @@ func NewService(Db *repository.DBs, planClient planpb.PlanServiceClient, exerCli
 
 func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
 	// get empty plan_id of user
+
+	ongoing, err := s.Db.CheckIfWorkoutIsOngoing(ctx, userID)
+	if err != nil{
+		return err
+	}
+
+	if ongoing {
+		return myerrors.ErrWorkoutOngoing
+	}
+
+	
 
 	r, err := s.PClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: int64(userID)})
 	if err != nil {

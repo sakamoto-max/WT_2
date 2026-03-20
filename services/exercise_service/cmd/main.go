@@ -9,8 +9,8 @@ func main() {
 
 	env.Load()
 
-	httpSer := NewhttpServer(os.Getenv("HTTP_SERVER_ADDR"))
-	go httpSer.Run()
+	// httpSer := NewhttpServer(os.Getenv("HTTP_SERVER_ADDR"))
+	// go httpSer.Run()
 
 	grpcSer := NewgrpcServer(os.Getenv("GRPC_SERVER_ADDR"))
 	grpcSer.Run()

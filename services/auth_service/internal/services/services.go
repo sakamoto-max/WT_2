@@ -37,7 +37,7 @@ func NewService(r *repository.Repo, planClient planpb.PlanServiceClient) *Servic
 	return &Service{repo: r, planClient: planClient}
 }
 
-func (s *Service) SignUp(ctx context.Context, name string, email string, password string) (time.Time, error) {
+func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (time.Time, error) {
 
 	var CreatedAt time.Time
 
@@ -48,7 +48,7 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 		return CreatedAt, err
 	}
 
-	userId, CreatedAt, err := s.repo.CreateUser(ctx, name, email, hashedPass)
+	userId, CreatedAt, err := s.repo.CreateUser(ctx, name, email, hashedPass, role)
 	if err != nil {
 		return CreatedAt, err
 	}
@@ -177,6 +177,70 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 	}
 
 	return accessToken, nil
+}
+
+
+func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, newPass string) error {
+		// {
+	// 	"old_password" : "x",
+	// 	"new_password" : "y",
+	// }
+
+	if oldPass == newPass{
+		return myerrors.ErrOldPassNewPassSame
+	}
+
+	passFromDb, err := s.repo.FetchUserPassById(ctx, userId)
+	if err != nil{
+		return err
+	}
+
+	err = utils.MatchPasswords(oldPass, passFromDb)
+	if err != nil{
+		return myerrors.ErrIncorrectPassword
+	}
+
+	hashedNewPass, err := utils.HashThePassword(newPass)
+	if err != nil{
+		return err	
+	}
+
+	err = s.repo.ChangePass(ctx, userId, hashedNewPass)
+	if err != nil{
+		return err
+	}
+
+	return nil
+
+	// check if ui old_pass and new_pass r same -> old_pass cannot be same as new pass
+	// get the old pass from the db
+	// check if the ui old_pass and the pass from the db r same
+	// if not -> incorrect_old pass
+	// if yes -> successfully changed the password
+}
+
+func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, newEmail string) error {
+
+	if oldEmail == newEmail{
+		return myerrors.ErrOldEmailNewEmailSame
+	}
+
+	emailFromDb, err := s.repo.GetEmail(ctx, userId)
+	if err != nil{
+		return err
+	}
+
+	if emailFromDb != oldEmail {
+		return myerrors.ErrEmailDoesntMatch
+	}
+
+	err = s.repo.ChangeEmail(ctx, userId, newEmail)
+	if err != nil{
+		return err
+	}
+	
+	return nil
+
 }
 
 // func Produce(ctx context.Context, action string, userID int, queueName string, ch *amqp.Channel) error {

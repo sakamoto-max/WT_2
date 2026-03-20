@@ -48,7 +48,7 @@ func MatchPasswords(password string, passFromDb string) error {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword){
 			return myErrs.ErrIncorrectPassword
 		}
-		return err
+		return fmt.Errorf("some error occured while authenticating the password : %w", err)
 	}
 	return nil
 }

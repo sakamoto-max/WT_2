@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	customerrors "auth_service/internal/custom_errors"
 	"auth_service/internal/services"
 	"context"
-	"errors"
+
 	pb "workout-tracker/proto/shared/auth"
 	myerrors "wt/pkg/my_errors"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -23,22 +23,19 @@ func (a *AuthController) UserSignUp(ctx context.Context, in *pb.UserSignUpReq) (
 
 	r := pb.UserSignUpResp{}
 
-	createdAt, err := a.service.SignUp(ctx, in.Name, in.Email, in.Password)
+	createdAt, err := a.service.SignUp(ctx, in.Name, in.Email, in.Password, in.Role)
 	if err != nil {
-
 		err = myerrors.ErrMaker(err)
-		
 		return &r, err
 	}
 
 	r.Name = in.Name
 	r.Email = in.Email
-	r.Role = "user"
+	r.Role = in.Role
 	r.CreatedAt = timestamppb.New(createdAt)
 
 	return &r, nil
 }
-
 
 func (a *AuthController) UserLogin(ctx context.Context, in *pb.UserLoginReq) (*pb.UserLoginResp, error) {
 
@@ -46,10 +43,7 @@ func (a *AuthController) UserLogin(ctx context.Context, in *pb.UserLoginReq) (*p
 
 	resp, err := a.service.Login(ctx, in.Email, in.Password)
 	if err != nil {
-		switch {
-		case errors.Is(err, customerrors.EmailDoesntExist):
-			return &r, myerrors.ErrUserNotfound
-		}
+		err = myerrors.ErrMaker(err)
 		return &r, err
 	}
 
@@ -91,9 +85,37 @@ func (a *AuthController) GetNewAccessToken(ctx context.Context, in *pb.SendUUID)
 	return &r, nil
 }
 
-
 func (a *AuthController) PING(ctx context.Context, in *pb.PINGreq) (*pb.PINGresp, error) {
 	r := pb.PINGresp{}
+
+	return &r, nil
+}
+
+func (a *AuthController) ChangePass(ctx context.Context, in *pb.ChangePassReq) (*pb.ChangePassResp, error) {
+
+	r := pb.ChangePassResp{}
+
+	err := a.service.ChangePass(ctx, int(in.UserId), in.OldPass, in.NewPass)
+	if err != nil {
+		return &r, err
+	}
+
+	r.Message = "password changed successfully"
+
+	return &r, nil
+
+}
+
+func (a *AuthController) ChangeEmail(ctx context.Context, in *pb.ChangeEmailReq) (*pb.ChangeEmailResp, error) {
+
+	r := pb.ChangeEmailResp{}
+	err := a.service.ChangeEmail(ctx, int(in.UserId), in.OldEmail, in.NewEmail)
+	if err != nil {
+		err = myerrors.ErrMaker(err)
+		return &r, err
+	}
+
+	r.Message = "email changed successfully"
 
 	return &r, nil
 }

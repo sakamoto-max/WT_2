@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
+
 	// "tracker_service/internal/models"
 	"tracker_service/internal/user"
 
@@ -75,12 +77,19 @@ func (d *DBs) RevertStartWorkout(ctx context.Context, trackerId int) error {
 // 	return nil
 // }
 func (d *DBs) SetTrackerId(ctx context.Context, userId int, trackerId int) error {
-	key := fmt.Sprintf("user:%v:tracker_id", userId)
-	err := d.RDB.Set(ctx, key, trackerId, 0).Err()
-	if err != nil {
-		return fmt.Errorf("error setting tracker id : %w", err)
+	keyforTrackId := fmt.Sprintf("user:%v:tracker_id", userId)
+	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
+
+	pipe := d.RDB.Pipeline()
+
+	pipe.Set(ctx, keyforTrackId, trackerId, 0)
+	pipe.Set(ctx, keyforOngoingWorkout, true, 0)
+
+	_, err := pipe.Exec(ctx)
+	if err != nil{
+		return fmt.Errorf("error setting the tracker Id and ongoing workout : %w", err)
 	}
-	
+
 	return nil
 }
 func (d *DBs) DelTrackerId(ctx context.Context, userId int) error {
@@ -106,6 +115,24 @@ func (d *DBs) GetTrackerId(ctx context.Context, userId int) (int, error) {
 
 	return id, nil
 
+}
+
+func (d *DBs) CheckIfWorkoutIsOngoing(ctx context.Context, userId int) (bool, error) {
+	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
+
+	res, err := d.RDB.Get(ctx, keyforOngoingWorkout).Result()
+	if err != nil{
+		if errors.Is(err, redis.Nil){
+			return false, nil
+		}
+		return false, fmt.Errorf("error in checking if user has ongoing workout : %w", err)
+	}
+
+	if res == "0" {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (d *DBs) EndWorkout(ctx context.Context, trackerId int, data *user.Tracker) error {

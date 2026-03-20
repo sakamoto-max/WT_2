@@ -47,6 +47,7 @@ var (
 	ErrTokenIsMissing   = errors.New("token is missing, please provide the token")
 	ErrRefreshExpired   = errors.New("referesh token is expired, please login again")
 	ErrSignatureInvalid = errors.New("token's signature is invalid")
+	ErrOldPassNewPassSame = errors.New("the old pass and new pass cannot be the same")
 )
 
 // claims error
@@ -65,6 +66,8 @@ var (
 var (
 	ErrEmailNotFound     = errors.New("email not found")
 	ErrIncorrectPassword = errors.New("password is incorrect")
+	ErrOldEmailNewEmailSame = errors.New("old email and new email shouldn't be the same")
+	ErrEmailDoesntMatch = errors.New("the email user sent is incorrect")
 )
 
 var (
@@ -72,8 +75,13 @@ var (
 )
 
 var (
-	CodeAlreadyExits   = 400
+	ErrWorkoutOngoing = errors.New("user has ongoing workout which is not ended")
+)
+
+var (
 	CodeInternalServer = 500
+	CodeBadRequest = 400
+	CodeNotFound = 404
 )
 
 func ErrMatcher(w http.ResponseWriter, err error) {
@@ -82,7 +90,7 @@ func ErrMatcher(w http.ResponseWriter, err error) {
 	switch code {
 	case codes.AlreadyExists:
 		appErr := &AppErrs{
-			code: CodeAlreadyExits,
+			code: CodeBadRequest,
 			Msg:  st.Message(),
 		}
 		appErr.AppErrWriter(w)
@@ -107,6 +115,18 @@ func ErrMatcher(w http.ResponseWriter, err error) {
 			Msg:  "server encountered a problem",
 		}
 		appErr.AppErrWriter(w)
+	case codes.PermissionDenied:
+		appErr := &AppErrs{
+			code: CodeBadRequest,
+			Msg: st.Message(),
+		}
+		appErr.AppErrWriter(w)
+	case codes.NotFound:
+		appErr := &AppErrs{
+			code: CodeNotFound,
+			Msg: st.Message(),
+		}
+		appErr.AppErrWriter(w)
 	}
 }
 
@@ -120,6 +140,14 @@ func ErrMaker(err error) error {
 		Err = status.Newf(codes.AlreadyExists, "user with the name already exists")
 	case errors.Is(err, PlanServerNotResponding):
 		Err = status.New(codes.Canceled, err.Error())
+	case errors.Is(err, ErrIncorrectPassword):
+		Err = status.New(codes.PermissionDenied, "the password is incorrect")
+	case errors.Is(err, ErrOldEmailNewEmailSame):
+		Err = status.New(codes.InvalidArgument, err.Error())
+	case errors.Is(err, ErrEmailDoesntMatch):
+		Err = status.New(codes.InvalidArgument, err.Error())
+	case errors.Is(err, ErrEmailNotFound):
+		Err = status.New(codes.NotFound, err.Error())
 	default:
 		Err = status.Newf(codes.Internal, "some internal error occured : %v", err)
 	}

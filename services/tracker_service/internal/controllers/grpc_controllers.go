@@ -6,6 +6,10 @@ import (
 	"tracker_service/internal/services"
 	"tracker_service/internal/user"
 	trackerpb "workout-tracker/proto/shared/tracker"
+	myerrors "wt/pkg/my_errors"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type TrackerController struct {
@@ -25,6 +29,10 @@ func (t *TrackerController) StartEmptyWorkout(ctx context.Context, in *trackerpb
 
 	err := t.service.StartEmptyWorkoutSer(ctx, int(in.UserId))
 	if err != nil {
+		if err == myerrors.ErrWorkoutOngoing{
+			st := status.New(codes.AlreadyExists, err.Error())
+			return &resp, st.Err()
+		}
 		return &resp, err
 	}
 

@@ -49,7 +49,7 @@ func (h *Handler) UserSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdAt, err := h.service.SignUp(ctx, userInput.Name, userInput.Email, userInput.Password)
+	createdAt, err := h.service.SignUp(ctx, userInput.Name, userInput.Email, userInput.Password, userInput.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, myErrs.ErrNameAlreadyExits):

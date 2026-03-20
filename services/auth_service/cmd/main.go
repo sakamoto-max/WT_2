@@ -7,17 +7,15 @@ import (
 )
 
 func main() {
-
+	
 	env.Load()
 
-	httpServer := NewhttpServer(os.Getenv("HTTP_SERVER_ADDR"))
-	go httpServer.Run()
-
 	grpcServer := NewgrpcServer(os.Getenv("GRPC_SERVER_ADDR"))
-	grpcServer.Run()
-
+	grpcServer.Run()	
 }
 
+// httpServer := NewhttpServer(os.Getenv("HTTP_SERVER_ADDR"))
+// go httpServer.Run()
 // rabbit mq
 // mq := broker.NewRabbitMq()
 
