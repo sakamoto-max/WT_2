@@ -32,3 +32,7 @@ type MqMsg struct {
 	Time   time.Time
 	Email  string
 }
+
+type UserIdPayload struct{
+	UserId int `json:"user_id"`
+}

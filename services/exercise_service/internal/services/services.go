@@ -79,3 +79,13 @@ func (s *Service)  GetExerciseNameByID(ctx context.Context, exerciseId int) (str
 	return s.DB.GetExerciseNameByID(ctx, exerciseId)
 }
 
+
+func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+
+	// check resp time of pg
+
+	pgRespTime := s.DB.GetPostgresRespTime(ctx)
+	redisRespTime := s.DB.GetRedisRespTime(ctx)
+
+	return pgRespTime, redisRespTime
+}

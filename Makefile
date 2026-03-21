@@ -12,3 +12,5 @@ tracker:
 
 gateway:
 	@cd api_gateway && cd cmd && go run .
+orc:
+	@cd services && go run main.go

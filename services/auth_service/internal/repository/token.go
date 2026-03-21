@@ -22,7 +22,7 @@ func (r *Repo) RefreshExists(ctx context.Context, userId int) (bool, error) {
 
 		return false, fmt.Errorf("error checking if uuid exists for user : %v", userId)
 	}
-
+	
 	refreshKey := fmt.Sprintf("%v_refresh", uuid)
 
 	_, err = r.rDB.Get(ctx, refreshKey).Result()

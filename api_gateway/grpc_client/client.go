@@ -1,10 +1,13 @@
 package grpcclient
 
 import (
-	"context"
+	// "context"
+	// "context"
 	"log"
 	"os"
-	"time"
+	// "time"
+
+	// "time"
 	authpb "workout-tracker/proto/shared/auth"
 	exerpb "workout-tracker/proto/shared/exercise"
 	planpb "workout-tracker/proto/shared/plan"
@@ -63,34 +66,34 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 
 }
 
-func (g *grpcClient) PingAll() {
+// func (g *grpcClient) PingAll() {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+// 	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+// 	// defer cancel()
 
-	inOne := authpb.PINGreq{}
-	_, err := g.AuthClient.PING(ctx, &inOne)
-	if err != nil {
-		log.Fatalf("auth service is not up")
-	}
+// 	// inOne := authpb.PINGreq{}
+// 	// _, err := g.AuthClient.PING(ctx, &inOne)
+// 	// if err != nil {
+// 	// 	log.Fatalf("auth service is not up")
+// 	// }
 
-	inTwo := planpb.PingPlanReq{}
-	_, err = g.PlanClient.PING(ctx, &inTwo)
-	if err != nil {
-		log.Fatalf("plan service is not up")
+// 	// inTwo := planpb.PingPlanReq{}
+// 	// _, err = g.PlanClient.PING(ctx, &inTwo)
+// 	// if err != nil {
+// 	// 	log.Fatalf("plan service is not up")
 
-	}
+// 	// }
 
-	inThree := exerpb.PingExerReq{}
-	_, err = g.ExerClient.PING(ctx, &inThree)
-	if err != nil {
-		log.Fatalf("exercise service is not up")
+// 	// inThree := exerpb.PingExerReq{}
+// 	// _, err = g.ExerClient.PING(ctx, &inThree)
+// 	// if err != nil {
+// 	// 	log.Fatalf("exercise service is not up")
 
-	}
+// 	// }
 
-	inFour := trackpb.PingTrackReq{}
-	_, err = g.TrackClient.PING(ctx, &inFour)
-	if err != nil {
-		log.Fatalf("tracker service is not up")
-	}
-}
+// 	// inFour := trackpb.PingTrackReq{}
+// 	// _, err = g.TrackClient.PING(ctx, &inFour)
+// 	// if err != nil {
+// 	// 	log.Fatalf("tracker service is not up")
+// 	// }
+// }

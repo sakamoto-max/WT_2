@@ -7,6 +7,7 @@ import (
 	pb "workout-tracker/proto/shared/auth"
 	myerrors "wt/pkg/my_errors"
 
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -118,4 +119,16 @@ func (a *AuthController) ChangeEmail(ctx context.Context, in *pb.ChangeEmailReq)
 	r.Message = "email changed successfully"
 
 	return &r, nil
+}
+
+func (a *AuthController) GetHealth(ctx context.Context, in *pb.GetHealthReq) (*pb.GetHealthResp, error) {
+
+	resp := pb.GetHealthResp{}
+
+	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+
+	resp.PostgresRespTime = durationpb.New(*pgRespTime)
+	resp.RedisRespTime = durationpb.New(*redisRespTime)
+
+	return &resp, nil
 }

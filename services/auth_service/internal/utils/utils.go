@@ -81,6 +81,19 @@ func MakeJSON(msg models.MqMsg) ([]byte, error) {
 	}
 
 	return dataInBytes, nil
-
 }
 
+func MakeJSONV2(msg any) (*string, error) {
+
+	var data string
+
+	dataInBytes, err := json.Marshal(msg)
+	if err != nil{
+		return nil, fmt.Errorf("error occured while making json : %w", err)
+	}
+
+	data = string(dataInBytes)
+
+	return &data, nil
+}
+ 

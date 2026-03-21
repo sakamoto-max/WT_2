@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"plan_service/internal/services"
 	planpb "workout-tracker/proto/shared/plan"
+
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 type PlanController struct {
@@ -19,8 +21,8 @@ func (p *PlanController) CreatePlan(ctx context.Context, in *planpb.CreatePlanRe
 	resp := planpb.CreatePlanResp{}
 
 	err := p.service.CreatePlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
-	if err != nil{
-		return  &resp, err
+	if err != nil {
+		return &resp, err
 	}
 
 	resp.PlanName = in.PlanName
@@ -163,4 +165,16 @@ func (a *PlanController) PING(ctx context.Context, in *planpb.PingPlanReq) (*pla
 	r := planpb.PingPlanResp{}
 
 	return &r, nil
+}
+
+func (a *PlanController) GetHealth(ctx context.Context, in *planpb.GetHealthReq) (*planpb.GetHealthResp, error) {
+
+	resp := planpb.GetHealthResp{}
+
+	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+
+	resp.PostgresRespTime = durationpb.New(*pgRespTime)
+	resp.RedisRespTime = durationpb.New(*redisRespTime)
+
+	return &resp, nil
 }

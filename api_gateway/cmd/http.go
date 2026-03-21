@@ -21,7 +21,6 @@ func (h *httpServer) Run() {
 
 	client := grpcclient.NewgrpcClient()
 	client = client.ConnectToClients()
-	client.PingAll()
 
 	fmt.Println("all services are up and running")
 

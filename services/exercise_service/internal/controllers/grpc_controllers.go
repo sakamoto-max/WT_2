@@ -5,6 +5,7 @@ import (
 	"exercise_service/internal/services"
 	exerpb "workout-tracker/proto/shared/exercise"
 
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -20,11 +21,11 @@ func NewExerController(service *services.Service) *ExerController {
 func (e *ExerController) GetAllExercises(ctx context.Context, in *exerpb.GetAllExercisesREq) (*exerpb.GetAllExercisesResp, error) {
 	resp := exerpb.GetAllExercisesResp{}
 	r, err := e.service.GetAllExercisesSer(ctx)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
-	for _, v := range *r{
+	for _, v := range *r {
 		eachExer := exerpb.OneExerciseResp{}
 		eachExer.Id = int64(v.Id)
 		eachExer.Name = v.Name
@@ -42,7 +43,7 @@ func (e *ExerController) GetOneExercise(ctx context.Context, in *exerpb.SendExer
 	resp := exerpb.OneExerciseResp{}
 
 	r, err := e.service.GetExerciseByNameSer(ctx, in.ExerciseName)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
@@ -56,19 +57,18 @@ func (e *ExerController) GetOneExercise(ctx context.Context, in *exerpb.SendExer
 	return &resp, nil
 }
 
-
 func (e *ExerController) CreateExercise(ctx context.Context, in *exerpb.CreateExerciseReq) (*exerpb.CreateExerciseResp, error) {
 
 	resp := exerpb.CreateExerciseResp{}
 	r, err := e.service.CreateExerciseSer(ctx, in.ExerciseName, in.BodyPart, in.Equipment, int(in.RestTime))
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
 	resp.Message = r.Message
 	resp.Exercise.Name = r.Exercise.Name
 	// resp.Exercise.Id = int64(r.Exercise.Id)
-		resp.Exercise.RestTime = int64(r.Exercise.RestTime)
+	resp.Exercise.RestTime = int64(r.Exercise.RestTime)
 	resp.Exercise.BodyPart = r.Exercise.BodyPart
 	resp.Exercise.Equipment = r.Exercise.Equipment
 	resp.Exercise.CreatedAt = timestamppb.New(r.Exercise.CreatedAt)
@@ -78,34 +78,34 @@ func (e *ExerController) CreateExercise(ctx context.Context, in *exerpb.CreateEx
 func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.DeleteExerciseResp, error) {
 	resp := exerpb.DeleteExerciseResp{}
 	err := e.service.DeleteExeciseSer(ctx, in.ExerciseName)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
 	return &resp, nil
-	
+
 }
 
 func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	var resp exerpb.ExerciseExistsReturnIdResp
 
 	exists, id, err := e.service.ExerciseExistsReturnId(ctx, in.ExerciseName)
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
 	resp = exerpb.ExerciseExistsReturnIdResp{
-		Exists: exists,
+		Exists:     exists,
 		ExerciseId: id,
 	}
 
 	return &resp, nil
 }
 func (e *ExerController) GetExerciseName(ctx context.Context, in *exerpb.SendExerciseID) (*exerpb.GetExerciseNameResp, error) {
-		
+
 	var resp exerpb.GetExerciseNameResp
 	exerciseName, err := e.service.GetExerciseNameByID(ctx, int(in.ExerciseId))
-	if err != nil{
+	if err != nil {
 		return &resp, err
 	}
 
@@ -118,4 +118,15 @@ func (a *ExerController) PING(ctx context.Context, in *exerpb.PingExerReq) (*exe
 	r := exerpb.PingExerResp{}
 
 	return &r, nil
+}
+func (a *ExerController) GetHealth(ctx context.Context, in *exerpb.GetHealthReq) (*exerpb.GetHealthResp, error) {
+
+	resp := exerpb.GetHealthResp{}
+
+	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+
+	resp.PostgresRespTime = durationpb.New(*pgRespTime)
+	resp.RedisRespTime = durationpb.New(*redisRespTime)
+
+	return &resp, nil
 }

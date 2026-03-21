@@ -11,6 +11,7 @@ import (
 	myerrors "wt/pkg/my_errors"
 	token "wt/pkg/shared"
 	"wt/pkg/utils"
+	"wt/pkg/enum"
 )
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	in.Password = userInput.Password
 	
 	if userInput.Role == nil{
-		in.Role = string(user.UserRole)
+		in.Role = string(enum.UserRole)
 	}else{
 		in.Role = *userInput.Role
 	}

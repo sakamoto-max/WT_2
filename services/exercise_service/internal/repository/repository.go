@@ -25,6 +25,30 @@ func NewRepo(p *pgxpool.Pool, r *redis.Client) *Repo {
 	}
 }
 
+func (r *Repo) GetPostgresRespTime(ctx context.Context) (*time.Duration) {
+	timeStart := time.Now()
+	err := r.PDB.Ping(ctx)
+	if err != nil{
+		return nil
+	}
+
+	timeEnd := time.Since(timeStart)
+
+	return &timeEnd
+}
+func (r *Repo) GetRedisRespTime(ctx context.Context) (*time.Duration) {
+	timeStart := time.Now()
+	err := r.RDB.Ping(ctx).Err()
+	if err != nil{
+		return nil
+	}
+
+	timeEnd := time.Since(timeStart)
+
+	return &timeEnd
+}
+
+
 
 func (r *Repo) GetExerciseByName(ctx context.Context, exerciseName string) (*models.Exercise, error) {
 

@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 type TrackerController struct {
@@ -29,7 +30,7 @@ func (t *TrackerController) StartEmptyWorkout(ctx context.Context, in *trackerpb
 
 	err := t.service.StartEmptyWorkoutSer(ctx, int(in.UserId))
 	if err != nil {
-		if err == myerrors.ErrWorkoutOngoing{
+		if err == myerrors.ErrWorkoutOngoing {
 			st := status.New(codes.AlreadyExists, err.Error())
 			return &resp, st.Err()
 		}
@@ -89,4 +90,16 @@ func (a *TrackerController) PING(ctx context.Context, in *trackerpb.PingTrackReq
 	r := trackerpb.PingTrackResp{}
 
 	return &r, nil
+}
+
+func (a *TrackerController) GetHealth(ctx context.Context, in *trackerpb.GetHealthReq) (*trackerpb.GetHealthResp, error) {
+
+	resp := trackerpb.GetHealthResp{}
+
+	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+
+	resp.PostgresRespTime = durationpb.New(*pgRespTime)
+	resp.RedisRespTime = durationpb.New(*redisRespTime)
+
+	return &resp, nil
 }

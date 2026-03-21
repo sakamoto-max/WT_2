@@ -6,6 +6,8 @@ import (
 	customerrors "plan_service/internal/custom_errors"
 	"plan_service/internal/models"
 	"plan_service/internal/repository"
+	"time"
+
 	// "plan_service/internal/user"
 
 	// "strconv"
@@ -22,7 +24,7 @@ func NewService(Db *repository.DBs, grpcCli exerpb.ExerciseServiceClient) *Servi
 	return &Service{Db: Db, GClient: grpcCli}
 }
 
-func (s *Service) CreatePlan(ctx context.Context, userId int, planName string, exerciseNames *[]string) (error) {
+func (s *Service) CreatePlan(ctx context.Context, userId int, planName string, exerciseNames *[]string) error {
 	var exerciseIDs []int
 	// var resp models.Plan2Resp
 	// lower case the plan_name
@@ -224,7 +226,7 @@ func (s *Service) DeleteExerciseFromPlan(ctx context.Context, userId int, planNa
 
 	return resp, nil
 }
-func (s *Service) DeletePlanSer(ctx context.Context, userId int, planName string) (error) {
+func (s *Service) DeletePlanSer(ctx context.Context, userId int, planName string) error {
 	// check if plan exists -> gets plan id
 
 	exists, planId, err := s.Db.PlanExistsReturnsId(ctx, userId, planName)
@@ -237,7 +239,7 @@ func (s *Service) DeletePlanSer(ctx context.Context, userId int, planName string
 	}
 
 	err = s.Db.DeletePlan(ctx, userId, planId)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -254,7 +256,7 @@ func (s *Service) GetEmptyPlanId(ctx context.Context, userId int) (int, error) {
 	return s.Db.GetEmptyPlanID(ctx, userId)
 }
 
-func (s *Service) CreateEmptyPlan(ctx context.Context, userId int) (error)  {
+func (s *Service) CreateEmptyPlan(ctx context.Context, userId int) error {
 	return s.Db.CreateEmptyPlan(ctx, userId)
 }
 
@@ -282,4 +284,14 @@ func MakeRespForAddingNewExer(ctx context.Context, planId int, planName string, 
 	resp.Exercises = allExercises
 
 	return &resp, nil
+}
+
+func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+
+	// check resp time of pg
+
+	pgRespTime := s.Db.GetPostgresRespTime(ctx)
+	redisRespTime := s.Db.GetRedisRespTime(ctx)
+
+	return pgRespTime, redisRespTime
 }

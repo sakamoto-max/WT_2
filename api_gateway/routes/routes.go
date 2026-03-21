@@ -15,6 +15,8 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	r.Use(chimiddleware.Logger)
 
+	r.Get("/wt/health", h.GetHealth)
+
 	r.Post("/wt/user/signup", h.SignUp)
 	r.Post("/wt/user/login", h.Login)
 	r.With(middleware.JwtMiddleware).Post("/wt/user/logout", h.Logout)
@@ -27,7 +29,7 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/exercise", h.CreateExercise)
 	r.With(middleware.JwtMiddleware).Delete("/wt/exercise", h.DeleteExecise)
 
-	r.Get("/wt/plan/health", h.CheckHealthPlan)
+	// r.Get("/wt/plan/health", h.CheckHealthPlan)
 	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plan/exercises", h.DeleteExerciseFromPlan)

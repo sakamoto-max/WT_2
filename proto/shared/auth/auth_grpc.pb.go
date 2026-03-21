@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_UserSignUp_FullMethodName        = "/proto.AuthService/UserSignUp"
-	AuthService_UserLogin_FullMethodName         = "/proto.AuthService/UserLogin"
-	AuthService_UserLogOut_FullMethodName        = "/proto.AuthService/UserLogOut"
-	AuthService_GetNewAccessToken_FullMethodName = "/proto.AuthService/GetNewAccessToken"
-	AuthService_PING_FullMethodName              = "/proto.AuthService/PING"
-	AuthService_ChangePass_FullMethodName        = "/proto.AuthService/ChangePass"
-	AuthService_ChangeEmail_FullMethodName       = "/proto.AuthService/ChangeEmail"
+	AuthService_UserSignUp_FullMethodName        = "/auth.AuthService/UserSignUp"
+	AuthService_UserLogin_FullMethodName         = "/auth.AuthService/UserLogin"
+	AuthService_UserLogOut_FullMethodName        = "/auth.AuthService/UserLogOut"
+	AuthService_GetNewAccessToken_FullMethodName = "/auth.AuthService/GetNewAccessToken"
+	AuthService_PING_FullMethodName              = "/auth.AuthService/PING"
+	AuthService_ChangePass_FullMethodName        = "/auth.AuthService/ChangePass"
+	AuthService_ChangeEmail_FullMethodName       = "/auth.AuthService/ChangeEmail"
+	AuthService_GetHealth_FullMethodName         = "/auth.AuthService/GetHealth"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -39,6 +40,7 @@ type AuthServiceClient interface {
 	PING(ctx context.Context, in *PINGreq, opts ...grpc.CallOption) (*PINGresp, error)
 	ChangePass(ctx context.Context, in *ChangePassReq, opts ...grpc.CallOption) (*ChangePassResp, error)
 	ChangeEmail(ctx context.Context, in *ChangeEmailReq, opts ...grpc.CallOption) (*ChangeEmailResp, error)
+	GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error)
 }
 
 type authServiceClient struct {
@@ -119,6 +121,16 @@ func (c *authServiceClient) ChangeEmail(ctx context.Context, in *ChangeEmailReq,
 	return out, nil
 }
 
+func (c *authServiceClient) GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHealthResp)
+	err := c.cc.Invoke(ctx, AuthService_GetHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type AuthServiceServer interface {
 	PING(context.Context, *PINGreq) (*PINGresp, error)
 	ChangePass(context.Context, *ChangePassReq) (*ChangePassResp, error)
 	ChangeEmail(context.Context, *ChangeEmailReq) (*ChangeEmailResp, error)
+	GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedAuthServiceServer) ChangePass(context.Context, *ChangePassReq
 }
 func (UnimplementedAuthServiceServer) ChangeEmail(context.Context, *ChangeEmailReq) (*ChangeEmailResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeEmail not implemented")
+}
+func (UnimplementedAuthServiceServer) GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHealth not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -308,11 +324,29 @@ func _AuthService_ChangeEmail_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_GetHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHealthReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetHealth(ctx, req.(*GetHealthReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.AuthService",
+	ServiceName: "auth.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -342,6 +376,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangeEmail",
 			Handler:    _AuthService_ChangeEmail_Handler,
+		},
+		{
+			MethodName: "GetHealth",
+			Handler:    _AuthService_GetHealth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

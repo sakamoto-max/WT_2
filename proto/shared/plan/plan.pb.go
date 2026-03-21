@@ -9,6 +9,7 @@ package plan
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,6 +22,110 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type GetHealthReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHealthReq) Reset() {
+	*x = GetHealthReq{}
+	mi := &file_plan_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHealthReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHealthReq) ProtoMessage() {}
+
+func (x *GetHealthReq) ProtoReflect() protoreflect.Message {
+	mi := &file_plan_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHealthReq.ProtoReflect.Descriptor instead.
+func (*GetHealthReq) Descriptor() ([]byte, []int) {
+	return file_plan_proto_rawDescGZIP(), []int{0}
+}
+
+type GetHealthResp struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	ServiceName      string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	Status           string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	PostgresRespTime *durationpb.Duration   `protobuf:"bytes,3,opt,name=postgres_resp_time,json=postgresRespTime,proto3" json:"postgres_resp_time,omitempty"`
+	RedisRespTime    *durationpb.Duration   `protobuf:"bytes,4,opt,name=redis_resp_time,json=redisRespTime,proto3" json:"redis_resp_time,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *GetHealthResp) Reset() {
+	*x = GetHealthResp{}
+	mi := &file_plan_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHealthResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHealthResp) ProtoMessage() {}
+
+func (x *GetHealthResp) ProtoReflect() protoreflect.Message {
+	mi := &file_plan_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHealthResp.ProtoReflect.Descriptor instead.
+func (*GetHealthResp) Descriptor() ([]byte, []int) {
+	return file_plan_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetHealthResp) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *GetHealthResp) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *GetHealthResp) GetPostgresRespTime() *durationpb.Duration {
+	if x != nil {
+		return x.PostgresRespTime
+	}
+	return nil
+}
+
+func (x *GetHealthResp) GetRedisRespTime() *durationpb.Duration {
+	if x != nil {
+		return x.RedisRespTime
+	}
+	return nil
+}
+
 type PingPlanReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -29,7 +134,7 @@ type PingPlanReq struct {
 
 func (x *PingPlanReq) Reset() {
 	*x = PingPlanReq{}
-	mi := &file_plan_proto_msgTypes[0]
+	mi := &file_plan_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -41,7 +146,7 @@ func (x *PingPlanReq) String() string {
 func (*PingPlanReq) ProtoMessage() {}
 
 func (x *PingPlanReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[0]
+	mi := &file_plan_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -54,7 +159,7 @@ func (x *PingPlanReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingPlanReq.ProtoReflect.Descriptor instead.
 func (*PingPlanReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{0}
+	return file_plan_proto_rawDescGZIP(), []int{2}
 }
 
 type PingPlanResp struct {
@@ -65,7 +170,7 @@ type PingPlanResp struct {
 
 func (x *PingPlanResp) Reset() {
 	*x = PingPlanResp{}
-	mi := &file_plan_proto_msgTypes[1]
+	mi := &file_plan_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -77,7 +182,7 @@ func (x *PingPlanResp) String() string {
 func (*PingPlanResp) ProtoMessage() {}
 
 func (x *PingPlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[1]
+	mi := &file_plan_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -90,7 +195,7 @@ func (x *PingPlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingPlanResp.ProtoReflect.Descriptor instead.
 func (*PingPlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{1}
+	return file_plan_proto_rawDescGZIP(), []int{3}
 }
 
 type DeletePlanReq struct {
@@ -103,7 +208,7 @@ type DeletePlanReq struct {
 
 func (x *DeletePlanReq) Reset() {
 	*x = DeletePlanReq{}
-	mi := &file_plan_proto_msgTypes[2]
+	mi := &file_plan_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -115,7 +220,7 @@ func (x *DeletePlanReq) String() string {
 func (*DeletePlanReq) ProtoMessage() {}
 
 func (x *DeletePlanReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[2]
+	mi := &file_plan_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -128,7 +233,7 @@ func (x *DeletePlanReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlanReq.ProtoReflect.Descriptor instead.
 func (*DeletePlanReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{2}
+	return file_plan_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *DeletePlanReq) GetUserId() int64 {
@@ -153,7 +258,7 @@ type DeletePlanResp struct {
 
 func (x *DeletePlanResp) Reset() {
 	*x = DeletePlanResp{}
-	mi := &file_plan_proto_msgTypes[3]
+	mi := &file_plan_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -165,7 +270,7 @@ func (x *DeletePlanResp) String() string {
 func (*DeletePlanResp) ProtoMessage() {}
 
 func (x *DeletePlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[3]
+	mi := &file_plan_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -178,7 +283,7 @@ func (x *DeletePlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlanResp.ProtoReflect.Descriptor instead.
 func (*DeletePlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{3}
+	return file_plan_proto_rawDescGZIP(), []int{5}
 }
 
 type PlanReq struct {
@@ -192,7 +297,7 @@ type PlanReq struct {
 
 func (x *PlanReq) Reset() {
 	*x = PlanReq{}
-	mi := &file_plan_proto_msgTypes[4]
+	mi := &file_plan_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -204,7 +309,7 @@ func (x *PlanReq) String() string {
 func (*PlanReq) ProtoMessage() {}
 
 func (x *PlanReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[4]
+	mi := &file_plan_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -217,7 +322,7 @@ func (x *PlanReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanReq.ProtoReflect.Descriptor instead.
 func (*PlanReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{4}
+	return file_plan_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PlanReq) GetUserId() int64 {
@@ -251,7 +356,7 @@ type GetPlanByNameReq struct {
 
 func (x *GetPlanByNameReq) Reset() {
 	*x = GetPlanByNameReq{}
-	mi := &file_plan_proto_msgTypes[5]
+	mi := &file_plan_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -263,7 +368,7 @@ func (x *GetPlanByNameReq) String() string {
 func (*GetPlanByNameReq) ProtoMessage() {}
 
 func (x *GetPlanByNameReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[5]
+	mi := &file_plan_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,7 +381,7 @@ func (x *GetPlanByNameReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlanByNameReq.ProtoReflect.Descriptor instead.
 func (*GetPlanByNameReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{5}
+	return file_plan_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetPlanByNameReq) GetUserId() int64 {
@@ -302,7 +407,7 @@ type GetAllPlansReq struct {
 
 func (x *GetAllPlansReq) Reset() {
 	*x = GetAllPlansReq{}
-	mi := &file_plan_proto_msgTypes[6]
+	mi := &file_plan_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -314,7 +419,7 @@ func (x *GetAllPlansReq) String() string {
 func (*GetAllPlansReq) ProtoMessage() {}
 
 func (x *GetAllPlansReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[6]
+	mi := &file_plan_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +432,7 @@ func (x *GetAllPlansReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllPlansReq.ProtoReflect.Descriptor instead.
 func (*GetAllPlansReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{6}
+	return file_plan_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetAllPlansReq) GetUserId() int64 {
@@ -347,7 +452,7 @@ type GetAllPlansResp struct {
 
 func (x *GetAllPlansResp) Reset() {
 	*x = GetAllPlansResp{}
-	mi := &file_plan_proto_msgTypes[7]
+	mi := &file_plan_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -359,7 +464,7 @@ func (x *GetAllPlansResp) String() string {
 func (*GetAllPlansResp) ProtoMessage() {}
 
 func (x *GetAllPlansResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[7]
+	mi := &file_plan_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,7 +477,7 @@ func (x *GetAllPlansResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllPlansResp.ProtoReflect.Descriptor instead.
 func (*GetAllPlansResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{7}
+	return file_plan_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetAllPlansResp) GetNumberOfPlans() int64 {
@@ -399,7 +504,7 @@ type PlanResp struct {
 
 func (x *PlanResp) Reset() {
 	*x = PlanResp{}
-	mi := &file_plan_proto_msgTypes[8]
+	mi := &file_plan_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -411,7 +516,7 @@ func (x *PlanResp) String() string {
 func (*PlanResp) ProtoMessage() {}
 
 func (x *PlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[8]
+	mi := &file_plan_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -424,7 +529,7 @@ func (x *PlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanResp.ProtoReflect.Descriptor instead.
 func (*PlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{8}
+	return file_plan_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PlanResp) GetPlanName() string {
@@ -452,7 +557,7 @@ type CreatePlanReq struct {
 
 func (x *CreatePlanReq) Reset() {
 	*x = CreatePlanReq{}
-	mi := &file_plan_proto_msgTypes[9]
+	mi := &file_plan_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -464,7 +569,7 @@ func (x *CreatePlanReq) String() string {
 func (*CreatePlanReq) ProtoMessage() {}
 
 func (x *CreatePlanReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[9]
+	mi := &file_plan_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -477,7 +582,7 @@ func (x *CreatePlanReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlanReq.ProtoReflect.Descriptor instead.
 func (*CreatePlanReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{9}
+	return file_plan_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *CreatePlanReq) GetUserId() int64 {
@@ -512,7 +617,7 @@ type CreatePlanResp struct {
 
 func (x *CreatePlanResp) Reset() {
 	*x = CreatePlanResp{}
-	mi := &file_plan_proto_msgTypes[10]
+	mi := &file_plan_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -524,7 +629,7 @@ func (x *CreatePlanResp) String() string {
 func (*CreatePlanResp) ProtoMessage() {}
 
 func (x *CreatePlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[10]
+	mi := &file_plan_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -537,7 +642,7 @@ func (x *CreatePlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlanResp.ProtoReflect.Descriptor instead.
 func (*CreatePlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{10}
+	return file_plan_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CreatePlanResp) GetMessage() string {
@@ -569,7 +674,7 @@ type CheckHealthReq struct {
 
 func (x *CheckHealthReq) Reset() {
 	*x = CheckHealthReq{}
-	mi := &file_plan_proto_msgTypes[11]
+	mi := &file_plan_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -581,7 +686,7 @@ func (x *CheckHealthReq) String() string {
 func (*CheckHealthReq) ProtoMessage() {}
 
 func (x *CheckHealthReq) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[11]
+	mi := &file_plan_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,7 +699,7 @@ func (x *CheckHealthReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckHealthReq.ProtoReflect.Descriptor instead.
 func (*CheckHealthReq) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{11}
+	return file_plan_proto_rawDescGZIP(), []int{13}
 }
 
 type CheckHealthResp struct {
@@ -606,7 +711,7 @@ type CheckHealthResp struct {
 
 func (x *CheckHealthResp) Reset() {
 	*x = CheckHealthResp{}
-	mi := &file_plan_proto_msgTypes[12]
+	mi := &file_plan_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -618,7 +723,7 @@ func (x *CheckHealthResp) String() string {
 func (*CheckHealthResp) ProtoMessage() {}
 
 func (x *CheckHealthResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[12]
+	mi := &file_plan_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -631,7 +736,7 @@ func (x *CheckHealthResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckHealthResp.ProtoReflect.Descriptor instead.
 func (*CheckHealthResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{12}
+	return file_plan_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CheckHealthResp) GetMessage() string {
@@ -650,7 +755,7 @@ type SendUserID struct {
 
 func (x *SendUserID) Reset() {
 	*x = SendUserID{}
-	mi := &file_plan_proto_msgTypes[13]
+	mi := &file_plan_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -662,7 +767,7 @@ func (x *SendUserID) String() string {
 func (*SendUserID) ProtoMessage() {}
 
 func (x *SendUserID) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[13]
+	mi := &file_plan_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -675,7 +780,7 @@ func (x *SendUserID) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendUserID.ProtoReflect.Descriptor instead.
 func (*SendUserID) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{13}
+	return file_plan_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SendUserID) GetUserId() int64 {
@@ -694,7 +799,7 @@ type CreateEmptyPlanResp struct {
 
 func (x *CreateEmptyPlanResp) Reset() {
 	*x = CreateEmptyPlanResp{}
-	mi := &file_plan_proto_msgTypes[14]
+	mi := &file_plan_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -706,7 +811,7 @@ func (x *CreateEmptyPlanResp) String() string {
 func (*CreateEmptyPlanResp) ProtoMessage() {}
 
 func (x *CreateEmptyPlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[14]
+	mi := &file_plan_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -719,7 +824,7 @@ func (x *CreateEmptyPlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateEmptyPlanResp.ProtoReflect.Descriptor instead.
 func (*CreateEmptyPlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{14}
+	return file_plan_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CreateEmptyPlanResp) GetMessage() string {
@@ -738,7 +843,7 @@ type EmptyPlanIdResp struct {
 
 func (x *EmptyPlanIdResp) Reset() {
 	*x = EmptyPlanIdResp{}
-	mi := &file_plan_proto_msgTypes[15]
+	mi := &file_plan_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -750,7 +855,7 @@ func (x *EmptyPlanIdResp) String() string {
 func (*EmptyPlanIdResp) ProtoMessage() {}
 
 func (x *EmptyPlanIdResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[15]
+	mi := &file_plan_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -763,7 +868,7 @@ func (x *EmptyPlanIdResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmptyPlanIdResp.ProtoReflect.Descriptor instead.
 func (*EmptyPlanIdResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{15}
+	return file_plan_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EmptyPlanIdResp) GetEmptyPlanId() int64 {
@@ -783,7 +888,7 @@ type SendPlanName struct {
 
 func (x *SendPlanName) Reset() {
 	*x = SendPlanName{}
-	mi := &file_plan_proto_msgTypes[16]
+	mi := &file_plan_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -795,7 +900,7 @@ func (x *SendPlanName) String() string {
 func (*SendPlanName) ProtoMessage() {}
 
 func (x *SendPlanName) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[16]
+	mi := &file_plan_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -808,7 +913,7 @@ func (x *SendPlanName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendPlanName.ProtoReflect.Descriptor instead.
 func (*SendPlanName) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{16}
+	return file_plan_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SendPlanName) GetUserId() int64 {
@@ -835,7 +940,7 @@ type PlanExistsResp struct {
 
 func (x *PlanExistsResp) Reset() {
 	*x = PlanExistsResp{}
-	mi := &file_plan_proto_msgTypes[17]
+	mi := &file_plan_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +952,7 @@ func (x *PlanExistsResp) String() string {
 func (*PlanExistsResp) ProtoMessage() {}
 
 func (x *PlanExistsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[17]
+	mi := &file_plan_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -860,7 +965,7 @@ func (x *PlanExistsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanExistsResp.ProtoReflect.Descriptor instead.
 func (*PlanExistsResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{17}
+	return file_plan_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *PlanExistsResp) GetExists() bool {
@@ -888,7 +993,7 @@ type PlanExistsReturnPlanResp struct {
 
 func (x *PlanExistsReturnPlanResp) Reset() {
 	*x = PlanExistsReturnPlanResp{}
-	mi := &file_plan_proto_msgTypes[18]
+	mi := &file_plan_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -900,7 +1005,7 @@ func (x *PlanExistsReturnPlanResp) String() string {
 func (*PlanExistsReturnPlanResp) ProtoMessage() {}
 
 func (x *PlanExistsReturnPlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_plan_proto_msgTypes[18]
+	mi := &file_plan_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -913,7 +1018,7 @@ func (x *PlanExistsReturnPlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlanExistsReturnPlanResp.ProtoReflect.Descriptor instead.
 func (*PlanExistsReturnPlanResp) Descriptor() ([]byte, []int) {
-	return file_plan_proto_rawDescGZIP(), []int{18}
+	return file_plan_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *PlanExistsReturnPlanResp) GetExists() bool {
@@ -942,7 +1047,13 @@ var File_plan_proto protoreflect.FileDescriptor
 const file_plan_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"plan.proto\x12\x05proto\"\r\n" +
+	"plan.proto\x12\x04plan\x1a\x1egoogle/protobuf/duration.proto\"\x0e\n" +
+	"\fGetHealthReq\"\xd6\x01\n" +
+	"\rGetHealthResp\x12!\n" +
+	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12G\n" +
+	"\x12postgres_resp_time\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x10postgresRespTime\x12A\n" +
+	"\x0fredis_resp_time\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\rredisRespTime\"\r\n" +
 	"\vPingPlanReq\"\x0e\n" +
 	"\fPingPlanResp\"E\n" +
 	"\rDeletePlanReq\x12\x17\n" +
@@ -957,10 +1068,10 @@ const file_plan_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\")\n" +
 	"\x0eGetAllPlansReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"g\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"f\n" +
 	"\x0fGetAllPlansResp\x12&\n" +
-	"\x0fnumber_of_plans\x18\x01 \x01(\x03R\rnumberOfPlans\x12,\n" +
-	"\tall_plans\x18\x02 \x03(\v2\x0f.proto.PlanRespR\ballPlans\"N\n" +
+	"\x0fnumber_of_plans\x18\x01 \x01(\x03R\rnumberOfPlans\x12+\n" +
+	"\tall_plans\x18\x02 \x03(\v2\x0e.plan.PlanRespR\ballPlans\"N\n" +
 	"\bPlanResp\x12\x1b\n" +
 	"\tplan_name\x18\x01 \x01(\tR\bplanName\x12%\n" +
 	"\x0eexercise_names\x18\x02 \x03(\tR\rexerciseNames\"l\n" +
@@ -991,22 +1102,23 @@ const file_plan_proto_rawDesc = "" +
 	"\x18PlanExistsReturnPlanResp\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
 	"\aplan_id\x18\x02 \x01(\x03R\x06planId\x12!\n" +
-	"\fexercise_ids\x18\x03 \x03(\x03R\vexerciseIds2\x85\x06\n" +
-	"\vPlanService\x12B\n" +
-	"\x12PlanExistsReturnId\x12\x13.proto.SendPlanName\x1a\x15.proto.PlanExistsResp\"\x00\x12N\n" +
-	"\x14PlanExistsReturnPlan\x12\x13.proto.SendPlanName\x1a\x1f.proto.PlanExistsReturnPlanResp\"\x00\x12=\n" +
-	"\x0eGetEmptyPlanId\x12\x11.proto.SendUserID\x1a\x16.proto.EmptyPlanIdResp\"\x00\x12B\n" +
-	"\x0fCreateEmptyPlan\x12\x11.proto.SendUserID\x1a\x1a.proto.CreateEmptyPlanResp\"\x00\x12>\n" +
-	"\vCheckHealth\x12\x15.proto.CheckHealthReq\x1a\x16.proto.CheckHealthResp\"\x00\x12;\n" +
+	"\fexercise_ids\x18\x03 \x03(\x03R\vexerciseIds2\xa5\x06\n" +
+	"\vPlanService\x12@\n" +
+	"\x12PlanExistsReturnId\x12\x12.plan.SendPlanName\x1a\x14.plan.PlanExistsResp\"\x00\x12L\n" +
+	"\x14PlanExistsReturnPlan\x12\x12.plan.SendPlanName\x1a\x1e.plan.PlanExistsReturnPlanResp\"\x00\x12;\n" +
+	"\x0eGetEmptyPlanId\x12\x10.plan.SendUserID\x1a\x15.plan.EmptyPlanIdResp\"\x00\x12@\n" +
+	"\x0fCreateEmptyPlan\x12\x10.plan.SendUserID\x1a\x19.plan.CreateEmptyPlanResp\"\x00\x12<\n" +
+	"\vCheckHealth\x12\x14.plan.CheckHealthReq\x1a\x15.plan.CheckHealthResp\"\x00\x129\n" +
 	"\n" +
-	"CreatePlan\x12\x14.proto.CreatePlanReq\x1a\x15.proto.CreatePlanResp\"\x00\x12>\n" +
-	"\vGetAllPlans\x12\x15.proto.GetAllPlansReq\x1a\x16.proto.GetAllPlansResp\"\x00\x12;\n" +
-	"\rGetPlanByName\x12\x17.proto.GetPlanByNameReq\x1a\x0f.proto.PlanResp\"\x00\x127\n" +
-	"\x12AddExercisesToPlan\x12\x0e.proto.PlanReq\x1a\x0f.proto.PlanResp\"\x00\x12<\n" +
-	"\x17DeleteExercisesFromPlan\x12\x0e.proto.PlanReq\x1a\x0f.proto.PlanResp\"\x00\x12;\n" +
+	"CreatePlan\x12\x13.plan.CreatePlanReq\x1a\x14.plan.CreatePlanResp\"\x00\x12<\n" +
+	"\vGetAllPlans\x12\x14.plan.GetAllPlansReq\x1a\x15.plan.GetAllPlansResp\"\x00\x129\n" +
+	"\rGetPlanByName\x12\x16.plan.GetPlanByNameReq\x1a\x0e.plan.PlanResp\"\x00\x125\n" +
+	"\x12AddExercisesToPlan\x12\r.plan.PlanReq\x1a\x0e.plan.PlanResp\"\x00\x12:\n" +
+	"\x17DeleteExercisesFromPlan\x12\r.plan.PlanReq\x1a\x0e.plan.PlanResp\"\x00\x129\n" +
 	"\n" +
-	"DeletePlan\x12\x14.proto.DeletePlanReq\x1a\x15.proto.DeletePlanResp\"\x00\x121\n" +
-	"\x04PING\x12\x12.proto.PingPlanReq\x1a\x13.proto.PingPlanResp\"\x00B\x0eZ\f/shared/planb\x06proto3"
+	"DeletePlan\x12\x13.plan.DeletePlanReq\x1a\x14.plan.DeletePlanResp\"\x00\x12/\n" +
+	"\x04PING\x12\x11.plan.PingPlanReq\x1a\x12.plan.PingPlanResp\"\x00\x126\n" +
+	"\tGetHealth\x12\x12.plan.GetHealthReq\x1a\x13.plan.GetHealthResp\"\x00B\x0eZ\f/shared/planb\x06proto3"
 
 var (
 	file_plan_proto_rawDescOnce sync.Once
@@ -1020,59 +1132,66 @@ func file_plan_proto_rawDescGZIP() []byte {
 	return file_plan_proto_rawDescData
 }
 
-var file_plan_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_plan_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_plan_proto_goTypes = []any{
-	(*PingPlanReq)(nil),              // 0: proto.PingPlanReq
-	(*PingPlanResp)(nil),             // 1: proto.PingPlanResp
-	(*DeletePlanReq)(nil),            // 2: proto.DeletePlanReq
-	(*DeletePlanResp)(nil),           // 3: proto.DeletePlanResp
-	(*PlanReq)(nil),                  // 4: proto.PlanReq
-	(*GetPlanByNameReq)(nil),         // 5: proto.GetPlanByNameReq
-	(*GetAllPlansReq)(nil),           // 6: proto.GetAllPlansReq
-	(*GetAllPlansResp)(nil),          // 7: proto.GetAllPlansResp
-	(*PlanResp)(nil),                 // 8: proto.PlanResp
-	(*CreatePlanReq)(nil),            // 9: proto.CreatePlanReq
-	(*CreatePlanResp)(nil),           // 10: proto.CreatePlanResp
-	(*CheckHealthReq)(nil),           // 11: proto.CheckHealthReq
-	(*CheckHealthResp)(nil),          // 12: proto.CheckHealthResp
-	(*SendUserID)(nil),               // 13: proto.SendUserID
-	(*CreateEmptyPlanResp)(nil),      // 14: proto.CreateEmptyPlanResp
-	(*EmptyPlanIdResp)(nil),          // 15: proto.EmptyPlanIdResp
-	(*SendPlanName)(nil),             // 16: proto.SendPlanName
-	(*PlanExistsResp)(nil),           // 17: proto.PlanExistsResp
-	(*PlanExistsReturnPlanResp)(nil), // 18: proto.PlanExistsReturnPlanResp
+	(*GetHealthReq)(nil),             // 0: plan.GetHealthReq
+	(*GetHealthResp)(nil),            // 1: plan.GetHealthResp
+	(*PingPlanReq)(nil),              // 2: plan.PingPlanReq
+	(*PingPlanResp)(nil),             // 3: plan.PingPlanResp
+	(*DeletePlanReq)(nil),            // 4: plan.DeletePlanReq
+	(*DeletePlanResp)(nil),           // 5: plan.DeletePlanResp
+	(*PlanReq)(nil),                  // 6: plan.PlanReq
+	(*GetPlanByNameReq)(nil),         // 7: plan.GetPlanByNameReq
+	(*GetAllPlansReq)(nil),           // 8: plan.GetAllPlansReq
+	(*GetAllPlansResp)(nil),          // 9: plan.GetAllPlansResp
+	(*PlanResp)(nil),                 // 10: plan.PlanResp
+	(*CreatePlanReq)(nil),            // 11: plan.CreatePlanReq
+	(*CreatePlanResp)(nil),           // 12: plan.CreatePlanResp
+	(*CheckHealthReq)(nil),           // 13: plan.CheckHealthReq
+	(*CheckHealthResp)(nil),          // 14: plan.CheckHealthResp
+	(*SendUserID)(nil),               // 15: plan.SendUserID
+	(*CreateEmptyPlanResp)(nil),      // 16: plan.CreateEmptyPlanResp
+	(*EmptyPlanIdResp)(nil),          // 17: plan.EmptyPlanIdResp
+	(*SendPlanName)(nil),             // 18: plan.SendPlanName
+	(*PlanExistsResp)(nil),           // 19: plan.PlanExistsResp
+	(*PlanExistsReturnPlanResp)(nil), // 20: plan.PlanExistsReturnPlanResp
+	(*durationpb.Duration)(nil),      // 21: google.protobuf.Duration
 }
 var file_plan_proto_depIdxs = []int32{
-	8,  // 0: proto.GetAllPlansResp.all_plans:type_name -> proto.PlanResp
-	16, // 1: proto.PlanService.PlanExistsReturnId:input_type -> proto.SendPlanName
-	16, // 2: proto.PlanService.PlanExistsReturnPlan:input_type -> proto.SendPlanName
-	13, // 3: proto.PlanService.GetEmptyPlanId:input_type -> proto.SendUserID
-	13, // 4: proto.PlanService.CreateEmptyPlan:input_type -> proto.SendUserID
-	11, // 5: proto.PlanService.CheckHealth:input_type -> proto.CheckHealthReq
-	9,  // 6: proto.PlanService.CreatePlan:input_type -> proto.CreatePlanReq
-	6,  // 7: proto.PlanService.GetAllPlans:input_type -> proto.GetAllPlansReq
-	5,  // 8: proto.PlanService.GetPlanByName:input_type -> proto.GetPlanByNameReq
-	4,  // 9: proto.PlanService.AddExercisesToPlan:input_type -> proto.PlanReq
-	4,  // 10: proto.PlanService.DeleteExercisesFromPlan:input_type -> proto.PlanReq
-	2,  // 11: proto.PlanService.DeletePlan:input_type -> proto.DeletePlanReq
-	0,  // 12: proto.PlanService.PING:input_type -> proto.PingPlanReq
-	17, // 13: proto.PlanService.PlanExistsReturnId:output_type -> proto.PlanExistsResp
-	18, // 14: proto.PlanService.PlanExistsReturnPlan:output_type -> proto.PlanExistsReturnPlanResp
-	15, // 15: proto.PlanService.GetEmptyPlanId:output_type -> proto.EmptyPlanIdResp
-	14, // 16: proto.PlanService.CreateEmptyPlan:output_type -> proto.CreateEmptyPlanResp
-	12, // 17: proto.PlanService.CheckHealth:output_type -> proto.CheckHealthResp
-	10, // 18: proto.PlanService.CreatePlan:output_type -> proto.CreatePlanResp
-	7,  // 19: proto.PlanService.GetAllPlans:output_type -> proto.GetAllPlansResp
-	8,  // 20: proto.PlanService.GetPlanByName:output_type -> proto.PlanResp
-	8,  // 21: proto.PlanService.AddExercisesToPlan:output_type -> proto.PlanResp
-	8,  // 22: proto.PlanService.DeleteExercisesFromPlan:output_type -> proto.PlanResp
-	3,  // 23: proto.PlanService.DeletePlan:output_type -> proto.DeletePlanResp
-	1,  // 24: proto.PlanService.PING:output_type -> proto.PingPlanResp
-	13, // [13:25] is the sub-list for method output_type
-	1,  // [1:13] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	21, // 0: plan.GetHealthResp.postgres_resp_time:type_name -> google.protobuf.Duration
+	21, // 1: plan.GetHealthResp.redis_resp_time:type_name -> google.protobuf.Duration
+	10, // 2: plan.GetAllPlansResp.all_plans:type_name -> plan.PlanResp
+	18, // 3: plan.PlanService.PlanExistsReturnId:input_type -> plan.SendPlanName
+	18, // 4: plan.PlanService.PlanExistsReturnPlan:input_type -> plan.SendPlanName
+	15, // 5: plan.PlanService.GetEmptyPlanId:input_type -> plan.SendUserID
+	15, // 6: plan.PlanService.CreateEmptyPlan:input_type -> plan.SendUserID
+	13, // 7: plan.PlanService.CheckHealth:input_type -> plan.CheckHealthReq
+	11, // 8: plan.PlanService.CreatePlan:input_type -> plan.CreatePlanReq
+	8,  // 9: plan.PlanService.GetAllPlans:input_type -> plan.GetAllPlansReq
+	7,  // 10: plan.PlanService.GetPlanByName:input_type -> plan.GetPlanByNameReq
+	6,  // 11: plan.PlanService.AddExercisesToPlan:input_type -> plan.PlanReq
+	6,  // 12: plan.PlanService.DeleteExercisesFromPlan:input_type -> plan.PlanReq
+	4,  // 13: plan.PlanService.DeletePlan:input_type -> plan.DeletePlanReq
+	2,  // 14: plan.PlanService.PING:input_type -> plan.PingPlanReq
+	0,  // 15: plan.PlanService.GetHealth:input_type -> plan.GetHealthReq
+	19, // 16: plan.PlanService.PlanExistsReturnId:output_type -> plan.PlanExistsResp
+	20, // 17: plan.PlanService.PlanExistsReturnPlan:output_type -> plan.PlanExistsReturnPlanResp
+	17, // 18: plan.PlanService.GetEmptyPlanId:output_type -> plan.EmptyPlanIdResp
+	16, // 19: plan.PlanService.CreateEmptyPlan:output_type -> plan.CreateEmptyPlanResp
+	14, // 20: plan.PlanService.CheckHealth:output_type -> plan.CheckHealthResp
+	12, // 21: plan.PlanService.CreatePlan:output_type -> plan.CreatePlanResp
+	9,  // 22: plan.PlanService.GetAllPlans:output_type -> plan.GetAllPlansResp
+	10, // 23: plan.PlanService.GetPlanByName:output_type -> plan.PlanResp
+	10, // 24: plan.PlanService.AddExercisesToPlan:output_type -> plan.PlanResp
+	10, // 25: plan.PlanService.DeleteExercisesFromPlan:output_type -> plan.PlanResp
+	5,  // 26: plan.PlanService.DeletePlan:output_type -> plan.DeletePlanResp
+	3,  // 27: plan.PlanService.PING:output_type -> plan.PingPlanResp
+	1,  // 28: plan.PlanService.GetHealth:output_type -> plan.GetHealthResp
+	16, // [16:29] is the sub-list for method output_type
+	3,  // [3:16] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_plan_proto_init() }
@@ -1086,7 +1205,7 @@ func file_plan_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plan_proto_rawDesc), len(file_plan_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

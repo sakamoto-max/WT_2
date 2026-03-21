@@ -1,8 +1,11 @@
 syntax = "proto3";
 
-package proto;
+package plan;
 
 option go_package = "/shared/plan";
+
+// import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 //
 service PlanService {
@@ -30,6 +33,17 @@ service PlanService {
     rpc DeletePlan(DeletePlanReq) returns (DeletePlanResp) {};
 //
     rpc PING(PingPlanReq) returns (PingPlanResp) {};
+    //
+    rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
+}
+
+message GetHealthReq {}
+
+message GetHealthResp {
+    string service_name = 1;
+    string status = 2;
+    google.protobuf.Duration postgres_resp_time = 3;
+    google.protobuf.Duration redis_resp_time = 4;    
 }
 
 message PingPlanReq {}

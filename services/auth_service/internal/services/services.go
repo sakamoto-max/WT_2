@@ -25,7 +25,9 @@ import (
 // type action string
 
 // var (
-// 	userSignedUp action = "user_signed_up"
+//
+//	userSignedUp action = "user_signed_up"
+//
 // )
 type Service struct {
 	repo       *repository.Repo
@@ -48,22 +50,22 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 		return CreatedAt, err
 	}
 
-	userId, CreatedAt, err := s.repo.CreateUser(ctx, name, email, hashedPass, role)
+	_, CreatedAt, err = s.repo.CreateUser(ctx, name, email, hashedPass, role)
 	if err != nil {
 		return CreatedAt, err
 	}
 
-	_, err = s.planClient.CreateEmptyPlan(ctx, &planpb.SendUserID{UserId: int64(userId),})
-	if err != nil{
-		// st,  := status.FromError(err)
+	// _, err = s.planClient.CreateEmptyPlan(ctx, &planpb.SendUserID{UserId: int64(userId),})
+	// if err != nil{
+	// 	// st,  := status.FromError(err)
 
-		return CreatedAt, myerrors.PlanServerNotResponding
-		
-		// try again
-		// return CreatedAt, fmt.Errorf("error creating empty plan : %v", err)
-		// grpc.ErrClientConnClosing
-		// return CreatedAt, status.Newf(codes.Canceled, "plan server is not responding").Err()
-	}
+	// 	return CreatedAt, myerrors.PlanServerNotResponding
+
+	// 	// try again
+	// 	// return CreatedAt, fmt.Errorf("error creating empty plan : %v", err)
+	// 	// grpc.ErrClientConnClosing
+	// 	// return CreatedAt, status.Newf(codes.Canceled, "plan server is not responding").Err()
+	// }
 
 	return CreatedAt, nil
 }
@@ -165,7 +167,7 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	claims, err := token.ValidateToken(refreshToken)
 	if err != nil {
-		if errors.Is(err, myerrors.ErrTokenExpired){
+		if errors.Is(err, myerrors.ErrTokenExpired) {
 			return "", myerrors.ErrRefreshExpired
 		}
 		return "", err
@@ -179,34 +181,33 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 	return accessToken, nil
 }
 
-
 func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, newPass string) error {
-		// {
+	// {
 	// 	"old_password" : "x",
 	// 	"new_password" : "y",
 	// }
 
-	if oldPass == newPass{
+	if oldPass == newPass {
 		return myerrors.ErrOldPassNewPassSame
 	}
 
 	passFromDb, err := s.repo.FetchUserPassById(ctx, userId)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
 	err = utils.MatchPasswords(oldPass, passFromDb)
-	if err != nil{
+	if err != nil {
 		return myerrors.ErrIncorrectPassword
 	}
 
 	hashedNewPass, err := utils.HashThePassword(newPass)
-	if err != nil{
-		return err	
+	if err != nil {
+		return err
 	}
 
 	err = s.repo.ChangePass(ctx, userId, hashedNewPass)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -221,12 +222,12 @@ func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, ne
 
 func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, newEmail string) error {
 
-	if oldEmail == newEmail{
+	if oldEmail == newEmail {
 		return myerrors.ErrOldEmailNewEmailSame
 	}
 
 	emailFromDb, err := s.repo.GetEmail(ctx, userId)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -235,12 +236,21 @@ func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, 
 	}
 
 	err = s.repo.ChangeEmail(ctx, userId, newEmail)
-	if err != nil{
+	if err != nil {
 		return err
 	}
-	
-	return nil
 
+	return nil
+}
+
+func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+
+	// check resp time of pg
+
+	pgRespTime := s.repo.GetPostgresRespTime(ctx)
+	redisRespTime := s.repo.GetRedisRespTime(ctx)
+
+	return pgRespTime, redisRespTime
 }
 
 // func Produce(ctx context.Context, action string, userID int, queueName string, ch *amqp.Channel) error {

@@ -19,18 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlanService_PlanExistsReturnId_FullMethodName      = "/proto.PlanService/PlanExistsReturnId"
-	PlanService_PlanExistsReturnPlan_FullMethodName    = "/proto.PlanService/PlanExistsReturnPlan"
-	PlanService_GetEmptyPlanId_FullMethodName          = "/proto.PlanService/GetEmptyPlanId"
-	PlanService_CreateEmptyPlan_FullMethodName         = "/proto.PlanService/CreateEmptyPlan"
-	PlanService_CheckHealth_FullMethodName             = "/proto.PlanService/CheckHealth"
-	PlanService_CreatePlan_FullMethodName              = "/proto.PlanService/CreatePlan"
-	PlanService_GetAllPlans_FullMethodName             = "/proto.PlanService/GetAllPlans"
-	PlanService_GetPlanByName_FullMethodName           = "/proto.PlanService/GetPlanByName"
-	PlanService_AddExercisesToPlan_FullMethodName      = "/proto.PlanService/AddExercisesToPlan"
-	PlanService_DeleteExercisesFromPlan_FullMethodName = "/proto.PlanService/DeleteExercisesFromPlan"
-	PlanService_DeletePlan_FullMethodName              = "/proto.PlanService/DeletePlan"
-	PlanService_PING_FullMethodName                    = "/proto.PlanService/PING"
+	PlanService_PlanExistsReturnId_FullMethodName      = "/plan.PlanService/PlanExistsReturnId"
+	PlanService_PlanExistsReturnPlan_FullMethodName    = "/plan.PlanService/PlanExistsReturnPlan"
+	PlanService_GetEmptyPlanId_FullMethodName          = "/plan.PlanService/GetEmptyPlanId"
+	PlanService_CreateEmptyPlan_FullMethodName         = "/plan.PlanService/CreateEmptyPlan"
+	PlanService_CheckHealth_FullMethodName             = "/plan.PlanService/CheckHealth"
+	PlanService_CreatePlan_FullMethodName              = "/plan.PlanService/CreatePlan"
+	PlanService_GetAllPlans_FullMethodName             = "/plan.PlanService/GetAllPlans"
+	PlanService_GetPlanByName_FullMethodName           = "/plan.PlanService/GetPlanByName"
+	PlanService_AddExercisesToPlan_FullMethodName      = "/plan.PlanService/AddExercisesToPlan"
+	PlanService_DeleteExercisesFromPlan_FullMethodName = "/plan.PlanService/DeleteExercisesFromPlan"
+	PlanService_DeletePlan_FullMethodName              = "/plan.PlanService/DeletePlan"
+	PlanService_PING_FullMethodName                    = "/plan.PlanService/PING"
+	PlanService_GetHealth_FullMethodName               = "/plan.PlanService/GetHealth"
 )
 
 // PlanServiceClient is the client API for PlanService service.
@@ -60,6 +61,7 @@ type PlanServiceClient interface {
 	// user_id, plan_name -> {}
 	DeletePlan(ctx context.Context, in *DeletePlanReq, opts ...grpc.CallOption) (*DeletePlanResp, error)
 	PING(ctx context.Context, in *PingPlanReq, opts ...grpc.CallOption) (*PingPlanResp, error)
+	GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error)
 }
 
 type planServiceClient struct {
@@ -190,6 +192,16 @@ func (c *planServiceClient) PING(ctx context.Context, in *PingPlanReq, opts ...g
 	return out, nil
 }
 
+func (c *planServiceClient) GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHealthResp)
+	err := c.cc.Invoke(ctx, PlanService_GetHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlanServiceServer is the server API for PlanService service.
 // All implementations must embed UnimplementedPlanServiceServer
 // for forward compatibility.
@@ -217,6 +229,7 @@ type PlanServiceServer interface {
 	// user_id, plan_name -> {}
 	DeletePlan(context.Context, *DeletePlanReq) (*DeletePlanResp, error)
 	PING(context.Context, *PingPlanReq) (*PingPlanResp, error)
+	GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error)
 	mustEmbedUnimplementedPlanServiceServer()
 }
 
@@ -262,6 +275,9 @@ func (UnimplementedPlanServiceServer) DeletePlan(context.Context, *DeletePlanReq
 }
 func (UnimplementedPlanServiceServer) PING(context.Context, *PingPlanReq) (*PingPlanResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method PING not implemented")
+}
+func (UnimplementedPlanServiceServer) GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHealth not implemented")
 }
 func (UnimplementedPlanServiceServer) mustEmbedUnimplementedPlanServiceServer() {}
 func (UnimplementedPlanServiceServer) testEmbeddedByValue()                     {}
@@ -500,11 +516,29 @@ func _PlanService_PING_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlanService_GetHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHealthReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanServiceServer).GetHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlanService_GetHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanServiceServer).GetHealth(ctx, req.(*GetHealthReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlanService_ServiceDesc is the grpc.ServiceDesc for PlanService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PlanService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.PlanService",
+	ServiceName: "plan.PlanService",
 	HandlerType: (*PlanServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -554,6 +588,10 @@ var PlanService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PING",
 			Handler:    _PlanService_PING_Handler,
+		},
+		{
+			MethodName: "GetHealth",
+			Handler:    _PlanService_GetHealth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

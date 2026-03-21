@@ -1,8 +1,9 @@
 syntax = "proto3";
 
-package proto;
+package auth;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 option go_package = "/shared/auth";
 //
@@ -21,7 +22,21 @@ service AuthService {
     rpc ChangePass(ChangePassReq) returns (ChangePassResp) {};
     //
     rpc ChangeEmail(ChangeEmailReq) returns (ChangeEmailResp) {};
+    //
+    rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
 }
+
+message GetHealthReq {}
+
+message GetHealthResp {
+    string service_name = 1;
+    string status = 2;
+    google.protobuf.Duration postgres_resp_time = 3;
+    google.protobuf.Duration redis_resp_time = 4;    
+}
+
+
+
 
 message ChangeEmailReq {
     int64 user_id = 1;
