@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	myerrors "wt/pkg/my_errors"
-	"wt/pkg/shared"
+	"wt/pkg/jwt"
 	"wt/pkg/utils"
 )
 
@@ -15,23 +15,23 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		// get the access token from header
 		token := r.Header.Get("access-token")
 		if token == "" {
-			err := myerrors.NewAppErr(myerrors.ErrTokenIsMissing, http.StatusBadRequest)
+			err := myerrors.NewAppErr(jwt.ErrTokenIsMissing, http.StatusBadRequest)
 			err.AppErrWriter(w)
 			return 
 		}
-		t := shared.JwtToken{}
+		t := jwt.JwtToken{}
 		claims, err := t.ValidateToken(token)
 		if err != nil {
 			switch{
-			case errors.Is(err, myerrors.ErrTokenMalformed):
-				err := myerrors.NewAppErr(myerrors.ErrTokenMalformed, http.StatusBadRequest)
+			case errors.Is(err, jwt.ErrTokenMalformed):
+				err := myerrors.NewAppErr(jwt.ErrTokenMalformed, http.StatusBadRequest)
 				err.AppErrWriter(w)
-			case errors.Is(err, myerrors.ErrTokenInvalid):
+			case errors.Is(err, jwt.ErrTokenInvalid):
 				fmt.Printf("error : %v\n", err)
-				err := myerrors.NewAppErr(myerrors.ErrTokenInvalid, http.StatusBadRequest)
+				err := myerrors.NewAppErr(jwt.ErrTokenInvalid, http.StatusBadRequest)
 				err.AppErrWriter(w)
-			case errors.Is(err, myerrors.ErrTokenExpired):
-				err := myerrors.NewAppErr(myerrors.ErrTokenExpired, http.StatusBadRequest)
+			case errors.Is(err, jwt.ErrTokenExpired):
+				err := myerrors.NewAppErr(jwt.ErrTokenExpired, http.StatusBadRequest)
 				err.AppErrWriter(w)
 			default:
 				utils.InternalServerErr(w, err)
@@ -39,7 +39,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), shared.Claimskey, claims)
+		ctx := context.WithValue(r.Context(), jwt.Claimskey, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

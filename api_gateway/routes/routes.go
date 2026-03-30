@@ -24,12 +24,11 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Patch("/wt/user/password", h.ChangePassWord)
 	r.With(middleware.JwtMiddleware).Patch("/wt/user/email", h.ChangeEmail)
 
-	r.Get("/wt/exercises", h.GetAllExercises)
-	r.Get("/wt/exercises/single", h.GetExerciseByName)
+	r.With(middleware.JwtMiddleware).Get("/wt/exercises", h.GetAllExercises)
+	r.With(middleware.JwtMiddleware).Get("/wt/exercises/single", h.GetExerciseByName)
 	r.With(middleware.JwtMiddleware).Post("/wt/exercise", h.CreateExercise)
 	r.With(middleware.JwtMiddleware).Delete("/wt/exercise", h.DeleteExecise)
 
-	// r.Get("/wt/plan/health", h.CheckHealthPlan)
 	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plan/exercises", h.DeleteExerciseFromPlan)

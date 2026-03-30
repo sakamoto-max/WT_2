@@ -3,8 +3,10 @@ package grpcclient
 import (
 	// "context"
 	// "context"
+	"fmt"
 	"log"
 	"os"
+
 	// "time"
 
 	// "time"
@@ -18,6 +20,11 @@ import (
 )
 
 type grpcClient struct {
+	authConn *grpc.ClientConn
+	planConn *grpc.ClientConn
+	exerConn *grpc.ClientConn
+	trackConn *grpc.ClientConn
+
 	AuthClient  authpb.AuthServiceClient
 	PlanClient  planpb.PlanServiceClient
 	ExerClient  exerpb.ExerciseServiceClient
@@ -36,6 +43,8 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 	if err != nil {
 		log.Fatalf("error creating auth client : %v", err)
 	}
+
+
 
 	connForPlan, err := grpc.NewClient(os.Getenv("PLAN_GRPC_CLIENT_ADDR"), opts...)
 	if err != nil {
@@ -58,13 +67,36 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 	TrackerClient := trackpb.NewTrackerServiceClient(connForTracker)
 
 	return &grpcClient{
+		authConn: connForAuth,
+		planConn: connForPlan,
+		exerConn: connForExer,
+		trackConn: connForTracker,
+
+	
 		AuthClient:  authClient,
 		PlanClient:  planClient,
 		ExerClient:  ExerClient,
 		TrackClient: TrackerClient,
 	}
-
 }
+
+func (g *grpcClient) Close() error {
+	if err := g.authConn.Close(); err != nil{	
+		return fmt.Errorf("error occured while closing auth client : %w", err)
+	}
+	if err := g.planConn.Close(); err != nil{
+		return fmt.Errorf("error occured while closing auth client : %w", err)
+	}
+	if err := g.trackConn.Close(); err != nil{
+		return fmt.Errorf("error occured while closing auth client : %w", err)
+	}
+	if err := g.exerConn.Close(); err != nil{
+		return fmt.Errorf("error occured while closing auth client : %w", err)
+	}
+
+	return nil
+}
+
 
 // func (g *grpcClient) PingAll() {
 

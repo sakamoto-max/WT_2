@@ -7,22 +7,13 @@ import (
 	"net/http"
 	"time"
 	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/shared"
+	token "wt/pkg/jwt"
 	"wt/pkg/utils"
 	planpb "workout-tracker/proto/shared/plan"
 )
 
-func (h *Handler) CheckHealthPlan(w http.ResponseWriter, r *http.Request) {
-	// ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
-	// defer cancel()
+func (h *Handler) CheckHealthPlan(w http.ResponseWriter, r *http.Request) {}
 
-	// t := token.JwtToken{}
-	// claims, ok := t.GetClaimsFromContext(r.Context())
-	// if !ok {
-	// 	utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	// }
-
-}
 func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -44,19 +35,21 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := planpb.CreatePlanReq{
-		UserId:        int64(claims.UserId),
+		UserId:        claims.UserId,
 		PlanName:      userInput.PlanName,
 		ExerciseNames: userInput.Exercises,
 	}
 
 	resp, err := h.planClient.CreatePlan(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
 	utils.CreatedWriter(w, resp)
 }
+
+
 func (h *Handler) GetAllPlans(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -68,7 +61,7 @@ func (h *Handler) GetAllPlans(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := planpb.GetAllPlansReq{
-		UserId: int64(claims.UserId),
+		UserId: claims.UserId,
 	}
 
 	resp, err := h.planClient.GetAllPlans(ctx, &in)
@@ -101,7 +94,7 @@ func (h *Handler) GetPLanByName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := planpb.GetPlanByNameReq{
-		UserId:   int64(claims.UserId),
+		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,
 	}
 
@@ -135,7 +128,7 @@ func (h *Handler) AddExercisesToPlan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := planpb.PlanReq{
-		UserId:        int64(claims.UserId),
+		UserId:        claims.UserId,
 		PlanName:      userInput.PlanName,
 		ExerciseNames: userInput.Exercises,
 	}
@@ -169,7 +162,7 @@ func (h *Handler) DeleteExerciseFromPlan(w http.ResponseWriter, r *http.Request)
 	}
 
 	in := planpb.PlanReq{
-		UserId:        int64(claims.UserId),
+		UserId:        claims.UserId,
 		PlanName:      userInput.PlanName,
 		ExerciseNames: userInput.Exercises,
 	}
@@ -203,7 +196,7 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := planpb.DeletePlanReq{
-		UserId:   int64(claims.UserId),
+		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,
 	}
 

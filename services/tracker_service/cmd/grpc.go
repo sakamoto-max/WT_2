@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"time"
 
 	grpcclient "tracker_service/grpc_client"
@@ -43,18 +44,41 @@ func (g *grpcServer) Run() {
 		log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
-	exerClient := grpcclient.NewExerClient().Connect()
-	planClient := grpcclient.NewPlanClient().Connect()
-
-	repo := repository.NewDBs(pool, redisClient)
-	service := services.NewService(repo, planClient, exerClient)
-	controller := controllers.NewTrackerController(service)
-
-	trackerpb.RegisterTrackerServiceServer(grpcServer, controller)
+	Client := grpcclient.New()
 	
-	log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("error listening to the grpc server : %v", err)
+	repo := repository.NewDBs(pool, redisClient)
+	service := services.NewService(repo, Client.PlanClient, Client.ExerClient)
+	controller := controllers.NewTrackerController(service)
+	
+	grpcServer := grpc.NewServer()
+	trackerpb.RegisterTrackerServiceServer(grpcServer, controller)
+
+	go func() {
+		log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("error listening to the grpc server : %v", err)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+
+	signal.Notify(sigChan, os.Interrupt)
+
+	sig := <-sigChan
+
+	log.Printf("shutdown signal received : %v", sig.String())
+
+
+	grpcServer.GracefulStop()
+
+	if err := repo.Close(); err != nil{
+		log.Println(err)
 	}
+
+	Client.Close()
+
+	
+	log.Println("gracefully shutdown")
+
+
 }

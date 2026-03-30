@@ -200,7 +200,7 @@ func (*PingTrackResp) Descriptor() ([]byte, []int) {
 
 type EndWorkoutReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	AllExerices   []*TrackerForEachExer  `protobuf:"bytes,2,rep,name=all_exerices,json=allExerices,proto3" json:"all_exerices,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -236,11 +236,11 @@ func (*EndWorkoutReq) Descriptor() ([]byte, []int) {
 	return file_tracker_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *EndWorkoutReq) GetUserId() int64 {
+func (x *EndWorkoutReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *EndWorkoutReq) GetAllExerices() []*TrackerForEachExer {
@@ -400,7 +400,7 @@ func (x *EndWorkoutResp) GetMessage() string {
 
 type StartWorkoutWithPlanReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string                 `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -436,11 +436,11 @@ func (*StartWorkoutWithPlanReq) Descriptor() ([]byte, []int) {
 	return file_tracker_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *StartWorkoutWithPlanReq) GetUserId() int64 {
+func (x *StartWorkoutWithPlanReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *StartWorkoutWithPlanReq) GetPlanName() string {
@@ -512,7 +512,7 @@ func (x *StartWorkoutWithPlanResp) GetExercisesInPlan() []string {
 
 type StartEmptyWorkoutReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -547,11 +547,11 @@ func (*StartEmptyWorkoutReq) Descriptor() ([]byte, []int) {
 	return file_tracker_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *StartEmptyWorkoutReq) GetUserId() int64 {
+func (x *StartEmptyWorkoutReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 type GeneralResp struct {
@@ -612,7 +612,7 @@ const file_tracker_proto_rawDesc = "" +
 	"\fPingTrackReq\"\x0f\n" +
 	"\rPingTrackResp\"h\n" +
 	"\rEndWorkoutReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12>\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12>\n" +
 	"\fall_exerices\x18\x02 \x03(\v2\x1b.tracker.TrackerForEachExerR\vallExerices\"o\n" +
 	"\x12TrackerForEachExer\x12\x1f\n" +
 	"\vexercise_id\x18\x01 \x01(\x03R\n" +
@@ -624,14 +624,14 @@ const file_tracker_proto_rawDesc = "" +
 	"\x0eEndWorkoutResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"O\n" +
 	"\x17StartWorkoutWithPlanReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\"}\n" +
 	"\x18StartWorkoutWithPlanResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\x12*\n" +
 	"\x11exercises_in_plan\x18\x03 \x03(\tR\x0fexercisesInPlan\"/\n" +
 	"\x14StartEmptyWorkoutReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"'\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"'\n" +
 	"\vGeneralResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage2\xf3\x02\n" +
 	"\x0eTrackerService\x12J\n" +

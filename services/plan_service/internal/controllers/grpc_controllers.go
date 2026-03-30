@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"plan_service/internal/services"
 	planpb "workout-tracker/proto/shared/plan"
-
-	"google.golang.org/protobuf/types/known/durationpb"
+	// "google.golang.org/protobuf/types/known/durationpb"
 )
 
 type PlanController struct {
@@ -17,164 +16,177 @@ type PlanController struct {
 func NewPlanController(service *services.Service) *PlanController {
 	return &PlanController{service: service}
 }
+
 func (p *PlanController) CreatePlan(ctx context.Context, in *planpb.CreatePlanReq) (*planpb.CreatePlanResp, error) {
-	resp := planpb.CreatePlanResp{}
 
-	err := p.service.CreatePlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
+	err := p.service.CreatePlan(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	resp.PlanName = in.PlanName
-	resp.ExerciseNames = in.ExerciseNames
-	resp.Message = fmt.Sprintf("%v created successfully", in.PlanName)
-
-	return &resp, nil
-}
-func (p *PlanController) CheckHealth(ctx context.Context, in *planpb.CheckHealthReq) (*planpb.CheckHealthResp, error) {
-	resp := planpb.CheckHealthResp{}
-
-	// ping the dbs
-
-	resp.Message = "every thing is all right"
-
-	return &resp, nil
-}
-func (p *PlanController) PlanExistsReturnId(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsResp, error) {
-	resp := planpb.PlanExistsResp{}
-	exits, planId, err := p.service.PlanExistsReturnId(ctx, int(in.UserId), in.PlanName)
-	if err != nil {
-		return &resp, err
-	}
-
-	resp.Exists = exits
-	resp.PlanId = int64(planId)
-
-	return &resp, nil
-}
-func (p *PlanController) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*planpb.EmptyPlanIdResp, error) {
-	resp := planpb.EmptyPlanIdResp{}
-
-	emptyPlanId, err := p.service.GetEmptyPlanId(ctx, int(in.UserId))
-
-	if err != nil {
-		return &resp, err
-	}
-
-	resp.EmptyPlanId = int64(emptyPlanId)
-
-	return &resp, nil
-}
-func (p *PlanController) PlanExistsReturnPlan(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsReturnPlanResp, error) {
-	resp := planpb.PlanExistsReturnPlanResp{}
-
-	exists, planId, exerciseIds, err := p.service.PlanExistsReturnPlan(ctx, int(in.UserId), in.PlanName)
-	if err != nil {
-		return &resp, err
-	}
-
-	resp.Exists = exists
-	resp.PlanId = int64(planId)
-	for _, eachExerciseId := range *exerciseIds {
-		resp.ExerciseIds = append(resp.ExerciseIds, int64(eachExerciseId))
+	resp := planpb.CreatePlanResp{
+		PlanName:      in.PlanName,
+		ExerciseNames: in.ExerciseNames,
+		Message:       fmt.Sprintf("%v created successfully", in.PlanName),
 	}
 
 	return &resp, nil
 }
-func (p *PlanController) CreateEmptyPlan(ctx context.Context, in *planpb.SendUserID) (*planpb.CreateEmptyPlanResp, error) {
-	resp := planpb.CreateEmptyPlanResp{}
 
-	err := p.service.CreateEmptyPlan(ctx, int(in.UserId))
-	if err != nil {
-		return &resp, err
-	}
-
-	resp.Message = "empty plan created successfully"
-
-	return &resp, nil
-
-}
 func (p *PlanController) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*planpb.GetAllPlansResp, error) {
-	resp := planpb.GetAllPlansResp{}
-	r, err := p.service.GetAllPlansSer(ctx, int(in.UserId))
+
+	numberOfPlans, allPlans, err := p.service.GetAllPlansSer(ctx, int(in.UserId))
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	for _, v := range r.Plans {
-		eachPlan := planpb.PlanResp{}
+	resp := planpb.GetAllPlansResp{}
 
-		eachPlan.PlanName = v.PlanName
-		eachPlan.ExerciseNames = v.Exercises
+	for _, eachPlan := range *allPlans {
+		eachPlan := planpb.PlanResp{
+			PlanName:      eachPlan.PlanName,
+			ExerciseNames: eachPlan.Exercises,
+		}
 
 		resp.AllPlans = append(resp.AllPlans, &eachPlan)
 	}
-	resp.NumberOfPlans = int64(r.NumberOfPlans)
+
+	resp.NumberOfPlans = int64(numberOfPlans)
 
 	return &resp, nil
 }
+
 func (p *PlanController) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.PlanResp, error) {
-	resp := planpb.PlanResp{}
-	r, err := p.service.GetPlanByNameSer(ctx, int(in.UserId), in.PlanName)
+
+	planName, exerciseNames, err := p.service.GetPlanByNameSer(ctx, int(in.UserId), in.PlanName)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	resp.ExerciseNames = r.Exercises
-	resp.PlanName = r.PlanName
+	resp := planpb.PlanResp{
+		ExerciseNames: *exerciseNames,
+		PlanName:      planName,
+	}
 
 	return &resp, nil
 }
+
 func (p *PlanController) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
-	resp := planpb.PlanResp{}
 
 	r, err := p.service.AddExercisesToPlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	resp.PlanName = r.PlanName
-	resp.ExerciseNames = r.Exercises
-
-	return &resp, nil
-}
-func (p *PlanController) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
-	resp := planpb.PlanResp{}
-	r, err := p.service.DeleteExerciseFromPlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
-	if err != nil {
-		return &resp, err
-	}
-
-	resp.PlanName = r.PlanName
-	resp.ExerciseNames = r.Exercises
-
-	return &resp, nil
-
-}
-func (p *PlanController) DeletePlan(ctx context.Context, in *planpb.DeletePlanReq) (*planpb.DeletePlanResp, error) {
-	resp := planpb.DeletePlanResp{}
-	err := p.service.DeletePlanSer(ctx, int(in.UserId), in.PlanName)
-	if err != nil {
-		return &resp, err
+	resp := planpb.PlanResp{
+		PlanName:      r.PlanName,
+		ExerciseNames: r.Exercises,
 	}
 
 	return &resp, nil
 }
 
-func (a *PlanController) PING(ctx context.Context, in *planpb.PingPlanReq) (*planpb.PingPlanResp, error) {
-	r := planpb.PingPlanResp{}
+// func (p *PlanController) PlanExistsReturnId(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsResp, error) {
 
-	return &r, nil
-}
+// 	exits, planId, err := p.service.PlanExistsReturnId(ctx, int(in.UserId), in.PlanName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-func (a *PlanController) GetHealth(ctx context.Context, in *planpb.GetHealthReq) (*planpb.GetHealthResp, error) {
+// 	resp := planpb.PlanExistsResp{
+// 		Exists: exits,
+// 		PlanId: int64(planId),
+// 	}
 
-	resp := planpb.GetHealthResp{}
+// 	return &resp, nil
+// }
 
-	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+// func (p *PlanController) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*planpb.EmptyPlanIdResp, error) {
 
-	resp.PostgresRespTime = durationpb.New(*pgRespTime)
-	resp.RedisRespTime = durationpb.New(*redisRespTime)
+// 	emptyPlanId, err := p.service.GetEmptyPlanId(ctx, int(in.UserId))
 
-	return &resp, nil
-}
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	resp := planpb.EmptyPlanIdResp{
+// 		EmptyPlanId: int64(emptyPlanId),
+// 	}
+
+// 	return &resp, nil
+// }
+
+// func (p *PlanController) PlanExistsReturnPlan(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsReturnPlanResp, error) {
+
+// 	exists, planId, exerciseIds, err := p.service.PlanExistsReturnPlan(ctx, int(in.UserId), in.PlanName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	resp := planpb.PlanExistsReturnPlanResp{
+// 		Exists: exists,
+// 		PlanId: int64(planId),
+// 	}
+
+// 	for _, eachExerciseId := range *exerciseIds {
+// 		resp.ExerciseIds = append(resp.ExerciseIds, int64(eachExerciseId))
+// 	}
+
+// 	return &resp, nil
+// }
+
+// func (p *PlanController) CreateEmptyPlan(ctx context.Context, in *planpb.SendUserID) (*planpb.CreateEmptyPlanResp, error) {
+
+// 	err := p.service.CreateEmptyPlan(ctx, int(in.UserId))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	resp := planpb.CreateEmptyPlanResp{
+// 		Message: "empty plan created successfully",
+// 	}
+
+// 	return &resp, nil
+// }
+
+// func (p *PlanController) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
+// 	r, err := p.service.DeleteExerciseFromPlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	resp := planpb.PlanResp{
+// 		PlanName: r.PlanName,
+// 		ExerciseNames: r.Exercises,
+// 	}
+
+// 	return &resp, nil
+
+// }
+
+// func (p *PlanController) DeletePlan(ctx context.Context, in *planpb.DeletePlanReq) (*planpb.DeletePlanResp, error) {
+
+// 	err := p.service.DeletePlanSer(ctx, int(in.UserId), in.PlanName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &planpb.DeletePlanResp{}, nil
+// }
+
+// func (a *PlanController) PING(ctx context.Context, in *planpb.PingPlanReq) (*planpb.PingPlanResp, error) {
+
+// 	return &planpb.PingPlanResp{}, nil
+// }
+
+// func (a *PlanController) GetHealth(ctx context.Context, in *planpb.GetHealthReq) (*planpb.GetHealthResp, error) {
+
+// 	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
+
+// 	resp := planpb.GetHealthResp{
+// 		PostgresRespTime: durationpb.New(*pgRespTime),
+// 		RedisRespTime: durationpb.New(*redisRespTime),
+// 	}
+
+// 	return &resp, nil
+// }

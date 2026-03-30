@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,6 +16,17 @@ type DBs struct {
 
 func NewDBs(pool *pgxpool.Pool, client *redis.Client) *DBs {
 	return &DBs{PDB: pool, RDB: client}
+}
+
+func (r *DBs) Close() error {
+	r.PDB.Close()
+
+	err := r.RDB.Close()
+	if err != nil {
+		return fmt.Errorf("error closing the redis Db : %w", err)
+	}
+
+	return nil
 }
 
 func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {

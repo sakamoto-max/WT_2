@@ -1,4 +1,0 @@
-CREATE TABLE body_parts(
-	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL
-)

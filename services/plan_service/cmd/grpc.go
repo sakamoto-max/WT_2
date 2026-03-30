@@ -43,17 +43,30 @@ func (g *grpcServer) Run() {
 		log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
-	exerClient := grpcclient.NewExerciseServiceClient().Connect()
-
+	exerClient := grpcclient.New()
+	
 	repo := repository.NewDBs(pool, redisClient)
-	service := services.NewService(repo, exerClient)
+	service := services.NewService(repo, exerClient.Client)
 	controller := controllers.NewPlanController(service)
-
+	
+	grpcServer := grpc.NewServer()
 	pb.RegisterPlanServiceServer(grpcServer, controller)
 
-	log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("error listening to the grpc server : %v", err)
+	go func() {
+		log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("error listening to the grpc server : %v", err)
+		}
+	}()
+	
+	grpcServer.GracefulStop()
+
+	if err := repo.Close(); err != nil{
+		log.Println(err)
 	}
+
+	exerClient.Close()
+
+
+	log.Println("gracefully shutdown")
 }

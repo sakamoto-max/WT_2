@@ -17,7 +17,7 @@ var (
 	errUserEmailReq    = validatonErrs{Path: "email", Message: "required"}
 	errUserPassWordReq = validatonErrs{Path: "password", Message: "required"}
 	errUUIDReq         = validatonErrs{Path: "UUID", Message: "required"}
-	ErrExerciseNameReq = validatonErrs{Path: "exericse_name", Message: "required"}
+	ErrExerciseNameReq = validatonErrs{Path: "name", Message: "required"}
 	ErrBodyPartReq     = validatonErrs{Path: "body_part", Message: "required"}
 	ErrEquipmentReq    = validatonErrs{Path: "equipment", Message: "required"}
 	ErrWorkoutReq      = validatonErrs{Path: "workout", Message: "required"}

@@ -9,14 +9,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type PlanClient struct{}
+type PlanClient struct {
+	conn   *grpc.ClientConn
+	Client planpb.PlanServiceClient
+}
 
 func NewPlanClient() *PlanClient {
 	return &PlanClient{}
 }
-
-func (p *PlanClient) Connect() planpb.PlanServiceClient {
-
+func New() *PlanClient {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -27,5 +28,14 @@ func (p *PlanClient) Connect() planpb.PlanServiceClient {
 
 	client := planpb.NewPlanServiceClient(conn)
 
-	return client
+
+	return &PlanClient{
+		conn: conn,
+		Client: client,
+	}
+}
+func (p *PlanClient) Close() {
+	if err := p.conn.Close(); err != nil{
+		log.Printf("error closing the client : %v", err)
+	}
 }

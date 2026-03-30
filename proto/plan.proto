@@ -52,28 +52,28 @@ message PingPlanResp {}
 
 
 message DeletePlanReq {
-    int64 user_id = 1;
+    string user_id = 1;
     string plan_name = 2;
 }
 
 message DeletePlanResp {}
 
 message PlanReq{
-    int64 user_id = 1;
+    string user_id = 1;
     string plan_name = 2;
     repeated string exercise_names = 3;
 }
 
 
 message GetPlanByNameReq{
-    int64 user_id = 1;
+    string user_id = 1;
     string plan_name = 2;
 }
 
 
 
 message GetAllPlansReq {
-    int64 user_id = 1;
+    string user_id = 1;
 }
 message GetAllPlansResp {
     int64 number_of_plans = 1;
@@ -86,7 +86,7 @@ message PlanResp {
 }
 
 message CreatePlanReq {
-    int64 user_id = 1;
+    string user_id = 1;
     string plan_name = 2;
     repeated string exercise_names = 3;
 }
@@ -109,7 +109,7 @@ message CheckHealthResp {
 //
 message SendUserID {
     // 
-    int64 user_id = 1;
+    string user_id = 1;
 }
 
 message CreateEmptyPlanResp {
@@ -117,12 +117,12 @@ message CreateEmptyPlanResp {
 }
 
 message EmptyPlanIdResp {
-    int64 empty_plan_id = 1;
+    string empty_plan_id = 1;
 }
 //
 message SendPlanName {
     //
-    int64 user_id = 1;
+    string user_id = 1;
     string plan_name = 2;
   
 }
@@ -137,8 +137,8 @@ message PlanExistsReturnPlanResp {
     //
     bool exists = 1;
     //
-    int64 plan_id = 2;
+    string plan_id = 2;
     //
-    repeated int64 exercise_ids = 3;
+    repeated string exercise_ids = 3;
 }
 

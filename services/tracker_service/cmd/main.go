@@ -2,17 +2,14 @@ package main
 
 import (
 	"os"
-	env "wt/pkg/shared/env"
+	env "wt/pkg/env"
 )
 
 func main() {
 
-	env.Load()
+	env.Load("../.env")
 	
 	grpcSer := NewgrpcServer(os.Getenv("GRPC_SERVER_ADDR"))
 	grpcSer.Run()
-
-	// httpSer := NewhttpServer(os.Getenv("HTTP_SERVER_ADDR"))
-	// httpSer.Run()
 
 }

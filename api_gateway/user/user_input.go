@@ -40,12 +40,17 @@ type ExerciseName struct {
 }
 
 type Exercise struct {
-	Id        int       `json:"id,omitempty"`
+	Id        string       `json:"id,omitempty"`
 	Name      string    `json:"name"`
-	RestTime  int       `json:"rest_time_in_seconds"`
 	BodyPart  string    `json:"body_part"`
 	Equipment string    `json:"equipment"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type CreateExerResp struct{
+	Messsage string `json:"message"`
+	Exercise Exercise `json:"exercise"`
 }
 
 type Plan struct {

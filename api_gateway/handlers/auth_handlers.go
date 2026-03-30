@@ -9,7 +9,7 @@ import (
 	"time"
 	authpb "workout-tracker/proto/shared/auth"
 	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/shared"
+	token "wt/pkg/jwt"
 	"wt/pkg/utils"
 	"wt/pkg/enum"
 )
@@ -99,7 +99,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := authpb.SendUserId{
-		UserId: int64(claims.UserId),
+		UserId: claims.UserId,
 	}
 
 	resp, err := h.authClient.UserLogOut(ctx, &in)
@@ -160,7 +160,7 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := authpb.ChangePassReq{
-		UserId:  int64(claims.UserId),
+		UserId:  claims.UserId,
 		OldPass: userInput.OldPass,
 		NewPass: userInput.NewPass,
 	}
@@ -205,7 +205,7 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := authpb.ChangeEmailReq{
-		UserId:   int64(claims.UserId),
+		UserId:   claims.UserId,
 		OldEmail: userInput.OldEmail,
 		NewEmail: userInput.NewEmail,
 	}

@@ -13,6 +13,7 @@ type taskStatus string
 
 var (
 	TaskCompleted taskStatus = "completed"
+	TaskPending taskStatus = "pending"
 	TaskNotCompleted taskStatus = "not_completed"
 )
 
@@ -42,4 +43,33 @@ var (
 	SuperAdminRole roles = "super_admin"
 )
 
+type queueName string
 
+var (
+	PlanQueue queueName = "plan"
+)
+
+
+type contentTypes string
+
+var (
+	ApplicationJsonType contentTypes = "application/json"
+)
+
+type correlationId string
+
+var(
+	EmptyPlanCrrId correlationId = "empty_plan"
+	UpdatePlanCrrId correlationId = "update_plan"
+)
+
+type resources string
+
+var (
+	ExerciseResource resources = "exercise"
+	BodyPartResource resources = "body_part"
+	EquipmentResource resources = "equipment"
+	PlanResource resources = "plan"
+	UserResource resources = "user"
+	EmailResource resources = "email"
+)

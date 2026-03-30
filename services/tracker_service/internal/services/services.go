@@ -34,7 +34,7 @@ func NewService(Db *repository.DBs, planClient planpb.PlanServiceClient, exerCli
 	return &Service{Db: Db, PClient: planClient, EClient: exerClient}
 }
 
-func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
+func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error {
 	// get empty plan_id of user
 
 	ongoing, err := s.Db.CheckIfWorkoutIsOngoing(ctx, userID)
@@ -46,12 +46,12 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
 		return myerrors.ErrWorkoutOngoing
 	}
 
-	r, err := s.PClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: int64(userID)})
+	r, err := s.PClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: userID})
 	if err != nil {
 		return fmt.Errorf("error getting data from plan server : %w", err)
 	}
 
-	trackerId, err := s.Db.StartWorkout(ctx, userID, int(r.EmptyPlanId))
+	trackerId, err := s.Db.StartWorkout(ctx, userID, r.EmptyPlanId)
 	if err != nil {
 		return err
 	}
@@ -67,14 +67,14 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID int) error {
 	return nil
 }
 
-func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planName string) (*[]string, error) {
+func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, planName string) (*[]string, error) {
 	// check if plan Name exists
 	// if exists get the plan_id
 
 	var allExerNames []string
 	// var resp models.Plan
 
-	r, err := s.PClient.PlanExistsReturnPlan(ctx, &planpb.SendPlanName{UserId: int64(userId), PlanName: planName})
+	r, err := s.PClient.PlanExistsReturnPlan(ctx, &planpb.SendPlanName{UserId: userId, PlanName: planName})
 	if err != nil {
 		return &allExerNames, fmt.Errorf("error getting data from plan server : %w", err)
 	}
@@ -83,8 +83,8 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planN
 		return &allExerNames, fmt.Errorf("plan doesnt exist")
 	}
 
-	for _, v := range r.ExerciseIds {
-		r, err := s.EClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: v})
+	for _, exerciseId := range r.ExerciseIds {
+		r, err := s.EClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: userId})
 		if err != nil {
 			return &allExerNames, fmt.Errorf("error getting data from exercise server : %w", err)
 		}
@@ -93,7 +93,7 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planN
 	}
 
 	// do db operations
-	trackerId, err := s.Db.StartWorkout(ctx, userId, int(r.PlanId))
+	trackerId, err := s.Db.StartWorkout(ctx, userId, r.PlanId)
 	if err != nil {
 		return &allExerNames, err
 	}
@@ -109,7 +109,7 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId int, planN
 	return &allExerNames, nil
 }
 
-func (s *Service) EndWorkoutSer(ctx context.Context, userId int, data *user.Tracker) error {
+func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *user.Tracker) error {
 
 	// get tracker ID from redis
 	trackerId, err := s.Db.GetTrackerId(ctx, userId)

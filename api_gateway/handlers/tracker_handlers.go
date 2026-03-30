@@ -9,7 +9,7 @@ import (
 	"time"
 	trackpb "workout-tracker/proto/shared/tracker"
 	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/shared"
+	token "wt/pkg/jwt"
 	"wt/pkg/utils"
 )
 
@@ -26,7 +26,7 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("user Id : %v\n", claims.UserId)
 
 	in := trackpb.StartEmptyWorkoutReq{
-		UserId: int64(claims.UserId),
+		UserId: claims.UserId,
 	}
 
 	resp, err := h.trackClient.StartEmptyWorkout(ctx, &in)
@@ -37,6 +37,8 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
 	utils.CreatedWriter(w, resp)
 }
+
+
 func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -58,7 +60,7 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := trackpb.StartWorkoutWithPlanReq{
-		UserId:   int64(claims.UserId),
+		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,
 	}
 
@@ -70,6 +72,8 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
 	utils.CreatedWriter(w, resp)
 }
+
+
 func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
@@ -92,7 +96,7 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	in := trackpb.EndWorkoutReq{}
-	in.UserId = int64(claims.UserId)
+	in.UserId = claims.UserId
 
 	for _, allExercises := range userInput.Workout {
 		allExer := trackpb.TrackerForEachExer{}

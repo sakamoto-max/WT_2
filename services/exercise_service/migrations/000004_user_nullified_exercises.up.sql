@@ -1,0 +1,4 @@
+CREATE TABLE user_nullified(
+	user_id INTEGER NOT NULL,
+	EXERCISE_ID UUID NOT NULL
+);

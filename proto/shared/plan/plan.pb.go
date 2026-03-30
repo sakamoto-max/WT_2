@@ -200,7 +200,7 @@ func (*PingPlanResp) Descriptor() ([]byte, []int) {
 
 type DeletePlanReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string                 `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -236,11 +236,11 @@ func (*DeletePlanReq) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *DeletePlanReq) GetUserId() int64 {
+func (x *DeletePlanReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *DeletePlanReq) GetPlanName() string {
@@ -288,7 +288,7 @@ func (*DeletePlanResp) Descriptor() ([]byte, []int) {
 
 type PlanReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string                 `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	ExerciseNames []string               `protobuf:"bytes,3,rep,name=exercise_names,json=exerciseNames,proto3" json:"exercise_names,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -325,11 +325,11 @@ func (*PlanReq) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *PlanReq) GetUserId() int64 {
+func (x *PlanReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *PlanReq) GetPlanName() string {
@@ -348,7 +348,7 @@ func (x *PlanReq) GetExerciseNames() []string {
 
 type GetPlanByNameReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string                 `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -384,11 +384,11 @@ func (*GetPlanByNameReq) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetPlanByNameReq) GetUserId() int64 {
+func (x *GetPlanByNameReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *GetPlanByNameReq) GetPlanName() string {
@@ -400,7 +400,7 @@ func (x *GetPlanByNameReq) GetPlanName() string {
 
 type GetAllPlansReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -435,11 +435,11 @@ func (*GetAllPlansReq) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *GetAllPlansReq) GetUserId() int64 {
+func (x *GetAllPlansReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 type GetAllPlansResp struct {
@@ -548,7 +548,7 @@ func (x *PlanResp) GetExerciseNames() []string {
 
 type CreatePlanReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string                 `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	ExerciseNames []string               `protobuf:"bytes,3,rep,name=exercise_names,json=exerciseNames,proto3" json:"exercise_names,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -585,11 +585,11 @@ func (*CreatePlanReq) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *CreatePlanReq) GetUserId() int64 {
+func (x *CreatePlanReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *CreatePlanReq) GetPlanName() string {
@@ -748,7 +748,7 @@ func (x *CheckHealthResp) GetMessage() string {
 
 type SendUserID struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -783,11 +783,11 @@ func (*SendUserID) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *SendUserID) GetUserId() int64 {
+func (x *SendUserID) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 type CreateEmptyPlanResp struct {
@@ -836,7 +836,7 @@ func (x *CreateEmptyPlanResp) GetMessage() string {
 
 type EmptyPlanIdResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EmptyPlanId   int64                  `protobuf:"varint,1,opt,name=empty_plan_id,json=emptyPlanId,proto3" json:"empty_plan_id,omitempty"`
+	EmptyPlanId   string                 `protobuf:"bytes,1,opt,name=empty_plan_id,json=emptyPlanId,proto3" json:"empty_plan_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -871,16 +871,16 @@ func (*EmptyPlanIdResp) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *EmptyPlanIdResp) GetEmptyPlanId() int64 {
+func (x *EmptyPlanIdResp) GetEmptyPlanId() string {
 	if x != nil {
 		return x.EmptyPlanId
 	}
-	return 0
+	return ""
 }
 
 type SendPlanName struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	PlanName      string `protobuf:"bytes,2,opt,name=plan_name,json=planName,proto3" json:"plan_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -916,11 +916,11 @@ func (*SendPlanName) Descriptor() ([]byte, []int) {
 	return file_plan_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *SendPlanName) GetUserId() int64 {
+func (x *SendPlanName) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *SendPlanName) GetPlanName() string {
@@ -985,8 +985,8 @@ func (x *PlanExistsResp) GetPlanId() int64 {
 type PlanExistsReturnPlanResp struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Exists bool `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`
-	PlanId int64 `protobuf:"varint,2,opt,name=plan_id,json=planId,proto3" json:"plan_id,omitempty"`
-	ExerciseIds   []int64 `protobuf:"varint,3,rep,packed,name=exercise_ids,json=exerciseIds,proto3" json:"exercise_ids,omitempty"`
+	PlanId string `protobuf:"bytes,2,opt,name=plan_id,json=planId,proto3" json:"plan_id,omitempty"`
+	ExerciseIds   []string `protobuf:"bytes,3,rep,name=exercise_ids,json=exerciseIds,proto3" json:"exercise_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1028,14 +1028,14 @@ func (x *PlanExistsReturnPlanResp) GetExists() bool {
 	return false
 }
 
-func (x *PlanExistsReturnPlanResp) GetPlanId() int64 {
+func (x *PlanExistsReturnPlanResp) GetPlanId() string {
 	if x != nil {
 		return x.PlanId
 	}
-	return 0
+	return ""
 }
 
-func (x *PlanExistsReturnPlanResp) GetExerciseIds() []int64 {
+func (x *PlanExistsReturnPlanResp) GetExerciseIds() []string {
 	if x != nil {
 		return x.ExerciseIds
 	}
@@ -1057,18 +1057,18 @@ const file_plan_proto_rawDesc = "" +
 	"\vPingPlanReq\"\x0e\n" +
 	"\fPingPlanResp\"E\n" +
 	"\rDeletePlanReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\"\x10\n" +
 	"\x0eDeletePlanResp\"f\n" +
 	"\aPlanReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\x12%\n" +
 	"\x0eexercise_names\x18\x03 \x03(\tR\rexerciseNames\"H\n" +
 	"\x10GetPlanByNameReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\")\n" +
 	"\x0eGetAllPlansReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"f\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"f\n" +
 	"\x0fGetAllPlansResp\x12&\n" +
 	"\x0fnumber_of_plans\x18\x01 \x01(\x03R\rnumberOfPlans\x12+\n" +
 	"\tall_plans\x18\x02 \x03(\v2\x0e.plan.PlanRespR\ballPlans\"N\n" +
@@ -1076,7 +1076,7 @@ const file_plan_proto_rawDesc = "" +
 	"\tplan_name\x18\x01 \x01(\tR\bplanName\x12%\n" +
 	"\x0eexercise_names\x18\x02 \x03(\tR\rexerciseNames\"l\n" +
 	"\rCreatePlanReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\x12%\n" +
 	"\x0eexercise_names\x18\x03 \x03(\tR\rexerciseNames\"n\n" +
 	"\x0eCreatePlanResp\x12\x18\n" +
@@ -1088,21 +1088,21 @@ const file_plan_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"%\n" +
 	"\n" +
 	"SendUserID\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"/\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"/\n" +
 	"\x13CreateEmptyPlanResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"5\n" +
 	"\x0fEmptyPlanIdResp\x12\"\n" +
-	"\rempty_plan_id\x18\x01 \x01(\x03R\vemptyPlanId\"D\n" +
+	"\rempty_plan_id\x18\x01 \x01(\tR\vemptyPlanId\"D\n" +
 	"\fSendPlanName\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\"A\n" +
 	"\x0ePlanExistsResp\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
 	"\aplan_id\x18\x02 \x01(\x03R\x06planId\"n\n" +
 	"\x18PlanExistsReturnPlanResp\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x17\n" +
-	"\aplan_id\x18\x02 \x01(\x03R\x06planId\x12!\n" +
-	"\fexercise_ids\x18\x03 \x03(\x03R\vexerciseIds2\xa5\x06\n" +
+	"\aplan_id\x18\x02 \x01(\tR\x06planId\x12!\n" +
+	"\fexercise_ids\x18\x03 \x03(\tR\vexerciseIds2\xa5\x06\n" +
 	"\vPlanService\x12@\n" +
 	"\x12PlanExistsReturnId\x12\x12.plan.SendPlanName\x1a\x14.plan.PlanExistsResp\"\x00\x12L\n" +
 	"\x14PlanExistsReturnPlan\x12\x12.plan.SendPlanName\x1a\x1e.plan.PlanExistsReturnPlanResp\"\x00\x12;\n" +

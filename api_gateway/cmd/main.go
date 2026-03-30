@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"wt/pkg/shared/env"
+	"wt/pkg/env"
 )
 
 func main() {
@@ -10,9 +10,8 @@ func main() {
 	env.LoadGateway()
 	
 	// httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
-	httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
+	httpSer := NewHttpServer2(os.Getenv("HTTP_SERVER_ADDR"))
 	httpSer.Run()
-
 }
 
 // r.Post("/wt/user/login", handler.)

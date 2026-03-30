@@ -34,5 +34,5 @@ type MqMsg struct {
 }
 
 type UserIdPayload struct{
-	UserId int `json:"user_id"`
+	UserId string `json:"user_id"`
 }

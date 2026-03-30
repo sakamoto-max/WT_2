@@ -4,10 +4,15 @@ import (
 	"context"
 	"errors"
 	"exercise_service/internal/models"
+
 	// "exercise_service/internal/user"
 	"fmt"
 	"time"
 
+	enum "wt/pkg/enum"
+	myerrs "wt/pkg/my_errors"
+
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -25,10 +30,20 @@ func NewRepo(p *pgxpool.Pool, r *redis.Client) *Repo {
 	}
 }
 
-func (r *Repo) GetPostgresRespTime(ctx context.Context) (*time.Duration) {
+func (r *Repo) Close() error {
+	r.PDB.Close()
+
+	if err := r.RDB.Close(); err != nil{
+		return fmt.Errorf("error closing the redis Db : %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.PDB.Ping(ctx)
-	if err != nil{
+	if err != nil {
 		return nil
 	}
 
@@ -36,10 +51,10 @@ func (r *Repo) GetPostgresRespTime(ctx context.Context) (*time.Duration) {
 
 	return &timeEnd
 }
-func (r *Repo) GetRedisRespTime(ctx context.Context) (*time.Duration) {
+func (r *Repo) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.RDB.Ping(ctx).Err()
-	if err != nil{
+	if err != nil {
 		return nil
 	}
 
@@ -47,75 +62,167 @@ func (r *Repo) GetRedisRespTime(ctx context.Context) (*time.Duration) {
 
 	return &timeEnd
 }
+func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*models.Exercise2, error) {
 
-
-
-func (r *Repo) GetExerciseByName(ctx context.Context, exerciseName string) (*models.Exercise, error) {
-
-	var exercise models.Exercise
-
-	err := r.PDB.QueryRow(ctx, `
-		SELECT EXERCISES.ID, EXERCISES.NAME, REST_TIME_IN_SECONDS, 
-			BODY_PARTS.NAME, EQUIPMENT.NAME, CREATED_AT FROM EXERCISES
+	var exercise models.Exercise2
+	query := `
+			SELECT 
+			EXERCISES.ID, 
+			EXERCISES.NAME, 
+			BODY_PARTS.NAME, 
+			EQUIPMENT.NAME ,
+			created_at,
+			updated_at
+		FROM 
+			EXERCISES
 		INNER JOIN 
-			BODY_PARTS
-		ON 	
+			BODY_PARTS 
+		ON 
 			EXERCISES.BODY_PART_ID = BODY_PARTS.ID
 		INNER JOIN 
-			EQUIPMENT
+			EQUIPMENT 
 		ON 
 			EXERCISES.EQUIPMENT_ID = EQUIPMENT.ID
+		FULL JOIN (
+			SELECT * FROM USER_NULLIFIED
+			WHERE USER_ID = @userId
+			) AS TABLE_B
+		ON 
+			EXERCISES.ID = TABLE_B.EXERCISE_ID
 		WHERE 
-			EXERCISES.name = $1
-	`, exerciseName).
-	Scan(&exercise.Id, &exercise.Name, &exercise.RestTime, &exercise.BodyPart, 
-		&exercise.Equipment, &exercise.CreatedAt) 
-	if err != nil{
-		return &exercise, err
+			Exercises.NAME = @exerciseName and (CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL;	
+	`
+	row := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId": userId})
+	err := row.Scan(&exercise.Id, &exercise.Name, &exercise.BodyPart, &exercise.Equipment, &exercise.CreatedAt, &exercise.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+		}
+
+		return nil, myerrs.InternalServerErrMaker(fmt.Errorf("error in getting the exercise by name : %v : %w", exerciseName, err))
 	}
 
 	return &exercise, nil
 }
-func (r *Repo) GetAllExercises(ctx context.Context) (*[]models.Exercise, error) {
+func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) {
 
-	var allExercises []models.Exercise
-	// var exercise models.Exercise
+	var bodyPartId uuid.UUID
+	var equipmentId uuid.UUID
+	var Id uuid.UUID
 
-	rows, err := r.PDB.Query(ctx, `
-		SELECT EXERCISES.ID, EXERCISES.NAME, REST_TIME_IN_SECONDS, 
-			BODY_PARTS.NAME, EQUIPMENT.NAME, CREATED_AT FROM EXERCISES
-		INNER JOIN 
-			BODY_PARTS
-		ON 	
-			EXERCISES.BODY_PART_ID = BODY_PARTS.ID
-		INNER JOIN 
-			EQUIPMENT
-		ON 
-			EXERCISES.EQUIPMENT_ID = EQUIPMENT.ID
-	`)
-	if err != nil{
-		return &allExercises, fmt.Errorf("error getting all exercises from DB : %w\n", err)
+	trnx, err := r.PDB.Begin(ctx)
+	if err != nil {
+		return "", fmt.Errorf("error creating a transaction : %w\n", err)
 	}
 
-	var id int
+	defer trnx.Rollback(ctx)
+
+	err = trnx.QueryRow(ctx, `
+		SELECT ID FROM BODY_PARTS
+		WHERE NAME = @name
+	`, pgx.NamedArgs{"name": bodyPartName}).Scan(&bodyPartId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", myerrs.ResourceNotFoundErrMaker(string(enum.BodyPartResource))
+		}
+
+		err := fmt.Errorf("error getting id of body_part : %w\n", err)
+		return "", myerrs.InternalServerErrMaker(err)
+	}
+
+	err = trnx.QueryRow(ctx, `
+		SELECT ID FROM EQUIPMENT
+		WHERE NAME = @name
+	`, pgx.NamedArgs{"name": equipmentName}).Scan(&equipmentId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", myerrs.ResourceNotFoundErrMaker(string(enum.EquipmentResource))
+		}
+
+		err := fmt.Errorf("error getting id of equipment : %w\n", err)
+		return "", myerrs.InternalServerErrMaker(err)
+	}
+	err = trnx.QueryRow(ctx, `
+		INSERT INTO exercises(name, created_by, body_part_id, equipment_id)
+		VALUES(	@name, @createdBy, @bodyPartId, @equipmentId)
+		RETURNING ID
+	`, pgx.NamedArgs{"name": exerciseName, "createdBy": userId, "bodyPartId": bodyPartId, "equipmentId": equipmentId}).Scan(&Id)
+	if err != nil {
+
+		err := fmt.Errorf("error inserting exercise %v : %w\n", exerciseName, err)
+		return "", myerrs.InternalServerErrMaker(err)
+	}
+
+	err = trnx.Commit(ctx)
+	if err != nil {
+		err := fmt.Errorf("error commiting the transaction : %w\n", err)
+		return "", myerrs.InternalServerErrMaker(err)
+	}
+
+	return Id.String(), nil
+}
+func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Exercise2, error) {
+
+
+	query := `
+		SELECT 
+			EXERCISES.ID, 
+			EXERCISES.NAME, 
+			BODY_PARTS.NAME, 
+			EQUIPMENT.NAME ,
+			created_at,
+			updated_at
+		FROM 
+			EXERCISES
+		INNER JOIN 
+			BODY_PARTS 
+		ON 
+			EXERCISES.BODY_PART_ID = BODY_PARTS.ID
+		INNER JOIN 
+			EQUIPMENT 
+		ON 
+			EXERCISES.EQUIPMENT_ID = EQUIPMENT.ID
+		FULL JOIN (
+			SELECT * FROM USER_NULLIFIED
+			WHERE USER_ID = @userId
+			) AS TABLE_B
+		ON 
+			EXERCISES.ID = TABLE_B.EXERCISE_ID
+		WHERE 
+			(CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL;
+	`
+
+	var allExercises []models.Exercise2
+
+	rows, err := r.PDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
+	if err != nil {
+
+		err := fmt.Errorf("error getting all exercises from DB : %w\n", err)
+
+		return nil, myerrs.InternalServerErrMaker(err)
+	}
+
+	var id string
 	var exerciseName string
-	var restTime int
 	var bodyPart string
 	var equipmentName string
 	var createdAt time.Time
+	var updatedAt time.Time
+
 	for rows.Next() {
-		err := rows.Scan(&id, &exerciseName, &restTime, &bodyPart, &equipmentName, &createdAt)
-		if err != nil{
-			return &allExercises, fmt.Errorf("error scanning the rows : %w\n", err)
+		err := rows.Scan(&id, &exerciseName, &bodyPart, &equipmentName, &createdAt, &updatedAt)
+		if err != nil {
+			err := fmt.Errorf("error scanning the rows : %w\n", err)
+			return nil, myerrs.InternalServerErrMaker(err)
 		}
 
-		exercise := models.Exercise{
-			Id: id, 
-			Name: exerciseName, 
-			RestTime: restTime, 
-			BodyPart: bodyPart, 
-			Equipment:  equipmentName, 
-			CreatedAt: createdAt, 
+		exercise := models.Exercise2{
+			Id:        id,
+			Name:      exerciseName,
+			BodyPart:  bodyPart,
+			Equipment: equipmentName,
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
 		}
 
 		allExercises = append(allExercises, exercise)
@@ -123,92 +230,114 @@ func (r *Repo) GetAllExercises(ctx context.Context) (*[]models.Exercise, error) 
 
 	return &allExercises, nil
 }
-
-
-func (r *Repo) DeleteExecise(ctx context.Context, exerciseName string) error {
-	_, err := r.PDB.Exec(ctx, `
-		DELETE FROM EXERCISES
-		WHERE name = $1
-	`, exerciseName)
-
-	if err != nil{
-		return fmt.Errorf("error deleting the exercise %v : %w", exerciseName, err)
-	}
-
-	return nil
-}
-
-func (r *Repo) CreateExercise(ctx context.Context, exerciseName string, bodyPartName string, equipmentName string, restTime int) error {
-
-	var bodyPartId int
-	var equipmentId int
-	trnx, err := r.PDB.Begin(ctx)
-	if err != nil{
-		return fmt.Errorf("error creating a transaction : %w\n", err)
-	}
-
-	defer trnx.Rollback(ctx)
-
-	err = trnx.QueryRow(ctx, `
-		SELECT ID FROM BODY_PARTS
-		WHERE NAME = $1	
-	`, bodyPartName).Scan(&bodyPartId)
-	if err != nil {
-		return fmt.Errorf("error getting id of body_part : %w\n", err)
-	}
-
-	err = trnx.QueryRow(ctx, `
-		SELECT ID FROM EQUIPMENT
-		WHERE NAME = $1	
-	`, equipmentName).Scan(&equipmentId)
-	if err != nil {
-		return fmt.Errorf("error getting id of equipment : %w\n", err)
-	}
-	_, err = trnx.Exec(ctx, `
-		INSERT INTO EXERCISES(name, body_part_id, rest_time_in_seconds, equipment_id, created_at)
-		VALUES($1, $2, $3, $4, NOW())	
-	`, exerciseName, bodyPartId, restTime, equipmentId)
-	if err != nil{
-		return fmt.Errorf("error inserting exercise %v : %w\n", exerciseName, err)
-	}
-
-	err = trnx.Commit(ctx)
-	if err != nil{
-		return fmt.Errorf("error commiting the transaction : %w\n", err)
-	}
-
-	return nil
-}
-
-func (r *Repo) ExerciseExistsReturnId(ctx context.Context, exerciseName string) (bool, int32, error) {
-
-	var id int32
-	err := r.PDB.QueryRow(ctx, `
-		SELECT id FROM exercises
-		WHERE name = $1
-	`, exerciseName).Scan(&id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows){
-			return false, id, nil
-		}
-
-		return false, id, fmt.Errorf("error checking if the exericse exists : %v", err)
-	}
-
-	return true, id, nil
-}
-
-func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId int) (string, error) {
+func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error) {
 
 	var exerciseName string
 
 	err := r.PDB.QueryRow(ctx, `
 		SELECT name from exercises
-		where id = $1	
-	`, exerciseId).Scan(&exerciseName)
-	if err != nil{
-		return exerciseName, fmt.Errorf("error getting execise name for id %v : %w", exerciseId, err )
+		where id = @id	
+	`, pgx.NamedArgs{"id": exerciseId}).Scan(&exerciseName)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+		}
+
+		err := fmt.Errorf("error getting execise name for id %v : %w", exerciseId, err)
+		return "", myerrs.InternalServerErrMaker(err)
 	}
 
 	return exerciseName, nil
+}
+func (r *Repo) DeleteExecise(ctx context.Context, userId string,  exerciseName string) error {
+	// if the exercise's created by is NULL -> move it to user nullified
+	// else delete the exercise
+
+	trnx, err := r.PDB.Begin(ctx)
+	if err != nil {
+		return myerrs.InternalServerErrMaker(fmt.Errorf("error creating a transaction"))
+	}
+
+	defer trnx.Rollback(ctx)
+
+	query := `SELECT 
+				id, 
+				created_by 
+			FROM
+				exercises
+			WHERE 
+				name = @name AND (created_by IS NULL OR created_by = @userId) `
+
+	var exerciseId uuid.UUID
+	var createdBy *int
+	err = trnx.QueryRow(ctx, query, pgx.NamedArgs{"name": exerciseName, "userId": userId}).Scan(&exerciseId, &createdBy)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+		}
+		return myerrs.InternalServerErrMaker(fmt.Errorf("error getting id and createdBy for exericse %v : %w", exerciseName, err))
+	}
+
+	if createdBy == nil {
+		query := `
+			INSERT INTO user_nullified(user_id, exercise_id)
+			VALUES(@userId, @exerciseId)	
+		`
+		_, err := trnx.Exec(ctx, query, pgx.NamedArgs{"userId": userId, "exerciseId": exerciseId})
+		if err != nil {
+			return myerrs.InternalServerErrMaker(fmt.Errorf("error inserting data into user_nullified : %w", err))
+		}
+
+		err = trnx.Commit(ctx)
+		if err != nil {
+			return myerrs.InternalServerErrMaker(fmt.Errorf("error committing : %w", err))
+		}
+
+		return nil
+	}
+
+	query = `
+		DELETE FROM exercises
+		WHERE id = @id
+	`
+
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"id": exerciseId})
+	if err != nil {
+		return myerrs.InternalServerErrMaker(fmt.Errorf("error deleting rows from table : %w", err))
+	}
+	err = trnx.Commit(ctx)
+	if err != nil {
+		return myerrs.InternalServerErrMaker(fmt.Errorf("error committing : %w", err))
+	}
+
+	return nil
+}
+func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error) {
+
+	query := `
+		SELECT 
+			ID 
+		FROM 
+			EXERCISES
+		LEFT JOIN 
+			(SELECT EXERCISE_ID FROM USER_NULLIFIED WHERE USER_ID = @userId) AS TABLE_2
+		ON 
+			EXERCISES.ID = TABLE_2.EXERCISE_ID
+		WHERE 
+			NAME = @exerciseName
+		AND 
+			(CREATED_BY = @userId OR CREATED_BY IS NULL) 
+		AND 
+			TABLE_2.EXERCISE_ID IS NULL;	
+	`
+	var id string
+	err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return id, myerrs.ResourceNotFoundErrMaker(exerciseName)
+		}    
+		return id, myerrs.InternalServerErrMaker(fmt.Errorf("error checking if the exericse exists : %v", err))
+	}
+
+	return id, nil
 }

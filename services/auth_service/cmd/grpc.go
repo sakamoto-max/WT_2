@@ -9,6 +9,8 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"time"
 
 	pb "workout-tracker/proto/shared/auth"
@@ -37,22 +39,45 @@ func (g *grpcServer) Run() {
 	}
 
 	lis, err := net.Listen("tcp", g.addr)
-
 	if err != nil {
 		log.Fatalf("failed to listen to tcp : %v", err)
 	}
-
-	grpcServer := grpc.NewServer()
-	planClient := grpcclient.NewPlanClient().Connect()
-
+	
+	
+	planClient := grpcclient.New()
+	
 	repo := repository.NewRepo(pool, redisClient)
-	service := services.NewService(repo, planClient)
+	service := services.NewService(repo, planClient.Client)
 	controller := controllers.NewAuthController(service)
-
+	
+	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, controller)
 
-	log.Printf("grpc server has started at %v", g.addr)
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("error listening to the grpc server : %v", err)
+	go func(){
+		log.Printf("grpc server has started at %v", g.addr)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("error listening to the grpc server : %v", err)
+		}
+	}()
+
+	
+	sigChan := make(chan os.Signal, 1)
+
+	signal.Notify(sigChan, os.Interrupt)
+
+	sig := <- sigChan
+
+	log.Printf("shutdown signal received : %v", sig.String())
+
+	grpcServer.GracefulStop()
+
+	// close dbs
+	if err := repo.Close(); err != nil{
+		log.Println(err)
 	}
+
+	planClient.Close()
+
+	log.Println("gracefully shutdown")
+
 }

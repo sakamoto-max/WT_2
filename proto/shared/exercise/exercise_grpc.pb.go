@@ -19,14 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExerciseService_ExerciseExistsReturnId_FullMethodName = "/exercise.ExerciseService/ExerciseExistsReturnId"
-	ExerciseService_GetExerciseName_FullMethodName        = "/exercise.ExerciseService/GetExerciseName"
-	ExerciseService_GetAllExercises_FullMethodName        = "/exercise.ExerciseService/GetAllExercises"
-	ExerciseService_GetOneExercise_FullMethodName         = "/exercise.ExerciseService/GetOneExercise"
-	ExerciseService_CreateExercise_FullMethodName         = "/exercise.ExerciseService/CreateExercise"
-	ExerciseService_DeleteExercise_FullMethodName         = "/exercise.ExerciseService/DeleteExercise"
-	ExerciseService_PING_FullMethodName                   = "/exercise.ExerciseService/PING"
-	ExerciseService_GetHealth_FullMethodName              = "/exercise.ExerciseService/GetHealth"
+	ExerciseService_ExerciseExistsReturnId_FullMethodName               = "/exercise.ExerciseService/ExerciseExistsReturnId"
+	ExerciseService_ExerciseExistsInMainReturnEveryThing_FullMethodName = "/exercise.ExerciseService/ExerciseExistsInMainReturnEveryThing"
+	ExerciseService_GetExerciseName_FullMethodName                      = "/exercise.ExerciseService/GetExerciseName"
+	ExerciseService_GetAllExercises_FullMethodName                      = "/exercise.ExerciseService/GetAllExercises"
+	ExerciseService_GetOneExercise_FullMethodName                       = "/exercise.ExerciseService/GetOneExercise"
+	ExerciseService_CreateExercise_FullMethodName                       = "/exercise.ExerciseService/CreateExercise"
+	ExerciseService_DeleteExercise_FullMethodName                       = "/exercise.ExerciseService/DeleteExercise"
+	ExerciseService_PING_FullMethodName                                 = "/exercise.ExerciseService/PING"
+	ExerciseService_GetHealth_FullMethodName                            = "/exercise.ExerciseService/GetHealth"
 )
 
 // ExerciseServiceClient is the client API for ExerciseService service.
@@ -35,6 +36,7 @@ const (
 type ExerciseServiceClient interface {
 	// used by plan service
 	ExerciseExistsReturnId(ctx context.Context, in *SendExerciseName, opts ...grpc.CallOption) (*ExerciseExistsReturnIdResp, error)
+	ExerciseExistsInMainReturnEveryThing(ctx context.Context, in *SendExerciseName, opts ...grpc.CallOption) (*SendEverythingResp, error)
 	// used by plan service
 	GetExerciseName(ctx context.Context, in *SendExerciseID, opts ...grpc.CallOption) (*GetExerciseNameResp, error)
 	GetAllExercises(ctx context.Context, in *GetAllExercisesREq, opts ...grpc.CallOption) (*GetAllExercisesResp, error)
@@ -58,6 +60,16 @@ func (c *exerciseServiceClient) ExerciseExistsReturnId(ctx context.Context, in *
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExerciseExistsReturnIdResp)
 	err := c.cc.Invoke(ctx, ExerciseService_ExerciseExistsReturnId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *exerciseServiceClient) ExerciseExistsInMainReturnEveryThing(ctx context.Context, in *SendExerciseName, opts ...grpc.CallOption) (*SendEverythingResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendEverythingResp)
+	err := c.cc.Invoke(ctx, ExerciseService_ExerciseExistsInMainReturnEveryThing_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +152,7 @@ func (c *exerciseServiceClient) GetHealth(ctx context.Context, in *GetHealthReq,
 type ExerciseServiceServer interface {
 	// used by plan service
 	ExerciseExistsReturnId(context.Context, *SendExerciseName) (*ExerciseExistsReturnIdResp, error)
+	ExerciseExistsInMainReturnEveryThing(context.Context, *SendExerciseName) (*SendEverythingResp, error)
 	// used by plan service
 	GetExerciseName(context.Context, *SendExerciseID) (*GetExerciseNameResp, error)
 	GetAllExercises(context.Context, *GetAllExercisesREq) (*GetAllExercisesResp, error)
@@ -161,6 +174,9 @@ type UnimplementedExerciseServiceServer struct{}
 
 func (UnimplementedExerciseServiceServer) ExerciseExistsReturnId(context.Context, *SendExerciseName) (*ExerciseExistsReturnIdResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExerciseExistsReturnId not implemented")
+}
+func (UnimplementedExerciseServiceServer) ExerciseExistsInMainReturnEveryThing(context.Context, *SendExerciseName) (*SendEverythingResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExerciseExistsInMainReturnEveryThing not implemented")
 }
 func (UnimplementedExerciseServiceServer) GetExerciseName(context.Context, *SendExerciseID) (*GetExerciseNameResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetExerciseName not implemented")
@@ -218,6 +234,24 @@ func _ExerciseService_ExerciseExistsReturnId_Handler(srv interface{}, ctx contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExerciseServiceServer).ExerciseExistsReturnId(ctx, req.(*SendExerciseName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExerciseService_ExerciseExistsInMainReturnEveryThing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendExerciseName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExerciseServiceServer).ExerciseExistsInMainReturnEveryThing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExerciseService_ExerciseExistsInMainReturnEveryThing_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExerciseServiceServer).ExerciseExistsInMainReturnEveryThing(ctx, req.(*SendExerciseName))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -358,6 +392,10 @@ var ExerciseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExerciseExistsReturnId",
 			Handler:    _ExerciseService_ExerciseExistsReturnId_Handler,
+		},
+		{
+			MethodName: "ExerciseExistsInMainReturnEveryThing",
+			Handler:    _ExerciseService_ExerciseExistsInMainReturnEveryThing_Handler,
 		},
 		{
 			MethodName: "GetExerciseName",

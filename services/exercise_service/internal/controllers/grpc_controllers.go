@@ -3,7 +3,12 @@ package controllers
 import (
 	"context"
 	"exercise_service/internal/services"
+	"fmt"
+
 	exerpb "workout-tracker/proto/shared/exercise"
+
+
+	// myerrs "wt/pkg/my_errors"
 
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -20,18 +25,20 @@ func NewExerController(service *services.Service) *ExerController {
 
 func (e *ExerController) GetAllExercises(ctx context.Context, in *exerpb.GetAllExercisesREq) (*exerpb.GetAllExercisesResp, error) {
 	resp := exerpb.GetAllExercisesResp{}
-	r, err := e.service.GetAllExercisesSer(ctx)
+	allExers, err := e.service.GetAllExercisesSer(ctx, in.UserId)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	for _, v := range *r {
-		eachExer := exerpb.OneExerciseResp{}
-		eachExer.Id = int64(v.Id)
-		eachExer.Name = v.Name
-		eachExer.BodyPart = v.BodyPart
-		eachExer.Equipment = v.Equipment
-		eachExer.RestTime = int64(v.RestTime)
+	for _, exer := range *allExers {
+		eachExer := exerpb.OneExerciseResp{
+			Id:        exer.Id,
+			Name:      exer.Name,
+			BodyPart:  exer.BodyPart,
+			Equipment: exer.Equipment,
+			CreatedAt: timestamppb.New(exer.CreatedAt),
+			UpdatedAt: timestamppb.New(exer.UpdatedAt),
+		}
 
 		resp.AllExericses = append(resp.AllExericses, &eachExer)
 	}
@@ -40,46 +47,41 @@ func (e *ExerController) GetAllExercises(ctx context.Context, in *exerpb.GetAllE
 }
 
 func (e *ExerController) GetOneExercise(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.OneExerciseResp, error) {
-	resp := exerpb.OneExerciseResp{}
 
-	r, err := e.service.GetExerciseByNameSer(ctx, in.ExerciseName)
+	r, err := e.service.GetExerciseByNameSer(ctx, in.UserId, in.ExerciseName)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	resp.Id = int64(r.Id)
-	resp.Name = r.Name
-	resp.BodyPart = r.BodyPart
-	resp.CreatedAt = timestamppb.New(r.CreatedAt)
-	resp.RestTime = int64(r.RestTime)
-	resp.Equipment = r.Equipment
+	resp := exerpb.OneExerciseResp{
+		Id:        r.Id,
+		Name:      r.Name,
+		BodyPart:  r.BodyPart,
+		Equipment: r.Equipment,
+		CreatedAt: timestamppb.New(r.CreatedAt),
+		UpdatedAt: timestamppb.New(r.UpdatedAt),
+	}
 
 	return &resp, nil
 }
 
 func (e *ExerController) CreateExercise(ctx context.Context, in *exerpb.CreateExerciseReq) (*exerpb.CreateExerciseResp, error) {
 
-	resp := exerpb.CreateExerciseResp{}
-	r, err := e.service.CreateExerciseSer(ctx, in.ExerciseName, in.BodyPart, in.Equipment, int(in.RestTime))
+	fmt.Println(in)
+
+	UUID, err := e.service.CreateExerciseSer(ctx, in.UserId, in.ExerciseName, in.BodyPart, in.Equipment)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
-	resp.Message = r.Message
-	resp.Exercise.Name = r.Exercise.Name
-	// resp.Exercise.Id = int64(r.Exercise.Id)
-	resp.Exercise.RestTime = int64(r.Exercise.RestTime)
-	resp.Exercise.BodyPart = r.Exercise.BodyPart
-	resp.Exercise.Equipment = r.Exercise.Equipment
-	resp.Exercise.CreatedAt = timestamppb.New(r.Exercise.CreatedAt)
-
+	resp := exerpb.CreateExerciseResp{Id: UUID}
 	return &resp, nil
 }
 func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.DeleteExerciseResp, error) {
 	resp := exerpb.DeleteExerciseResp{}
-	err := e.service.DeleteExeciseSer(ctx, in.ExerciseName)
+	err := e.service.DeleteExeciseSer(ctx, in.UserId, in.ExerciseName)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
 
 	return &resp, nil
@@ -89,13 +91,12 @@ func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExer
 func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	var resp exerpb.ExerciseExistsReturnIdResp
 
-	exists, id, err := e.service.ExerciseExistsReturnId(ctx, in.ExerciseName)
+	id, err := e.service.ExerciseExistsReturnId(ctx, in.UserId, in.ExerciseName)
 	if err != nil {
 		return &resp, err
 	}
 
 	resp = exerpb.ExerciseExistsReturnIdResp{
-		Exists:     exists,
 		ExerciseId: id,
 	}
 
@@ -104,7 +105,7 @@ func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.
 func (e *ExerController) GetExerciseName(ctx context.Context, in *exerpb.SendExerciseID) (*exerpb.GetExerciseNameResp, error) {
 
 	var resp exerpb.GetExerciseNameResp
-	exerciseName, err := e.service.GetExerciseNameByID(ctx, int(in.ExerciseId))
+	exerciseName, err := e.service.GetExerciseNameByID(ctx, in.ExerciseId)
 	if err != nil {
 		return &resp, err
 	}

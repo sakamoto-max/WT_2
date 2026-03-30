@@ -9,46 +9,46 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+type Client struct{
+	connForPlan *grpc.ClientConn
+	connForExer *grpc.ClientConn
+	PlanClient planpb.PlanServiceClient
+	ExerClient exerpb.ExerciseServiceClient
+}
+
 type PlanClient struct{}
 
-func NewPlanClient() *PlanClient {
-	return &PlanClient{}
-}
+func New() *Client {
 
-
-func (p *PlanClient) Connect() planpb.PlanServiceClient {
-	
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	
-	conn, err := grpc.NewClient("localhost:6002", opts...)
+
+	connForPlan, err := grpc.NewClient("localhost:6002", opts...)
+	if err != nil {
+		log.Fatalf("failed to create the client : %v", err)
+	}
+
+	planClient := planpb.NewPlanServiceClient(connForPlan)
+
+	connForExer, err := grpc.NewClient("localhost:6003", opts...)
 	if err != nil {
 		log.Fatalf("failed to create the client : %v", err)
 	}
 	
-	client := planpb.NewPlanServiceClient(conn)
-	
-	return client
-}
+	exerClient := exerpb.NewExerciseServiceClient(connForExer)
 
-type ExerClient struct{}
-
-func NewExerClient() *ExerClient {
-	return &ExerClient{}
-}
-
-func (e *ExerClient) Connect() exerpb.ExerciseServiceClient {
-	
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	
-	conn, err := grpc.NewClient("localhost:6003", opts...)
-	if err != nil {
-		log.Fatalf("failed to create the client : %v", err)
+	return &Client{
+		connForPlan: connForPlan,
+		connForExer: connForExer,
+		PlanClient: planClient,
+		ExerClient: exerClient,
 	}
-	
-	client := exerpb.NewExerciseServiceClient(conn)
-	
-	return client
 }
+
+
+func (c *Client) Close() {
+	c.connForExer.Close()
+	c.connForPlan.Close()
+}
+
 

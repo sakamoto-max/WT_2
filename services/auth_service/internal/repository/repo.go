@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,6 +16,17 @@ type Repo struct {
 
 func NewRepo(pool *pgxpool.Pool, client *redis.Client) *Repo {
 	return &Repo{pDB: pool, rDB: client}
+}
+
+func (r *Repo) Close() error {
+	r.pDB.Close()
+
+	err := r.rDB.Close()
+	if err != nil{
+		return fmt.Errorf("error closing the redis Db : %w", err)
+	}
+
+	return nil
 }
 
 

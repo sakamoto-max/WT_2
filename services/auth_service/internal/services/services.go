@@ -1,9 +1,8 @@
 package services
 
 import (
-	customerrors "auth_service/internal/custom_errors"
+	// customerrors "auth_service/internal/custom_errors"
 	"auth_service/internal/repository"
-	"auth_service/internal/responses"
 	"auth_service/internal/utils"
 	"context"
 	"errors"
@@ -13,32 +12,28 @@ import (
 
 	planpb "workout-tracker/proto/shared/plan"
 	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/shared"
+	token "wt/pkg/jwt"
 
-	// "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	// "google.golang.org/grpc"
-	// "google.golang.org/grpc/codes"
-	// "google.golang.org/grpc/status"
 )
 
-// type action string
-
-// var (
-//
-//	userSignedUp action = "user_signed_up"
-//
-// )
 type Service struct {
 	repo       *repository.Repo
 	planClient planpb.PlanServiceClient
-	// mqChannel *amqp.Channel
 }
 
 func NewService(r *repository.Repo, planClient planpb.PlanServiceClient) *Service {
 	return &Service{repo: r, planClient: planClient}
 }
 
+var(
+	ErrEmailDoesntMatch = errors.New("email user sent is wrong")
+	ErrPasswordIncorrect = errors.New("incorrect password")
+	ErrSameOldPass = errors.New("new password cannot be same as the old password")
+	ErrSameOldEmail = errors.New("new email cannot be same as the old email")
+)
+
+// DONE
 func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (time.Time, error) {
 
 	var CreatedAt time.Time
@@ -55,93 +50,63 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 		return CreatedAt, err
 	}
 
-	// _, err = s.planClient.CreateEmptyPlan(ctx, &planpb.SendUserID{UserId: int64(userId),})
-	// if err != nil{
-	// 	// st,  := status.FromError(err)
-
-	// 	return CreatedAt, myerrors.PlanServerNotResponding
-
-	// 	// try again
-	// 	// return CreatedAt, fmt.Errorf("error creating empty plan : %v", err)
-	// 	// grpc.ErrClientConnClosing
-	// 	// return CreatedAt, status.Newf(codes.Canceled, "plan server is not responding").Err()
-	// }
-
 	return CreatedAt, nil
 }
 
-func (s *Service) Login(ctx context.Context, email string, password string) (*responses.LoginResp, error) {
+// DONE
+func (s *Service) Login(ctx context.Context, email string, password string) (string, string, string, error) {
 
 	var refreshToken string
 	var UUID string
 
-	var resp responses.LoginResp
-
-	exists, err := s.repo.EmailExists(ctx, email)
-	if err != nil {
-		return &resp, err
-	}
-
-	if !exists {
-		return &resp, customerrors.PleaseSignUp
-	}
-
 	hashedPass, err := s.repo.FetchUserPass(ctx, email)
 	if err != nil {
-		return &resp, err
+		return "", "" ,"" , err
 	}
 
 	err = utils.MatchPasswords(password, hashedPass)
 	if err != nil {
-		return &resp, err
+		return "", "" ,"" , err
 	}
 
-	userId, roleID, name, err := s.repo.FetchNameUserIdRoleId(ctx, email)
+	userId, roleID, name, err := s.repo.FetchUserIdRoleIdName(ctx, email)
 	if err != nil {
-		return &resp, err
+		return "", "" ,"" , err
 	}
 
 	token := token.JwtToken{}
 	AccessToken, err := token.GenerateAccessToken(userId, roleID)
 	if err != nil {
-		return &resp, err
+		return "", "" ,"" , err
 	}
 
-	exists, err = s.repo.RefreshExists(ctx, userId)
+	exists, err := s.repo.RefreshExists(ctx, userId)
 	if err != nil {
-		return &resp, err
+		return "", "" ,"" , err
 	}
 
 	if exists {
 		UUID, err = s.repo.GetUUID(ctx, userId)
 		if err != nil {
-			return &resp, err
+			return "", ""  ,"", err
 		}
 	}
 
 	if !exists {
 		refreshToken, err = token.GenerateRefreshToken(userId, roleID)
 		if err != nil {
-			return &resp, err
+			return "", ""  ,"", err
 		}
 		UUID = uuid.NewString()
 		err := s.repo.SetRefreshTokenAndUUID(ctx, UUID, refreshToken, userId)
 		if err != nil {
-			return &resp, err
+			return "",  ""  ,"", err
 		}
 	}
-
-	resp.Message = "login successful"
-	resp.Email = email
-	resp.Name = name
-	resp.AccessToken = AccessToken
-	resp.UUID = UUID
-	return &resp, nil
+	return name, AccessToken, UUID, nil
 }
-
-func (s *Service) Logout(ctx context.Context, userId int) error {
-
-	// remove the refresh token from redis
+//DONE
+func (s *Service) Logout(ctx context.Context, userId string) error {
 
 	uuid, err := s.repo.GetUUID(ctx, userId)
 	if err != nil {
@@ -167,9 +132,6 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	claims, err := token.ValidateToken(refreshToken)
 	if err != nil {
-		if errors.Is(err, myerrors.ErrTokenExpired) {
-			return "", myerrors.ErrRefreshExpired
-		}
 		return "", err
 	}
 
@@ -181,14 +143,14 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 	return accessToken, nil
 }
 
-func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, newPass string) error {
+func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string, newPass string) error {
 	// {
 	// 	"old_password" : "x",
 	// 	"new_password" : "y",
 	// }
 
 	if oldPass == newPass {
-		return myerrors.ErrOldPassNewPassSame
+		return myerrors.BadReqErrMaker(ErrSameOldPass)
 	}
 
 	passFromDb, err := s.repo.FetchUserPassById(ctx, userId)
@@ -198,7 +160,7 @@ func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, ne
 
 	err = utils.MatchPasswords(oldPass, passFromDb)
 	if err != nil {
-		return myerrors.ErrIncorrectPassword
+		return myerrors.BadReqErrMaker(ErrPasswordIncorrect)
 	}
 
 	hashedNewPass, err := utils.HashThePassword(newPass)
@@ -220,10 +182,10 @@ func (s *Service) ChangePass(ctx context.Context, userId int, oldPass string, ne
 	// if yes -> successfully changed the password
 }
 
-func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, newEmail string) error {
+func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail string, newEmail string) error {
 
 	if oldEmail == newEmail {
-		return myerrors.ErrOldEmailNewEmailSame
+		return myerrors.BadReqErrMaker(ErrSameOldEmail)
 	}
 
 	emailFromDb, err := s.repo.GetEmail(ctx, userId)
@@ -232,7 +194,7 @@ func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, 
 	}
 
 	if emailFromDb != oldEmail {
-		return myerrors.ErrEmailDoesntMatch
+		return myerrors.BadReqErrMaker(ErrEmailDoesntMatch)
 	}
 
 	err = s.repo.ChangeEmail(ctx, userId, newEmail)
@@ -245,35 +207,8 @@ func (s *Service) ChangeEmail(ctx context.Context, userId int, oldEmail string, 
 
 func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
 
-	// check resp time of pg
-
 	pgRespTime := s.repo.GetPostgresRespTime(ctx)
 	redisRespTime := s.repo.GetRedisRespTime(ctx)
 
 	return pgRespTime, redisRespTime
 }
-
-// func Produce(ctx context.Context, action string, userID int, queueName string, ch *amqp.Channel) error {
-// 	a := models.MqMsg{
-// 		UserId: userID,
-// 		Action: action,
-// 		Time:   time.Now(),
-// 	}
-
-// 	data, err := utils.MakeJSON(a)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	msg := amqp.Publishing{
-// 		Body: data,
-// 	}
-
-// 	// ch.PublishWithContext()
-// 	// ch.PublishWithContext(ctx, "", "repo", false, false, msg)
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
-
-// 	return nil
-// }

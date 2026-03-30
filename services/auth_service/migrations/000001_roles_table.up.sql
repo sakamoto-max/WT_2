@@ -1,4 +1,4 @@
 CREATE TABLE roles(
-	id SERIAL PRIMARY KEY,
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	role TEXT NOT NULL UNIQUE
 )

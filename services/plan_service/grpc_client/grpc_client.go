@@ -8,13 +8,16 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type ExerciseClient struct {}
+type ExerciseClient struct{
+	conn *grpc.ClientConn
+	Client exerpb.ExerciseServiceClient
+}
 
 func NewExerciseServiceClient() *ExerciseClient {
 	return &ExerciseClient{}
 }
 
-func (e *ExerciseClient) Connect() exerpb.ExerciseServiceClient {
+func New() *ExerciseClient {
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -26,6 +29,12 @@ func (e *ExerciseClient) Connect() exerpb.ExerciseServiceClient {
 
 	client := exerpb.NewExerciseServiceClient(conn)
 
-	return client
+	return &ExerciseClient{
+		conn: conn,
+		Client: client,
+	}
 }
 
+func (e *ExerciseClient) Close() {
+	e.conn.Close()
+}

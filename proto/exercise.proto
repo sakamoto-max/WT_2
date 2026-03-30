@@ -10,6 +10,8 @@ option go_package = "/shared/exercise";
 service ExerciseService {
     // used by plan service
     rpc ExerciseExistsReturnId(SendExerciseName) returns (ExerciseExistsReturnIdResp) {};
+    //
+    rpc ExerciseExistsInMainReturnEveryThing(SendExerciseName) returns (sendEverythingResp) {};
     // used by plan service
     rpc GetExerciseName(SendExerciseID) returns (GetExerciseNameResp) {};
     //
@@ -26,6 +28,15 @@ service ExerciseService {
     rpc PING(PingExerReq) returns (PingExerResp) {};
     //
     rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
+}
+
+//
+message sendEverythingResp {
+    string name = 1;
+    int64 body_part_id = 2;
+    int64 rest_time_in_seconds = 3;
+    int64 equipment_id = 4;  
+    
 }
 
 message GetHealthReq {}
@@ -47,11 +58,10 @@ message CreateExerciseReq {
     string exercise_name = 1;
     string body_part = 2;
     string equipment = 3;
-    int64 rest_time = 4;
+    string user_id = 4;
 }
-message CreateExerciseResp {
-    string message = 1;
-    OneExerciseResp exercise = 2;
+message CreateExerciseResp {    
+    string id = 1;
 }
 
 message DeleteExerciseResp {
@@ -62,15 +72,16 @@ message DeleteExerciseResp {
 //
 message SendExerciseName {
     string exercise_name = 1;  
+    string user_id = 2;
 }
 //
 message ExerciseExistsReturnIdResp {
-    bool exists = 1;    
-    int32 exercise_id = 2;
+    string exercise_id = 2;
 }
 //
 message SendExerciseID {
-    int64 exercise_id = 1;  
+    string exercise_id = 1;  
+    string user_id = 2;
 }
 //
 message GetExerciseNameResp {
@@ -80,7 +91,7 @@ message GetExerciseNameResp {
 
 //
 message GetAllExercisesREq {
-    //
+    string user_id = 1;    //
 }
 
 message GetAllExercisesResp {
@@ -89,10 +100,10 @@ message GetAllExercisesResp {
 
 //
 message OneExerciseResp {
-    int64 id = 1;
+    string id = 1;
     string name = 2;
-    int64 rest_time = 3;
-    string body_part = 4;
-    string equipment = 5;
-    google.protobuf.Timestamp created_at = 6;
+    string body_part = 3;
+    string equipment = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
 }

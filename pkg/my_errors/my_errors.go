@@ -4,14 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-
-	// "fmt"
-	// "log"
 	"net/http"
-
-	// "wt/pkg/utils"
-
-	// "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -39,16 +32,16 @@ func (a *AppErrs) AppErrWriter(w http.ResponseWriter) {
 }
 
 // jwt errors
-var (
-	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")
-	// ErrUserExits2       = status.Error(codes.AlreadyExists, "user already exits")
-	ErrTokenMalformed   = errors.New("token is malformed. please check the token again")
-	ErrTokenInvalid     = errors.New("token is invalid")
-	ErrTokenIsMissing   = errors.New("token is missing, please provide the token")
-	ErrRefreshExpired   = errors.New("referesh token is expired, please login again")
-	ErrSignatureInvalid = errors.New("token's signature is invalid")
-	ErrOldPassNewPassSame = errors.New("the old pass and new pass cannot be the same")
-)
+// var (
+// 	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")
+// 	// ErrUserExits2       = status.Error(codes.AlreadyExists, "user already exits")
+// 	ErrTokenMalformed   = errors.New("token is malformed. please check the token again")
+// 	ErrTokenInvalid     = errors.New("token is invalid")
+// 	ErrTokenIsMissing   = errors.New("token is missing, please provide the token")
+// 	ErrRefreshExpired   = errors.New("referesh token is expired, please login again")
+// 	ErrSignatureInvalid = errors.New("token's signature is invalid")
+// 	ErrOldPassNewPassSame = errors.New("the old pass and new pass cannot be the same")
+// )
 
 // claims error
 
@@ -78,11 +71,39 @@ var (
 	ErrWorkoutOngoing = errors.New("user has ongoing workout which is not ended")
 )
 
+var(
+	ErrExerciseNotFound = errors.New("exercise not found")
+)
+
+var (
+	ErrPlanAlreadyExists = errors.New("plan already exits")
+)
+
 var (
 	CodeInternalServer = 500
 	CodeBadRequest = 400
 	CodeNotFound = 404
 )
+
+func ResourceNotFoundErrMaker(resource string) error {
+	st := status.Newf(codes.NotFound, "%v not found", resource)
+	return st.Err()
+}
+
+func InternalServerErrMaker(err error) error {
+	st := status.New(codes.Internal, err.Error())
+	return st.Err()
+}
+
+func BadReqErrMaker(err error) error {
+	st := status.New(codes.AlreadyExists, err.Error())
+	return st.Err()
+}
+
+func AlreadyExitsErrMaker(resource string) error {
+	st := status.Newf(codes.AlreadyExists, "%v already exists", resource)
+	return st.Err()
+}
 
 func ErrMatcher(w http.ResponseWriter, err error) {
 	st, _ := status.FromError(err)

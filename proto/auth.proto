@@ -36,10 +36,8 @@ message GetHealthResp {
 }
 
 
-
-
 message ChangeEmailReq {
-    int64 user_id = 1;
+    string user_id = 1;
     string old_email = 2;
     string new_email = 3;  
 }
@@ -49,9 +47,8 @@ message ChangeEmailResp {
 
 
 
-
 message ChangePassReq{
-    int64 user_id = 1;
+    string user_id = 1;
     string old_pass = 2;
     string new_pass = 3;
 }
@@ -73,7 +70,7 @@ message GetNewAccessTokenResp {
 }
 
 message SendUserId {
-    int64 user_id = 1;
+    string user_id = 1;
 }
 
 message UserLogOutResp {

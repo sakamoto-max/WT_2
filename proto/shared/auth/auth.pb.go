@@ -129,7 +129,7 @@ func (x *GetHealthResp) GetRedisRespTime() *durationpb.Duration {
 
 type ChangeEmailReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	OldEmail      string                 `protobuf:"bytes,2,opt,name=old_email,json=oldEmail,proto3" json:"old_email,omitempty"`
 	NewEmail      string                 `protobuf:"bytes,3,opt,name=new_email,json=newEmail,proto3" json:"new_email,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -166,11 +166,11 @@ func (*ChangeEmailReq) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ChangeEmailReq) GetUserId() int64 {
+func (x *ChangeEmailReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *ChangeEmailReq) GetOldEmail() string {
@@ -233,7 +233,7 @@ func (x *ChangeEmailResp) GetMessage() string {
 
 type ChangePassReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	OldPass       string                 `protobuf:"bytes,2,opt,name=old_pass,json=oldPass,proto3" json:"old_pass,omitempty"`
 	NewPass       string                 `protobuf:"bytes,3,opt,name=new_pass,json=newPass,proto3" json:"new_pass,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -270,11 +270,11 @@ func (*ChangePassReq) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ChangePassReq) GetUserId() int64 {
+func (x *ChangePassReq) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *ChangePassReq) GetOldPass() string {
@@ -497,7 +497,7 @@ func (x *GetNewAccessTokenResp) GetNewAccessToken() string {
 
 type SendUserId struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -532,11 +532,11 @@ func (*SendUserId) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *SendUserId) GetUserId() int64 {
+func (x *SendUserId) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 type UserLogOutResp struct {
@@ -860,13 +860,13 @@ const file_auth_proto_rawDesc = "" +
 	"\x12postgres_resp_time\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x10postgresRespTime\x12A\n" +
 	"\x0fredis_resp_time\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\rredisRespTime\"c\n" +
 	"\x0eChangeEmailReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\told_email\x18\x02 \x01(\tR\boldEmail\x12\x1b\n" +
 	"\tnew_email\x18\x03 \x01(\tR\bnewEmail\"+\n" +
 	"\x0fChangeEmailResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"^\n" +
 	"\rChangePassReq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x19\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x19\n" +
 	"\bold_pass\x18\x02 \x01(\tR\aoldPass\x12\x19\n" +
 	"\bnew_pass\x18\x03 \x01(\tR\anewPass\"*\n" +
 	"\x0eChangePassResp\x12\x18\n" +
@@ -880,7 +880,7 @@ const file_auth_proto_rawDesc = "" +
 	"\x10new_access_token\x18\x01 \x01(\tR\x0enewAccessToken\"%\n" +
 	"\n" +
 	"SendUserId\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"*\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"*\n" +
 	"\x0eUserLogOutResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"@\n" +
 	"\fUserLoginReq\x12\x14\n" +

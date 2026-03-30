@@ -17,7 +17,7 @@ type Plan2Resp struct{
 
 type Plan3 struct {
 	PlanName string
-	Id       int
+	Id       string
 }
 
 type AllPlansResp struct {

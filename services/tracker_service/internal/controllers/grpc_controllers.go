@@ -26,41 +26,38 @@ func NewTrackerController(service *services.Service) *TrackerController {
 
 func (t *TrackerController) StartEmptyWorkout(ctx context.Context, in *trackerpb.StartEmptyWorkoutReq) (*trackerpb.GeneralResp, error) {
 
-	resp := trackerpb.GeneralResp{}
-
-	err := t.service.StartEmptyWorkoutSer(ctx, int(in.UserId))
+	err := t.service.StartEmptyWorkoutSer(ctx, in.UserId)
 	if err != nil {
 		if err == myerrors.ErrWorkoutOngoing {
 			st := status.New(codes.AlreadyExists, err.Error())
-			return &resp, st.Err()
+			return nil, st.Err()
 		}
-		return &resp, err
+		return nil, err
 	}
-
-	resp.Message = "an empty workout has started"
+	
+	resp := trackerpb.GeneralResp{
+		Message: "an empty workout has started",
+	}
 
 	return &resp, nil
 }
 func (t *TrackerController) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartWorkoutWithPlanReq) (*trackerpb.StartWorkoutWithPlanResp, error) {
-	resp := trackerpb.StartWorkoutWithPlanResp{}
-
-	exercisesNames, err := t.service.StartWorkoutWithPlanSer(ctx, int(in.UserId), in.PlanName)
+	
+	exercisesNames, err := t.service.StartWorkoutWithPlanSer(ctx, in.UserId, in.PlanName)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
-
-	resp.Message = fmt.Sprintf("workout with plan %v has started", in.PlanName)
-	resp.PlanName = in.PlanName
-	resp.ExercisesInPlan = *exercisesNames
+	resp := trackerpb.StartWorkoutWithPlanResp{
+		Message: fmt.Sprintf("workout with plan %v has started", in.PlanName),
+		PlanName: in.PlanName,
+		ExercisesInPlan: *exercisesNames,
+	}
 
 	return &resp, nil
 }
 func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (*trackerpb.EndWorkoutResp, error) {
-	resp := trackerpb.EndWorkoutResp{}
-
+	
 	tracker := user.Tracker{}
-	// workout := user.Workout{}
-	// reps := user.Reps{}
 
 	for _, eachExerWithidSetsandReps := range in.AllExerices {
 		a := user.Workout{}
@@ -76,12 +73,14 @@ func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWor
 		tracker.Workout = append(tracker.Workout, a)
 	}
 
-	err := t.service.EndWorkoutSer(ctx, int(in.UserId), &tracker)
+	err := t.service.EndWorkoutSer(ctx, in.UserId, &tracker)
 	if err != nil {
-		return &resp, err
+		return nil, err
 	}
-
-	resp.Message = "workout ended successfully"
+	
+	resp := trackerpb.EndWorkoutResp{
+		Message: "workout ended successfully",
+	}
 
 	return &resp, nil
 }
