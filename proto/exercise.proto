@@ -95,7 +95,8 @@ message GetAllExercisesREq {
 }
 
 message GetAllExercisesResp {
-    repeated OneExerciseResp all_exericses = 1;
+    int64 number_of_exercises = 1;
+    repeated OneExerciseResp all_exericses = 2;
 }
 
 //

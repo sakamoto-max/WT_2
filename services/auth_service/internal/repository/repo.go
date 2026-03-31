@@ -29,8 +29,6 @@ func (r *Repo) Close() error {
 	return nil
 }
 
-
-
 func (r *Repo) GetPostgresRespTime(ctx context.Context) (*time.Duration) {
 	timeStart := time.Now()
 	err := r.pDB.Ping(ctx)

@@ -1,19 +1,23 @@
-package database
+package repository
 
 import (
 	"context"
 	"fmt"
 	"os"
 	"strconv"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
-func initializePostgres(ctx context.Context) (*pgxpool.Pool, error) {
+type DB struct {
+	AuthPg *pgxpool.Pool
+	Redis  *redis.Client
+}
 
-	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_CONN"))
+func initializeAuthPostgres(ctx context.Context) (*pgxpool.Pool, error) {
+
+	pool, err := pgxpool.New(ctx, os.Getenv("AUTH_POSTGRES_CONN"))
 
 	if err != nil {
 		return pool, fmt.Errorf("error creating the postgres pool : %w\n", err)
@@ -42,26 +46,22 @@ func initializeRedis(ctx context.Context) (*redis.Client, error) {
 	return rdb, nil
 }
 
-func InitializeDBs(ctx context.Context) (*pgxpool.Pool, *redis.Client, error) {
+func InitializeDBs(ctx context.Context) (*DB, error) {
 
-	var pool *pgxpool.Pool
-	var client *redis.Client
-
-	pool, err := initializePostgres(ctx)
+	poolForAuth, err := initializeAuthPostgres(ctx)
 	if err != nil {
-		return pool, client, err
+		return nil, err
 	}
 
-	client, err = initializeRedis(ctx)
+	client, err := initializeRedis(ctx)
 	if err != nil {
-		return pool, client, err
+		return nil, err
 	}
 
-	return pool, client, nil
+	return &DB{AuthPg: poolForAuth, Redis: client}, nil
 }
 
 func CloseDBs(pool *pgxpool.Pool, client *redis.Client) {
 	pool.Close()
 	client.Close()
 }
-

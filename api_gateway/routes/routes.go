@@ -32,7 +32,6 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plan/exercises", h.DeleteExerciseFromPlan)
-	r.With(middleware.JwtMiddleware).Get("/wt/plan/health", h.CheckHealthPlan)
 	r.With(middleware.JwtMiddleware).Get("/wt/plan", h.GetAllPlans)
 	r.With(middleware.JwtMiddleware).Get("/wt/plan/oneplan", h.GetPLanByName)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plan", h.DeletePlan)

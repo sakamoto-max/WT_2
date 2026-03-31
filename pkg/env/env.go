@@ -6,6 +6,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func LoadNoLookUp(fileName string) {
+	err := godotenv.Load(fileName)
+	if err != nil{
+		log.Fatalf("error loading the env file : %v", err)
+	}
+}
 
 func Load(fileName string) {
 	err := godotenv.Load(fileName)

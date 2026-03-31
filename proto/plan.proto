@@ -13,8 +13,6 @@ service PlanService {
     rpc PlanExistsReturnId(SendPlanName) returns (PlanExistsResp) {};
     // plan_name, user_id -> exits, plan_id, exercise_ids
     rpc PlanExistsReturnPlan(SendPlanName) returns (PlanExistsReturnPlanResp) {};
-    // user_id -> empty_plan_id
-    rpc GetEmptyPlanId(SendUserID) returns (EmptyPlanIdResp) {};
     // user_id -> msg
     rpc CreateEmptyPlan(SendUserID) returns (CreateEmptyPlanResp) {}; 
     // {} -> msg
@@ -24,7 +22,7 @@ service PlanService {
     // user_id -> number_of_plans, [{plan_name, exercise_names}]
     rpc GetAllPlans(GetAllPlansReq) returns (GetAllPlansResp) {};
     // user_id, plan_name -> plan_name, exercise_names
-    rpc GetPlanByName(GetPlanByNameReq) returns (PlanResp) {};
+    rpc GetPlanByName(GetPlanByNameReq) returns (GetPlanByNameResp) {};
     // user_id, plan_name, exercise_names -> plan_names, exercise_names
     rpc AddExercisesToPlan(PlanReq) returns (PlanResp) {};
     // user_id, plan_name, exercise_names -> plan_names, exercise_names
@@ -35,6 +33,13 @@ service PlanService {
     rpc PING(PingPlanReq) returns (PingPlanResp) {};
     //
     rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
+}
+
+message GetPlanByNameResp{
+    string plan_name = 1;
+    repeated string exercise_names = 2;
+    string plan_id = 3;
+
 }
 
 message GetHealthReq {}
@@ -116,10 +121,6 @@ message CreateEmptyPlanResp {
     string message = 1;
 }
 
-message EmptyPlanIdResp {
-    string empty_plan_id = 1;
-}
-//
 message SendPlanName {
     //
     string user_id = 1;

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"plan_service/internal/services"
 	planpb "workout-tracker/proto/shared/plan"
-	// "google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 type PlanController struct {
@@ -32,10 +32,9 @@ func (p *PlanController) CreatePlan(ctx context.Context, in *planpb.CreatePlanRe
 
 	return &resp, nil
 }
-
 func (p *PlanController) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*planpb.GetAllPlansResp, error) {
 
-	numberOfPlans, allPlans, err := p.service.GetAllPlansSer(ctx, int(in.UserId))
+	numberOfPlans, allPlans, err := p.service.GetAllPlansSer(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -55,25 +54,24 @@ func (p *PlanController) GetAllPlans(ctx context.Context, in *planpb.GetAllPlans
 
 	return &resp, nil
 }
+func (p *PlanController) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.GetPlanByNameResp, error) {
 
-func (p *PlanController) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.PlanResp, error) {
-
-	planName, exerciseNames, err := p.service.GetPlanByNameSer(ctx, int(in.UserId), in.PlanName)
+	planId, planName, exerciseNames, err := p.service.GetPlanByNameSer(ctx, in.UserId, in.PlanName)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := planpb.PlanResp{
+	resp := planpb.GetPlanByNameResp{
 		ExerciseNames: *exerciseNames,
 		PlanName:      planName,
+		PlanId:        planId,
 	}
 
 	return &resp, nil
 }
-
 func (p *PlanController) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
 
-	r, err := p.service.AddExercisesToPlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
+	r, err := p.service.AddExercisesToPlan(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
 	if err != nil {
 		return nil, err
 	}
@@ -85,108 +83,57 @@ func (p *PlanController) AddExercisesToPlan(ctx context.Context, in *planpb.Plan
 
 	return &resp, nil
 }
+func (a *PlanController) GetHealth(ctx context.Context, in *planpb.GetHealthReq) (*planpb.GetHealthResp, error) {
 
-// func (p *PlanController) PlanExistsReturnId(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsResp, error) {
+	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
 
-// 	exits, planId, err := p.service.PlanExistsReturnId(ctx, int(in.UserId), in.PlanName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	resp := planpb.GetHealthResp{
+		PostgresRespTime: durationpb.New(*pgRespTime),
+		RedisRespTime:    durationpb.New(*redisRespTime),
+	}
 
-// 	resp := planpb.PlanExistsResp{
-// 		Exists: exits,
-// 		PlanId: int64(planId),
-// 	}
+	return &resp, nil
+}
+func (p *PlanController) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*planpb.EmptyPlanIdResp, error) {
 
-// 	return &resp, nil
-// }
+	emptyPlanId, err := p.service.GetEmptyPlanId(ctx, in.UserId)
 
-// func (p *PlanController) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*planpb.EmptyPlanIdResp, error) {
+	if err != nil {
+		return nil, err
+	}
 
-// 	emptyPlanId, err := p.service.GetEmptyPlanId(ctx, int(in.UserId))
+	resp := planpb.EmptyPlanIdResp{
+		EmptyPlanId: emptyPlanId,
+	}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return &resp, nil
+}
+func (p *PlanController) DeletePlan(ctx context.Context, in *planpb.DeletePlanReq) (*planpb.DeletePlanResp, error) {
 
-// 	resp := planpb.EmptyPlanIdResp{
-// 		EmptyPlanId: int64(emptyPlanId),
-// 	}
+	err := p.service.DeletePlanSer(ctx, in.UserId, in.PlanName)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return &resp, nil
-// }
+	return &planpb.DeletePlanResp{}, nil
+}
+func (p *PlanController) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
+	r, err := p.service.DeleteExerciseFromPlan(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
+	if err != nil {
+		return nil, err
+	}
 
-// func (p *PlanController) PlanExistsReturnPlan(ctx context.Context, in *planpb.SendPlanName) (*planpb.PlanExistsReturnPlanResp, error) {
+	resp := planpb.PlanResp{
+		PlanName: r.PlanName,
+		ExerciseNames: r.Exercises,
+	}
 
-// 	exists, planId, exerciseIds, err := p.service.PlanExistsReturnPlan(ctx, int(in.UserId), in.PlanName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return &resp, nil
 
-// 	resp := planpb.PlanExistsReturnPlanResp{
-// 		Exists: exists,
-// 		PlanId: int64(planId),
-// 	}
+}
 
-// 	for _, eachExerciseId := range *exerciseIds {
-// 		resp.ExerciseIds = append(resp.ExerciseIds, int64(eachExerciseId))
-// 	}
 
-// 	return &resp, nil
-// }
 
-// func (p *PlanController) CreateEmptyPlan(ctx context.Context, in *planpb.SendUserID) (*planpb.CreateEmptyPlanResp, error) {
 
-// 	err := p.service.CreateEmptyPlan(ctx, int(in.UserId))
-// 	if err != nil {
-// 		return nil, err
-// 	}
 
-// 	resp := planpb.CreateEmptyPlanResp{
-// 		Message: "empty plan created successfully",
-// 	}
 
-// 	return &resp, nil
-// }
-
-// func (p *PlanController) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
-// 	r, err := p.service.DeleteExerciseFromPlan(ctx, int(in.UserId), in.PlanName, &in.ExerciseNames)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	resp := planpb.PlanResp{
-// 		PlanName: r.PlanName,
-// 		ExerciseNames: r.Exercises,
-// 	}
-
-// 	return &resp, nil
-
-// }
-
-// func (p *PlanController) DeletePlan(ctx context.Context, in *planpb.DeletePlanReq) (*planpb.DeletePlanResp, error) {
-
-// 	err := p.service.DeletePlanSer(ctx, int(in.UserId), in.PlanName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &planpb.DeletePlanResp{}, nil
-// }
-
-// func (a *PlanController) PING(ctx context.Context, in *planpb.PingPlanReq) (*planpb.PingPlanResp, error) {
-
-// 	return &planpb.PingPlanResp{}, nil
-// }
-
-// func (a *PlanController) GetHealth(ctx context.Context, in *planpb.GetHealthReq) (*planpb.GetHealthResp, error) {
-
-// 	pgRespTime, redisRespTime := a.service.GetHealth(ctx)
-
-// 	resp := planpb.GetHealthResp{
-// 		PostgresRespTime: durationpb.New(*pgRespTime),
-// 		RedisRespTime: durationpb.New(*redisRespTime),
-// 	}
-
-// 	return &resp, nil
-// }

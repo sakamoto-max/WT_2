@@ -3,7 +3,7 @@ CREATE TABLE exercises(
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	name TEXT NOT NULL,
-	created_by INTEGER,
+	created_by UUID,
 	body_part_id UUID REFERENCES body_parts(id),
 	equipment_id UUID REFERENCES equipment(id)
 );

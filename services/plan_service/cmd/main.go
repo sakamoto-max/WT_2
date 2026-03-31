@@ -12,5 +12,4 @@ func main() {
 	gRPCServer := NewgrpcServer(os.Getenv("GRPC_SERVER_ADDR"))
 	gRPCServer.Run()
 
-
 }

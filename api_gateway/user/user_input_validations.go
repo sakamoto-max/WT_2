@@ -32,12 +32,6 @@ var (
 	ErrOldEmailReq = validatonErrs{Path: "old_email", Message: "required"}
 	ErrNewEmailReq = validatonErrs{Path: "new_email", Message: "required"}
 )
-var (
-// ErrPlanNameReq  = validatonErrs{Path: "plan_name", Message: "required"}
-// ErrExercisesReq = validatonErrs{Path: "exercises", Message: "required", Type: "slice"}
-// errMinUserName = validatonErrs{Path: "name", Message: "the min required length of the name is 2"}
-// errMaxUserName = validatonErrs{Path: "name", Message: "the max length of the name is 20"}
-)
 
 func (c *ChangeEmail) Validate() (*[]validatonErrs, bool) {	
 	var validationErrs []validatonErrs

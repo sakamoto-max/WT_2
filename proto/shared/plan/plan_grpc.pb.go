@@ -53,7 +53,7 @@ type PlanServiceClient interface {
 	// user_id -> number_of_plans, [{plan_name, exercise_names}]
 	GetAllPlans(ctx context.Context, in *GetAllPlansReq, opts ...grpc.CallOption) (*GetAllPlansResp, error)
 	// user_id, plan_name -> plan_name, exercise_names
-	GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*PlanResp, error)
+	GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*GetPlanByNameResp, error)
 	// user_id, plan_name, exercise_names -> plan_names, exercise_names
 	AddExercisesToPlan(ctx context.Context, in *PlanReq, opts ...grpc.CallOption) (*PlanResp, error)
 	// user_id, plan_name, exercise_names -> plan_names, exercise_names
@@ -142,9 +142,9 @@ func (c *planServiceClient) GetAllPlans(ctx context.Context, in *GetAllPlansReq,
 	return out, nil
 }
 
-func (c *planServiceClient) GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*PlanResp, error) {
+func (c *planServiceClient) GetPlanByName(ctx context.Context, in *GetPlanByNameReq, opts ...grpc.CallOption) (*GetPlanByNameResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PlanResp)
+	out := new(GetPlanByNameResp)
 	err := c.cc.Invoke(ctx, PlanService_GetPlanByName_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ type PlanServiceServer interface {
 	// user_id -> number_of_plans, [{plan_name, exercise_names}]
 	GetAllPlans(context.Context, *GetAllPlansReq) (*GetAllPlansResp, error)
 	// user_id, plan_name -> plan_name, exercise_names
-	GetPlanByName(context.Context, *GetPlanByNameReq) (*PlanResp, error)
+	GetPlanByName(context.Context, *GetPlanByNameReq) (*GetPlanByNameResp, error)
 	// user_id, plan_name, exercise_names -> plan_names, exercise_names
 	AddExercisesToPlan(context.Context, *PlanReq) (*PlanResp, error)
 	// user_id, plan_name, exercise_names -> plan_names, exercise_names
@@ -261,7 +261,7 @@ func (UnimplementedPlanServiceServer) CreatePlan(context.Context, *CreatePlanReq
 func (UnimplementedPlanServiceServer) GetAllPlans(context.Context, *GetAllPlansReq) (*GetAllPlansResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAllPlans not implemented")
 }
-func (UnimplementedPlanServiceServer) GetPlanByName(context.Context, *GetPlanByNameReq) (*PlanResp, error) {
+func (UnimplementedPlanServiceServer) GetPlanByName(context.Context, *GetPlanByNameReq) (*GetPlanByNameResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPlanByName not implemented")
 }
 func (UnimplementedPlanServiceServer) AddExercisesToPlan(context.Context, *PlanReq) (*PlanResp, error) {

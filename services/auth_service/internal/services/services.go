@@ -1,7 +1,6 @@
 package services
 
 import (
-	// customerrors "auth_service/internal/custom_errors"
 	"auth_service/internal/repository"
 	"auth_service/internal/utils"
 	"context"
@@ -9,8 +8,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	planpb "workout-tracker/proto/shared/plan"
 	myerrors "wt/pkg/my_errors"
 	token "wt/pkg/jwt"
 
@@ -19,11 +16,10 @@ import (
 
 type Service struct {
 	repo       *repository.Repo
-	planClient planpb.PlanServiceClient
 }
 
-func NewService(r *repository.Repo, planClient planpb.PlanServiceClient) *Service {
-	return &Service{repo: r, planClient: planClient}
+func NewService(r *repository.Repo) *Service {
+	return &Service{repo: r}
 }
 
 var(
@@ -144,10 +140,6 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 }
 
 func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string, newPass string) error {
-	// {
-	// 	"old_password" : "x",
-	// 	"new_password" : "y",
-	// }
 
 	if oldPass == newPass {
 		return myerrors.BadReqErrMaker(ErrSameOldPass)
@@ -174,12 +166,6 @@ func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string,
 	}
 
 	return nil
-
-	// check if ui old_pass and new_pass r same -> old_pass cannot be same as new pass
-	// get the old pass from the db
-	// check if the ui old_pass and the pass from the db r same
-	// if not -> incorrect_old pass
-	// if yes -> successfully changed the password
 }
 
 func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail string, newEmail string) error {

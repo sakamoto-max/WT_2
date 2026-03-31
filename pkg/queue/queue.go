@@ -18,21 +18,21 @@ func NewConn() *amqp.Connection {
 	return conn
 }
 
-type messageQueue struct {
+type MessageQueue struct {
 	Ch    *amqp.Channel
 	queue *amqp.Queue
 }
 
 type ConsumerChan chan <-amqp.Delivery
 
-func NewMessageQueue(conn *amqp.Connection, QueueName string) *messageQueue {
+func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
 	channel := createChannel(conn)
 	queue := createQueue(channel, QueueName)
 
-	return &messageQueue{Ch: channel, queue: &queue}
+	return &MessageQueue{Ch: channel, queue: &queue}
 }
 
-func (m *messageQueue) Publish(ctx context.Context, data *[]byte, contentType string) error {
+func (m *MessageQueue) Publish(ctx context.Context, data *[]byte, contentType string) error {
 
 	msg := amqp.Publishing{
 		ContentType: contentType,
@@ -51,7 +51,7 @@ func (m *messageQueue) Publish(ctx context.Context, data *[]byte, contentType st
 }
 
 
-func (m *messageQueue) Consume(queueName string, chanName <- chan amqp.Delivery) <-chan amqp.Delivery {
+func (m *MessageQueue) Consume(queueName string, chanName <- chan amqp.Delivery) <-chan amqp.Delivery {
 	chanName, err := m.Ch.Consume(queueName, "", true, false, false, false, nil)
 	if err != nil {
 		fmt.Printf("error occured : %v", err)

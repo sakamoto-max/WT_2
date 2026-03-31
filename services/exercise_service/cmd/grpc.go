@@ -7,15 +7,11 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
 	"exercise_service/internal/controllers"
 	"exercise_service/internal/database"
-
-	// "exercise_service/internal/handlers"
 	"exercise_service/internal/repository"
 	"exercise_service/internal/services"
 	exercisepb "workout-tracker/proto/shared/exercise"
-
 	"google.golang.org/grpc"
 )
 

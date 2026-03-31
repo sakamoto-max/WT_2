@@ -6,7 +6,6 @@ import (
 	"api_gateway/routes"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,25 +17,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+
 type httpServer struct {
-	addr string
-}
-type httpServer2 struct {
 	addr   string
 	router *chi.Mux
 }
 
 func NewHttpServer(addr string) *httpServer {
-	return &httpServer{addr: addr}
-}
-func NewHttpServer2(addr string) *httpServer2 {
 
-	s := httpServer2{addr: addr}
+	s := httpServer{addr: addr}
 
 	return &s
 }
 
-func (h *httpServer2) Run() {
+func (h *httpServer) Run() {
 
 	client := grpcclient.NewgrpcClient().ConnectToClients()
 	log.Println("created the clients")
@@ -53,14 +47,12 @@ func (h *httpServer2) Run() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-	// ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-
 	go func() {
 
+		log.Printf("server has started at %v", h.addr)
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("error opening http server at %v : %v\n", h.addr, err)
-
 		}
 
 	}()
@@ -82,27 +74,4 @@ func (h *httpServer2) Run() {
 	
 
 	log.Printf("graceful shutdown complete")
-}
-
-func (h *httpServer) Run() {
-
-	// server := http.Server{Addr: h.addr}
-	// server.ListenAndServe()
-	// server.Shutdown(ctx)
-
-	client := grpcclient.NewgrpcClient()
-	client = client.ConnectToClients()
-
-	fmt.Println("all services are up and running")
-
-	handler := handlers.NewHandler(client.AuthClient, client.PlanClient, client.ExerClient, client.TrackClient)
-
-	router := routes.NewRouter(handler)
-
-	fmt.Printf("gateway has started listening at %v\n", h.addr)
-
-	if err := http.ListenAndServe(h.addr, router); err != nil {
-		log.Fatalf("error opening http server at %v : %v\n", h.addr, err)
-	}
-
 }

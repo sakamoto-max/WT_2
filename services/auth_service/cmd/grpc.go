@@ -3,7 +3,6 @@ package main
 import (
 	"auth_service/internal/controllers"
 	"auth_service/internal/database"
-	grpcclient "auth_service/internal/grpc_client"
 	"auth_service/internal/repository"
 	"auth_service/internal/services"
 	"context"
@@ -44,10 +43,10 @@ func (g *grpcServer) Run() {
 	}
 	
 	
-	planClient := grpcclient.New()
+	// planClient := grpcclient.New()
 	
 	repo := repository.NewRepo(pool, redisClient)
-	service := services.NewService(repo, planClient.Client)
+	service := services.NewService(repo)
 	controller := controllers.NewAuthController(service)
 	
 	grpcServer := grpc.NewServer()
@@ -70,13 +69,10 @@ func (g *grpcServer) Run() {
 	log.Printf("shutdown signal received : %v", sig.String())
 
 	grpcServer.GracefulStop()
-
-	// close dbs
+	
 	if err := repo.Close(); err != nil{
 		log.Println(err)
 	}
-
-	planClient.Close()
 
 	log.Println("gracefully shutdown")
 

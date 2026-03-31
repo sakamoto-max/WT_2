@@ -4,7 +4,6 @@ import (
 	"context"
 	"exercise_service/internal/models"
 	"exercise_service/internal/repository"
-	// "exercise_service/internal/user"
 	"time"
 )
 
@@ -67,8 +66,6 @@ func (s *Service)  GetExerciseNameByID(ctx context.Context, exerciseId string) (
 
 
 func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
-
-	// check resp time of pg
 
 	pgRespTime := s.DB.GetPostgresRespTime(ctx)
 	redisRespTime := s.DB.GetRedisRespTime(ctx)

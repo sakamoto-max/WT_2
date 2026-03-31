@@ -38,7 +38,6 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 	utils.CreatedWriter(w, resp)
 }
 
-
 func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -72,7 +71,6 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
 	utils.CreatedWriter(w, resp)
 }
-
 
 func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 

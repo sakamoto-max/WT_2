@@ -1,5 +1,11 @@
 package enum
 
+type planName string
+
+var (
+	EmptyPlanName planName = "empty"
+)
+
 type serviceName string
 
 var (

@@ -660,10 +660,11 @@ func (x *GetAllExercisesREq) GetUserId() string {
 }
 
 type GetAllExercisesResp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AllExericses  []*OneExerciseResp     `protobuf:"bytes,1,rep,name=all_exericses,json=allExericses,proto3" json:"all_exericses,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	NumberOfExercises int64                  `protobuf:"varint,1,opt,name=number_of_exercises,json=numberOfExercises,proto3" json:"number_of_exercises,omitempty"`
+	AllExericses      []*OneExerciseResp     `protobuf:"bytes,2,rep,name=all_exericses,json=allExericses,proto3" json:"all_exericses,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *GetAllExercisesResp) Reset() {
@@ -694,6 +695,13 @@ func (x *GetAllExercisesResp) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetAllExercisesResp.ProtoReflect.Descriptor instead.
 func (*GetAllExercisesResp) Descriptor() ([]byte, []int) {
 	return file_exercise_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetAllExercisesResp) GetNumberOfExercises() int64 {
+	if x != nil {
+		return x.NumberOfExercises
+	}
+	return 0
 }
 
 func (x *GetAllExercisesResp) GetAllExericses() []*OneExerciseResp {
@@ -828,9 +836,10 @@ const file_exercise_proto_rawDesc = "" +
 	"\x13GetExerciseNameResp\x12#\n" +
 	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\"-\n" +
 	"\x12GetAllExercisesREq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"U\n" +
-	"\x13GetAllExercisesResp\x12>\n" +
-	"\rall_exericses\x18\x01 \x03(\v2\x19.exercise.OneExerciseRespR\fallExericses\"\xe6\x01\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x85\x01\n" +
+	"\x13GetAllExercisesResp\x12.\n" +
+	"\x13number_of_exercises\x18\x01 \x01(\x03R\x11numberOfExercises\x12>\n" +
+	"\rall_exericses\x18\x02 \x03(\v2\x19.exercise.OneExerciseRespR\fallExericses\"\xe6\x01\n" +
 	"\x0fOneExerciseResp\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +

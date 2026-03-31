@@ -3,8 +3,8 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"tracker_service/internal/models"
 	"tracker_service/internal/services"
-	"tracker_service/internal/user"
 	trackerpb "workout-tracker/proto/shared/tracker"
 	myerrors "wt/pkg/my_errors"
 
@@ -34,7 +34,7 @@ func (t *TrackerController) StartEmptyWorkout(ctx context.Context, in *trackerpb
 		}
 		return nil, err
 	}
-	
+
 	resp := trackerpb.GeneralResp{
 		Message: "an empty workout has started",
 	}
@@ -42,28 +42,33 @@ func (t *TrackerController) StartEmptyWorkout(ctx context.Context, in *trackerpb
 	return &resp, nil
 }
 func (t *TrackerController) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartWorkoutWithPlanReq) (*trackerpb.StartWorkoutWithPlanResp, error) {
-	
+
 	exercisesNames, err := t.service.StartWorkoutWithPlanSer(ctx, in.UserId, in.PlanName)
 	if err != nil {
+		if err == myerrors.ErrWorkoutOngoing {
+			st := status.New(codes.AlreadyExists, err.Error())
+			return nil, st.Err()
+		}
 		return nil, err
 	}
+
+
 	resp := trackerpb.StartWorkoutWithPlanResp{
-		Message: fmt.Sprintf("workout with plan %v has started", in.PlanName),
-		PlanName: in.PlanName,
+		Message:         fmt.Sprintf("workout with plan %v has started", in.PlanName),
+		PlanName:        in.PlanName,
 		ExercisesInPlan: *exercisesNames,
 	}
-
 	return &resp, nil
 }
 func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (*trackerpb.EndWorkoutResp, error) {
-	
-	tracker := user.Tracker{}
+
+	tracker := models.Tracker{}
 
 	for _, eachExerWithidSetsandReps := range in.AllExerices {
-		a := user.Workout{}
+		a := models.Workout{}
 		a.ExerciseId = int(eachExerWithidSetsandReps.ExerciseId)
 		for _, eachExer := range a.RepsWeight {
-			reps := user.Reps{}
+			reps := models.Reps{}
 			reps.Reps = int(eachExer.Reps)
 			reps.Weight = int(eachExer.Weight)
 
@@ -77,20 +82,18 @@ func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWor
 	if err != nil {
 		return nil, err
 	}
-	
+
 	resp := trackerpb.EndWorkoutResp{
 		Message: "workout ended successfully",
 	}
 
 	return &resp, nil
 }
-
 func (a *TrackerController) PING(ctx context.Context, in *trackerpb.PingTrackReq) (*trackerpb.PingTrackResp, error) {
 	r := trackerpb.PingTrackResp{}
 
 	return &r, nil
 }
-
 func (a *TrackerController) GetHealth(ctx context.Context, in *trackerpb.GetHealthReq) (*trackerpb.GetHealthResp, error) {
 
 	resp := trackerpb.GetHealthResp{}

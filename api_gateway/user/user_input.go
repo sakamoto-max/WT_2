@@ -48,6 +48,11 @@ type Exercise struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type AllExercisesResp struct {
+	NumberOfExercises int `json:"number_of_exercises"`
+	Exercises []Exercise `json:"all_exercises"`
+}
+
 type CreateExerResp struct{
 	Messsage string `json:"message"`
 	Exercise Exercise `json:"exercise"`

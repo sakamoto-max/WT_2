@@ -8,7 +8,8 @@ import (
 	myerrors "wt/pkg/my_errors"
 
 	// "tracker_service/internal/models"
-	"tracker_service/internal/user"
+	"tracker_service/internal/models"
+	// "tracker_service/internal/user"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -23,12 +24,11 @@ func NewDBs(pool *pgxpool.Pool, client *redis.Client) *DBs {
 	return &DBs{PDB: pool, RDB: client}
 }
 
-
 func (r *DBs) Close() error {
 	r.PDB.Close()
 
 	err := r.RDB.Close()
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("error while closing redis db : %w", err)
 	}
 
@@ -116,10 +116,6 @@ func (d *DBs) GetTrackerId(ctx context.Context, userId string) (string, error) {
 		return id, myerrors.InternalServerErrMaker(fmt.Errorf("error in getting the tracker Id of the user with id %v : %w", userId, err))
 	}
 
-	if err != nil {
-		return id, myerrors.InternalServerErrMaker(fmt.Errorf("error in converting the tracker id from string to int : %w", err))
-	}
-
 	return id, nil
 
 }
@@ -142,7 +138,7 @@ func (d *DBs) CheckIfWorkoutIsOngoing(ctx context.Context, userId string) (bool,
 	return true, nil
 }
 
-func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *user.Tracker) error {
+func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tracker) error {
 
 	trnx, err := d.PDB.Begin(ctx)
 	if err != nil {
@@ -183,4 +179,28 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *user.Track
 	}
 
 	return nil
+}
+
+
+
+func (d *DBs) SetExerciseNameById(ctx context.Context, exerciseId string, exerciseName string) error {
+	key := fmt.Sprintf("exercise_id:%v:name", exerciseId)
+	
+	err := d.RDB.Set(ctx, key, exerciseName, 0).Err()
+	if err != nil{
+		return fmt.Errorf("error setting exercise name : %w", err)
+	}
+	
+	return nil
+}
+func (d *DBs) GetExerciseNameById(ctx context.Context, exerciseId string) (string, error) {
+	key := fmt.Sprintf("exercise_id:%v:name", exerciseId)
+
+	var exerciseName string
+	err := d.RDB.Get(ctx, key).Scan(&exerciseName)
+	if err != nil{
+		return exerciseName, err
+	}
+
+	return exerciseId, nil
 }

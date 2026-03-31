@@ -34,8 +34,7 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var health dto.OverAllStatus
-
-	//////////////////////////////////////////////////////////////////////////////////////////////
+	
 	authStatus := dto.OneServiceStatus{}
 	authStatus.ServiceName = string(enum.AuthService)
 

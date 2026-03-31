@@ -2,13 +2,8 @@ package database
 
 import (
 	"context"
-	// "errors"
 	"os"
 	"strconv"
-
-	// "github.com/golang-migrate/migrate/v4"
-	// _ "github.com/golang-migrate/migrate/v4/database/postgres"
-	// _ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
@@ -66,19 +61,3 @@ func CloseDBs(pool *pgxpool.Pool, client *redis.Client) {
 	client.Close()
 
 }
-
-// func RunMigrationsUp() error {
-// 	m, err := migrate.New("file://../migrations", os.Getenv("POSTGRES_CONN_STR"))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	err = m.Up()
-// 	if err != nil {
-// 		if errors.Is(err, migrate.ErrNoChange) {
-// 			return nil
-// 		}
-// 		return err
-// 	}
-
-// 	return nil
-// }

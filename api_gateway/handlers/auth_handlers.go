@@ -172,17 +172,6 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
-
-	// {
-	// 	"old_password" : "x",
-	// 	"new_password" : "y",
-	// }
-
-	// check if ui old_pass and new_pass r same -> old_pass cannot be same as new pass
-	// get the old pass from the db
-	// check if the ui old_pass and the pass from the db r same
-	// if not -> incorrect_old pass
-	// if yes -> successfully changed the password
 }
 func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)

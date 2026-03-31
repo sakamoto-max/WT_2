@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"exercise_service/internal/models"
-
-	// "exercise_service/internal/user"
 	"fmt"
 	"time"
-
 	enum "wt/pkg/enum"
 	myerrs "wt/pkg/my_errors"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -148,7 +144,6 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 		RETURNING ID
 	`, pgx.NamedArgs{"name": exerciseName, "createdBy": userId, "bodyPartId": bodyPartId, "equipmentId": equipmentId}).Scan(&Id)
 	if err != nil {
-
 		err := fmt.Errorf("error inserting exercise %v : %w\n", exerciseName, err)
 		return "", myerrs.InternalServerErrMaker(err)
 	}
@@ -313,6 +308,8 @@ func (r *Repo) DeleteExecise(ctx context.Context, userId string,  exerciseName s
 	return nil
 }
 func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error) {
+	fmt.Println(userId)
+	fmt.Println(exerciseName)
 
 	query := `
 		SELECT 
@@ -332,6 +329,7 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerci
 	`
 	var id string
 	err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
+	// err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return id, myerrs.ResourceNotFoundErrMaker(exerciseName)

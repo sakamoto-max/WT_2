@@ -126,7 +126,8 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 		utils.BadReq(w, err)
 	}
 
-	var resp []user.Exercise
+
+	var resp user.AllExercisesResp
 
 	for _, eachExer := range res.AllExericses {
 		exer := user.Exercise{
@@ -138,9 +139,11 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 			UpdatedAt: eachExer.UpdatedAt.AsTime(),
 		}
 
-		resp = append(resp, exer)
+		resp.Exercises = append(resp.Exercises, exer)
 	}
 
+	resp.NumberOfExercises = int(res.NumberOfExercises)
+	
 	utils.OkRespWriter(w, resp)
 }
 func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {

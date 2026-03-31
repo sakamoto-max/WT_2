@@ -6,14 +6,12 @@ import (
 	"net"
 	"os"
 	"time"
-
 	grpcclient "plan_service/grpc_client"
 	"plan_service/internal/controllers"
 	"plan_service/internal/database"
 	"plan_service/internal/repository"
 	"plan_service/internal/services"
 	pb "workout-tracker/proto/shared/plan"
-
 	"google.golang.org/grpc"
 )
 
@@ -58,6 +56,11 @@ func (g *grpcServer) Run() {
 			log.Fatalf("error listening to the grpc server : %v", err)
 		}
 	}()
+
+	sigChan := make(chan os.Signal, 1)
+
+	sig := <-sigChan
+	log.Printf("shutdown signal received : %v", sig.String())
 	
 	grpcServer.GracefulStop()
 

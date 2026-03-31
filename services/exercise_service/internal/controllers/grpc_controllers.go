@@ -4,12 +4,7 @@ import (
 	"context"
 	"exercise_service/internal/services"
 	"fmt"
-
 	exerpb "workout-tracker/proto/shared/exercise"
-
-
-	// myerrs "wt/pkg/my_errors"
-
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -42,6 +37,8 @@ func (e *ExerController) GetAllExercises(ctx context.Context, in *exerpb.GetAllE
 
 		resp.AllExericses = append(resp.AllExericses, &eachExer)
 	}
+
+	resp.NumberOfExercises = int64(len(*allExers))
 
 	return &resp, nil
 }
@@ -90,6 +87,7 @@ func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExer
 
 func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	var resp exerpb.ExerciseExistsReturnIdResp
+	fmt.Println(in.UserId)
 
 	id, err := e.service.ExerciseExistsReturnId(ctx, in.UserId, in.ExerciseName)
 	if err != nil {

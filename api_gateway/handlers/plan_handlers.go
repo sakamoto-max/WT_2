@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/jwt"
-	"wt/pkg/utils"
 	planpb "workout-tracker/proto/shared/plan"
+	token "wt/pkg/jwt"
+	myerrors "wt/pkg/my_errors"
+	"wt/pkg/utils"
 )
-
-func (h *Handler) CheckHealthPlan(w http.ResponseWriter, r *http.Request) {}
 
 func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
@@ -48,7 +46,6 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 
 	utils.CreatedWriter(w, resp)
 }
-
 
 func (h *Handler) GetAllPlans(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
