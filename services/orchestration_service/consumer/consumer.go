@@ -8,6 +8,7 @@ import (
 	"wt/pkg/logger"
 	"wt/pkg/queue"
 	mq "wt/pkg/queue"
+	// "wt/pkg/utils"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -44,16 +45,18 @@ func (c *consumer) Operate(ctx context.Context, msgs <-chan amqp.Delivery) {
 	for {
 		select {
 		case msg, ok := <-msgs:
-
 			if !ok {
 				c.logger.Log.Infoln("consumer has closed")
 				return
 			}
+			
+			c.logger.Log.Infoln("consumer got data")
 
 			var data queue.TaskStatus
 
 			_ = json.Unmarshal(msg.Body, &data)
 
+			
 			err := c.db.TaskCompletedUpdateForAuth(ctx, data.Id)
 			if err != nil {
 				c.logger.Log.Errorf("error : unable to update the task status : %v", err)

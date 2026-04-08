@@ -79,7 +79,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	sig := <-sigChan
-	logger.Log.Infow("shutdown signal received : %v", zap.String("signal", sig.String()))
+	logger.Log.Infow("shutdown signal received", zap.String("signal", sig.String()))
 
 	ticker.Stop()
 	cancel()

@@ -33,6 +33,7 @@ func OperateForEmail(ctx context.Context, v types.Data, emailQueue *mq.MessageQu
 	if err != nil {
 		return err
 	}
+	
 	err = Db.TaskPendingUpdateForAuth(ctx, v.Id)
 	if err != nil {
 		return err
