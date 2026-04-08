@@ -2,51 +2,54 @@ package handlers
 
 import (
 	"api_gateway/responses"
-	"api_gateway/user"
 	"context"
 	"encoding/json"
 	"net/http"
 	"time"
 	authpb "workout-tracker/proto/shared/auth"
-	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/jwt"
-	"wt/pkg/utils"
 	"wt/pkg/enum"
+	"wt/pkg/middleware"
+	myerrors "wt/pkg/my_errors"
+	"wt/pkg/user"
+	"wt/pkg/utils"
+
+	"go.uber.org/zap"
 )
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	// parse the data from the user
+	logger.Log.Infow("USER_SIGNUP_CALLED", zap.String("REQ_ID", reqId))
+
 	var userInput user.Signup
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	// validate it
 	validationErrs, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErrs)
+		utils.ValidationErrWriter(w, *validationErrs)
 		return
 	}
 
-	// make a new req
 	in := authpb.UserSignUpReq{}
 	in.Email = userInput.Email
 	in.Name = userInput.Name
 	in.Password = userInput.Password
-	
-	if userInput.Role == nil{
+
+	if userInput.Role == nil {
 		in.Role = string(enum.UserRole)
-	}else{
+	} else {
 		in.Role = *userInput.Role
 	}
 
-
 	resp, err := h.authClient.UserSignUp(ctx, &in)
 	if err != nil {
-		myerrors.ErrMatcher(w, err)
+		myerrors.ErrMatcher2(w, err, logger)
 		return
 	}
 
@@ -58,8 +61,16 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.CreatedWriter(w, re)
+
+	logger.Log.Infow("USER_SIGNUP_SUCCESSFUL", zap.String("REQ_ID", reqId))
 }
+
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+
+	logger.Log.Infow("USER_LOGIN_CALLED", zap.String("REQ_ID", reqId))
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -70,7 +81,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErr)
+		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
 
@@ -86,18 +97,21 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
+	logger.Log.Infow("USER_LOGIN_SUCCESFULL", zap.String("REQ_ID", reqId))
 }
-func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
+func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+	
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+	
+	logger.Log.Infow("USER_LOGOUT_CALLED", zap.String("REQ_ID", reqId))
+	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
-
+	claims := middleware.GetClaims(ctx)
+	
 	in := authpb.SendUserId{
 		UserId: claims.UserId,
 	}
@@ -109,45 +123,55 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
+	logger.Log.Infow("USER_LOGOUT_SUCCESSFULL", zap.String("REQ_ID", reqId))
+	
 }
-func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 
+func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
+	
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+	
+	logger.Log.Infow("NEW_ACCESS_TOKEN_CALLED", zap.String("REQ_ID", reqId))
+	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
+	
 	var userInput user.UUIDReader
-
+	
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErr)
+		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
-
+	
 	in := authpb.SendUUID{
 		UUID: userInput.UUID,
 	}
-
+	
 	resp, err := h.authClient.GetNewAccessToken(ctx, &in)
 	if err != nil {
 		utils.BadReq(w, err)
 		return
 	}
-
+	
 	utils.CreatedWriter(w, resp)
+
+	logger.Log.Infow("NEW_ACCESS_TOKEN_CREATED", zap.String("REQ_ID", reqId))
 }
 
 func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
-
+	
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+	
+	logger.Log.Infow("USER_PASSWORD_CHANGE_CALLED", zap.String("REQ_ID", reqId))
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
+	
+	claims := middleware.GetClaims(ctx)
 
 	var userInput user.ChangePass
 
@@ -155,7 +179,7 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 
 	validationErrs, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErrs)
+		utils.ValidationErrWriter(w, *validationErrs)
 		return
 	}
 
@@ -164,7 +188,7 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 		OldPass: userInput.OldPass,
 		NewPass: userInput.NewPass,
 	}
-
+	
 	resp, err := h.authClient.ChangePass(ctx, &in)
 	if err != nil {
 		utils.BadReq(w, err)
@@ -172,16 +196,20 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
+	logger.Log.Infow("USER_PASSWORD_CHANGE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
+
 func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
+
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+	
+	logger.Log.Infow("USER_EMAIL_CHANGE_CALLED", zap.String("REQ_ID", reqId))
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
+	
+	claims := middleware.GetClaims(ctx)
 
 	var userInput user.ChangeEmail
 
@@ -189,7 +217,7 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 
 	validationErrs, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErrs)
+		utils.ValidationErrWriter(w, *validationErrs)
 		return
 	}
 
@@ -203,6 +231,7 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		myerrors.ErrMatcher(w, err)
 		return
 	}
-
+	
 	utils.OkRespWriter(w, resp)
+	logger.Log.Infow("USER_EMAIL_CHANGE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }

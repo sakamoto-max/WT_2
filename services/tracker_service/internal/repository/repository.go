@@ -6,38 +6,15 @@ import (
 	"fmt"
 	"time"
 	myerrors "wt/pkg/my_errors"
-
-	// "tracker_service/internal/models"
 	"tracker_service/internal/models"
-	// "tracker_service/internal/user"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
-type DBs struct {
-	PDB *pgxpool.Pool
-	RDB *redis.Client
-}
 
-func NewDBs(pool *pgxpool.Pool, client *redis.Client) *DBs {
-	return &DBs{PDB: pool, RDB: client}
-}
-
-func (r *DBs) Close() error {
-	r.PDB.Close()
-
-	err := r.RDB.Close()
-	if err != nil {
-		return fmt.Errorf("error while closing redis db : %w", err)
-	}
-
-	return nil
-}
 
 func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.PDB.Ping(ctx)
+	err := r.pDB.Ping(ctx)
 	if err != nil {
 		return nil
 	}
@@ -48,7 +25,7 @@ func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 }
 func (r *DBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.RDB.Ping(ctx).Err()
+	err := r.rDB.Ping(ctx).Err()
 	if err != nil {
 		return nil
 	}
@@ -60,7 +37,7 @@ func (r *DBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 
 func (d *DBs) StartWorkout(ctx context.Context, userId string, planId string) (string, error) {
 	var trackerId string
-	err := d.PDB.QueryRow(ctx, `
+	err := d.pDB.QueryRow(ctx, `
 		INSERT INTO tracker(user_id, plan_id, started_at)
 		VALUES($1, $2, NOW())
 		RETURNING id	
@@ -73,7 +50,7 @@ func (d *DBs) StartWorkout(ctx context.Context, userId string, planId string) (s
 }
 func (d *DBs) RevertStartWorkout(ctx context.Context, trackerId string) error {
 
-	_, err := d.PDB.Exec(ctx, `
+	_, err := d.pDB.Exec(ctx, `
 		DELETE FROM TRACKER 
 		WHERE ID = $1
 	`, trackerId)
@@ -88,7 +65,7 @@ func (d *DBs) SetTrackerId(ctx context.Context, userId string, trackerId string)
 	keyforTrackId := fmt.Sprintf("user:%v:tracker_id", userId)
 	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
 
-	pipe := d.RDB.Pipeline()
+	pipe := d.rDB.Pipeline()
 
 	pipe.Set(ctx, keyforTrackId, trackerId, 0)
 	pipe.Set(ctx, keyforOngoingWorkout, true, 0)
@@ -102,7 +79,7 @@ func (d *DBs) SetTrackerId(ctx context.Context, userId string, trackerId string)
 }
 func (d *DBs) DelTrackerId(ctx context.Context, userId string) error {
 	key := fmt.Sprintf("user:%v:tracker_id", userId)
-	err := d.RDB.Del(ctx, key).Err()
+	err := d.rDB.Del(ctx, key).Err()
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error in deleting the tracker Id of user with id  %v : %w", userId, err))
 	}
@@ -111,7 +88,7 @@ func (d *DBs) DelTrackerId(ctx context.Context, userId string) error {
 func (d *DBs) GetTrackerId(ctx context.Context, userId string) (string, error) {
 	var id string
 	key := fmt.Sprintf("user:%v:tracker_id", userId)
-	id, err := d.RDB.Get(ctx, key).Result()
+	id, err := d.rDB.Get(ctx, key).Result()
 	if err != nil {
 		return id, myerrors.InternalServerErrMaker(fmt.Errorf("error in getting the tracker Id of the user with id %v : %w", userId, err))
 	}
@@ -123,7 +100,7 @@ func (d *DBs) GetTrackerId(ctx context.Context, userId string) (string, error) {
 func (d *DBs) CheckIfWorkoutIsOngoing(ctx context.Context, userId string) (bool, error) {
 	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
 
-	res, err := d.RDB.Get(ctx, keyforOngoingWorkout).Result()
+	res, err := d.rDB.Get(ctx, keyforOngoingWorkout).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return false, nil
@@ -140,7 +117,7 @@ func (d *DBs) CheckIfWorkoutIsOngoing(ctx context.Context, userId string) (bool,
 
 func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tracker) error {
 
-	trnx, err := d.PDB.Begin(ctx)
+	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error initializing a transaction : %w", err))
 	}
@@ -186,7 +163,7 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tra
 func (d *DBs) SetExerciseNameById(ctx context.Context, exerciseId string, exerciseName string) error {
 	key := fmt.Sprintf("exercise_id:%v:name", exerciseId)
 	
-	err := d.RDB.Set(ctx, key, exerciseName, 0).Err()
+	err := d.rDB.Set(ctx, key, exerciseName, 0).Err()
 	if err != nil{
 		return fmt.Errorf("error setting exercise name : %w", err)
 	}
@@ -197,7 +174,7 @@ func (d *DBs) GetExerciseNameById(ctx context.Context, exerciseId string) (strin
 	key := fmt.Sprintf("exercise_id:%v:name", exerciseId)
 
 	var exerciseName string
-	err := d.RDB.Get(ctx, key).Scan(&exerciseName)
+	err := d.rDB.Get(ctx, key).Scan(&exerciseName)
 	if err != nil{
 		return exerciseName, err
 	}

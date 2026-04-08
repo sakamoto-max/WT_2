@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"wt/pkg/enum"
+	"wt/pkg/utils"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+
 
 func NewConn() *amqp.Connection {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -23,6 +26,43 @@ type MessageQueue struct {
 	queue *amqp.Queue
 }
 
+type TaskFailed struct {
+	Id string
+	TargerService string
+	OriginatedBy string
+	TaskName string
+	DbUpdateValue string
+}
+
+type TaskSuccess struct {
+
+}
+
+type TaskStatus struct {
+	Id string
+	targetService string
+	originatedBy string
+	taskName string
+	dbUpdateValue string
+	taskStatus string
+}
+
+func NewTaskStatus(id string, targerService string, originatedBy string, taskName string, dbUpdateValue string) *TaskStatus {
+	return &TaskStatus{
+		Id: id,
+		targetService: targerService,
+		originatedBy: originatedBy,
+		taskName: taskName,
+		dbUpdateValue: dbUpdateValue,
+		// taskStatus: taskStatus,
+	}
+}
+
+func (t *TaskStatus) ConvertToBytes() *[]byte {
+	dataInBytes, _ := utils.ConvertIntoBytes(t)
+	return dataInBytes
+}
+
 type ConsumerChan chan <-amqp.Delivery
 
 func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
@@ -33,14 +73,11 @@ func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
 }
 
 func (m *MessageQueue) Publish(ctx context.Context, data *[]byte, contentType string) error {
-
 	msg := amqp.Publishing{
 		ContentType: contentType,
 		Body:        *data,
 		CorrelationId: string(enum.EmptyPlanCrrId),
 	}
-
-	fmt.Println(msg)
 
 	err := m.Ch.PublishWithContext(ctx, "", m.queue.Name, false, false, msg)
 	if err != nil {
@@ -51,17 +88,13 @@ func (m *MessageQueue) Publish(ctx context.Context, data *[]byte, contentType st
 }
 
 
-func (m *MessageQueue) Consume(queueName string, chanName <- chan amqp.Delivery) <-chan amqp.Delivery {
-	chanName, err := m.Ch.Consume(queueName, "", true, false, false, false, nil)
+func (m *MessageQueue) Consume(queueName string) (<-chan amqp.Delivery, error) {
+	consumerChan, err := m.Ch.Consume(queueName, "", true, false, false, false, nil)
 	if err != nil {
-		fmt.Printf("error occured : %v", err)
+		return consumerChan, fmt.Errorf("error occured while consuming from queue %v : %w", queueName, err)
 	}
 
-	// chanName = msgs
-
-
-
-	return chanName
+	return consumerChan, nil
 }
 
 
@@ -79,6 +112,7 @@ func createQueue(ch *amqp.Channel, queueName string) amqp.Queue {
 	if err != nil {
 		log.Fatalf("error creating %v : %v", queue.Name, err)
 	}
+
 	return queue
 }
 

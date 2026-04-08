@@ -2,21 +2,20 @@ package grpcclient
 
 import (
 	"fmt"
-	"log"
 	"os"
 	authpb "workout-tracker/proto/shared/auth"
 	exerpb "workout-tracker/proto/shared/exercise"
 	planpb "workout-tracker/proto/shared/plan"
 	trackpb "workout-tracker/proto/shared/tracker"
-
+	"wt/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type grpcClient struct {
-	authConn *grpc.ClientConn
-	planConn *grpc.ClientConn
-	exerConn *grpc.ClientConn
+	authConn  *grpc.ClientConn
+	planConn  *grpc.ClientConn
+	exerConn  *grpc.ClientConn
 	trackConn *grpc.ClientConn
 
 	AuthClient  authpb.AuthServiceClient
@@ -29,28 +28,28 @@ func NewgrpcClient() *grpcClient {
 	return &grpcClient{}
 }
 
-func (g *grpcClient) ConnectToClients() *grpcClient {
+func (g *grpcClient) ConnectToClients(logger *logger.MyLogger) *grpcClient {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	connForAuth, err := grpc.NewClient(os.Getenv("AUTH_GRPC_CLIENT_ADDR"), opts...)
 	if err != nil {
-		log.Fatalf("error creating auth client : %v", err)
+		logger.Log.Fatalf("error creating auth client : %v", err)
 	}
 
 	connForPlan, err := grpc.NewClient(os.Getenv("PLAN_GRPC_CLIENT_ADDR"), opts...)
 	if err != nil {
-		log.Fatalf("error creating plan client : %v", err)
+		logger.Log.Fatalf("error creating plan client : %v", err)
 	}
 
 	connForExer, err := grpc.NewClient(os.Getenv("EXER_GRPC_CLIENT_ADDR"), opts...)
 	if err != nil {
-		log.Fatalf("error creating exer client : %v", err)
+		logger.Log.Fatalf("error creating exer client : %v", err)
 	}
 
 	connForTracker, err := grpc.NewClient(os.Getenv("TRACKER_GRPC_CLIENT_ADDR"), opts...)
 	if err != nil {
-		log.Fatalf("error creating tracker client : %v", err)
+		logger.Log.Fatalf("error creating tracker client : %v", err)
 	}
 
 	authClient := authpb.NewAuthServiceClient(connForAuth)
@@ -59,12 +58,11 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 	TrackerClient := trackpb.NewTrackerServiceClient(connForTracker)
 
 	return &grpcClient{
-		authConn: connForAuth,
-		planConn: connForPlan,
-		exerConn: connForExer,
+		authConn:  connForAuth,
+		planConn:  connForPlan,
+		exerConn:  connForExer,
 		trackConn: connForTracker,
 
-	
 		AuthClient:  authClient,
 		PlanClient:  planClient,
 		ExerClient:  ExerClient,
@@ -73,19 +71,18 @@ func (g *grpcClient) ConnectToClients() *grpcClient {
 }
 
 func (g *grpcClient) Close() error {
-	if err := g.authConn.Close(); err != nil{	
+	if err := g.authConn.Close(); err != nil {
 		return fmt.Errorf("error occured while closing auth client : %w", err)
 	}
-	if err := g.planConn.Close(); err != nil{
+	if err := g.planConn.Close(); err != nil {
 		return fmt.Errorf("error occured while closing auth client : %w", err)
 	}
-	if err := g.trackConn.Close(); err != nil{
+	if err := g.trackConn.Close(); err != nil {
 		return fmt.Errorf("error occured while closing auth client : %w", err)
 	}
-	if err := g.exerConn.Close(); err != nil{
+	if err := g.exerConn.Close(); err != nil {
 		return fmt.Errorf("error occured while closing auth client : %w", err)
 	}
 
 	return nil
 }
-

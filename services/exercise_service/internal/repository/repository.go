@@ -8,37 +8,16 @@ import (
 	"time"
 	enum "wt/pkg/enum"
 	myerrs "wt/pkg/my_errors"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
+	// "github.com/redis/go-redis/v9"
 )
 
-type Repo struct {
-	PDB *pgxpool.Pool
-	RDB *redis.Client
-}
-
-func NewRepo(p *pgxpool.Pool, r *redis.Client) *Repo {
-	return &Repo{
-		PDB: p,
-		RDB: r,
-	}
-}
-
-func (r *Repo) Close() error {
-	r.PDB.Close()
-
-	if err := r.RDB.Close(); err != nil{
-		return fmt.Errorf("error closing the redis Db : %w", err)
-	}
-
-	return nil
-}
 
 func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.PDB.Ping(ctx)
+	err := r.pDB.Ping(ctx)
 	if err != nil {
 		return nil
 	}
@@ -49,7 +28,7 @@ func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 }
 func (r *Repo) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.RDB.Ping(ctx).Err()
+	err := r.rDB.Ping(ctx).Err()
 	if err != nil {
 		return nil
 	}
@@ -88,7 +67,7 @@ func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseNam
 		WHERE 
 			Exercises.NAME = @exerciseName and (CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL;	
 	`
-	row := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId": userId})
+	row := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId": userId})
 	err := row.Scan(&exercise.Id, &exercise.Name, &exercise.BodyPart, &exercise.Equipment, &exercise.CreatedAt, &exercise.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -100,13 +79,65 @@ func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseNam
 
 	return &exercise, nil
 }
+
+var (
+	id string = "id"
+	bodyPart string = "body_part"
+	equipment string = "equipment"
+	createdAt string = "created_at"
+	updatedAt string = "updated_at"
+)
+func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*models.Exercise2, error) {
+	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerciseName)
+
+	res, err := r.rDB.HGetAll(ctx, key).Result()
+	if err != nil{
+		return nil, fmt.Errorf("failed to get exercise by name from cache : %w", err)
+	}
+
+	if len(res) == 0 {
+		return nil, nil
+	}
+
+	layout := "2006-01-02T15:04:05.9999999Z07:00"
+	createdAt, err := time.Parse(layout, res[createdAt])
+	updatedAt, err := time.Parse(layout, res[updatedAt])
+
+	id := res[id]
+	name := exerciseName
+	bodyPart := res[bodyPart]
+	equipment := res[equipment]
+
+	data := models.Exercise2{
+		Id: id,
+		Name: name,
+		BodyPart: bodyPart,
+		Equipment: equipment,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
+	}
+
+	return &data, nil
+}
+
+func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *models.Exercise2) error {
+	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerData.Name)
+
+	err := r.rDB.HSet(ctx, key, id, exerData.Id, bodyPart, exerData.BodyPart, equipment, exerData.Equipment, createdAt, exerData.CreatedAt, updatedAt, exerData.UpdatedAt).Err()
+	if err != nil{
+		return fmt.Errorf("error setting exercise %v in redis : %w", exerData.Name, err)
+	}
+
+	return nil
+}
+
 func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) {
 
 	var bodyPartId uuid.UUID
 	var equipmentId uuid.UUID
 	var Id uuid.UUID
 
-	trnx, err := r.PDB.Begin(ctx)
+	trnx, err := r.pDB.Begin(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error creating a transaction : %w\n", err)
 	}
@@ -157,6 +188,7 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 	return Id.String(), nil
 }
 func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Exercise2, error) {
+	// HSET ALLEXERCISES EXERCISE_NAME 
 
 
 	query := `
@@ -189,7 +221,7 @@ func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Ex
 
 	var allExercises []models.Exercise2
 
-	rows, err := r.PDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
+	rows, err := r.pDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
 	if err != nil {
 
 		err := fmt.Errorf("error getting all exercises from DB : %w\n", err)
@@ -229,7 +261,7 @@ func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (stri
 
 	var exerciseName string
 
-	err := r.PDB.QueryRow(ctx, `
+	err := r.pDB.QueryRow(ctx, `
 		SELECT name from exercises
 		where id = @id	
 	`, pgx.NamedArgs{"id": exerciseId}).Scan(&exerciseName)
@@ -248,7 +280,7 @@ func (r *Repo) DeleteExecise(ctx context.Context, userId string,  exerciseName s
 	// if the exercise's created by is NULL -> move it to user nullified
 	// else delete the exercise
 
-	trnx, err := r.PDB.Begin(ctx)
+	trnx, err := r.pDB.Begin(ctx)
 	if err != nil {
 		return myerrs.InternalServerErrMaker(fmt.Errorf("error creating a transaction"))
 	}
@@ -328,7 +360,7 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerci
 			TABLE_2.EXERCISE_ID IS NULL;	
 	`
 	var id string
-	err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
 	// err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

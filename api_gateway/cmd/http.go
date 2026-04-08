@@ -6,17 +6,15 @@ import (
 	"api_gateway/routes"
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
-
-	// "syscall"
 	"time"
+	"wt/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
-
 
 type httpServer struct {
 	addr   string
@@ -32,46 +30,58 @@ func NewHttpServer(addr string) *httpServer {
 
 func (h *httpServer) Run() {
 
-	client := grpcclient.NewgrpcClient().ConnectToClients()
-	log.Println("created the clients")
-	handler := handlers.NewHandler(client.AuthClient, client.PlanClient, client.ExerClient, client.TrackClient)
-	log.Println("created the handlers")
-	router := routes.NewRouter(handler)
-	log.Println("created the router")
+	logger := logger.NewLogger()
+	defer logger.Log.Sync()
 
+	logger.Log.Info("starting the server")
+
+	client := grpcclient.NewgrpcClient().ConnectToClients(logger)
+
+	logger.Log.Info("connected to the grpc clients")
+
+	handler := handlers.NewHandler(
+		client.AuthClient, 
+		client.PlanClient, 
+		client.ExerClient, 
+		client.TrackClient,
+	)
+
+	router := routes.NewRouter(handler)
+
+	logger.Log.Info("created the handlers")
+	
 	server := http.Server{
 		Addr:    h.addr,
 		Handler: router,
 	}
-
+	
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-	go func() {
 
-		log.Printf("server has started at %v", h.addr)
+	go func() {
+		logger.Log.Infow("server has started", zap.String("addr", h.addr))
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("error opening http server at %v : %v\n", h.addr, err)
+			logger.Log.Warnw("failed to run the http server", zap.Error(err))
+			sigChan <- os.Interrupt
 		}
 
 	}()
 
-	sig := <- sigChan
-	log.Printf("shutdown signal received : %v", sig.String())
-
+	sig := <-sigChan
+	logger.Log.Infow("shutdown signal received", zap.String("signal", sig.String()))
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Printf("unable to shutdown the server : %v", err)
+		logger.Log.Errorf("unable to shutdown the server :", err)
 	}
 
 	if err := client.Close(); err != nil {
-		log.Println(err)
+		logger.Log.Errorf("unable to close the clients : %v", err)
 	}
-	
 
-	log.Printf("graceful shutdown complete")
+	logger.Log.Info("graceful shutdown complete")
 }

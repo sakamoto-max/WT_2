@@ -33,6 +33,10 @@ type MqMsg struct {
 	Email  string
 }
 
-type UserIdPayload struct{
+type EmptyPayload struct {
 	UserId string `json:"user_id"`
 }
+
+type EmailPayload struct {
+	Email string `json:"email"`
+}	

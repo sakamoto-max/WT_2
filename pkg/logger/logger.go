@@ -1,12 +1,18 @@
 package logger
 
-// import "log/slog"
+import (
+	zap "go.uber.org/zap"
+)
 
-//
+type MyLogger struct {
+	Log *zap.SugaredLogger
+}
 
-func new() {
-	// slog.Debug()
-	// slog.Error()
-	// slog.Warn()
-	// slog.Info()
+
+func NewLogger() *MyLogger {
+	log := zap.Must(zap.NewDevelopment())
+
+	logger :=  log.Sugar()
+
+	return &MyLogger{Log: logger}
 }

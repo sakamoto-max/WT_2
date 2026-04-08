@@ -642,6 +642,7 @@ type UserLoginResp struct {
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	AccessToken   string                 `protobuf:"bytes,4,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	UUID          string                 `protobuf:"bytes,5,opt,name=UUID,proto3" json:"UUID,omitempty"`
+	UserId        string                 `protobuf:"bytes,6,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -707,6 +708,13 @@ func (x *UserLoginResp) GetAccessToken() string {
 func (x *UserLoginResp) GetUUID() string {
 	if x != nil {
 		return x.UUID
+	}
+	return ""
+}
+
+func (x *UserLoginResp) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -785,6 +793,7 @@ type UserSignUpResp struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -847,6 +856,13 @@ func (x *UserSignUpResp) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *UserSignUpResp) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -885,24 +901,26 @@ const file_auth_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"@\n" +
 	"\fUserLoginReq\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x8a\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xa3\x01\n" +
 	"\rUserLoginResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12!\n" +
 	"\faccess_token\x18\x04 \x01(\tR\vaccessToken\x12\x12\n" +
-	"\x04UUID\x18\x05 \x01(\tR\x04UUID\"i\n" +
+	"\x04UUID\x18\x05 \x01(\tR\x04UUID\x12\x17\n" +
+	"\auser_id\x18\x06 \x01(\tR\x06userId\"i\n" +
 	"\rUserSignUpReq\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x12\n" +
-	"\x04role\x18\x04 \x01(\tR\x04role\"\x89\x01\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\"\xa2\x01\n" +
 	"\x0eUserSignUpResp\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x129\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt2\xd6\x03\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x17\n" +
+	"\auser_id\x18\x05 \x01(\tR\x06userId2\xd6\x03\n" +
 	"\vAuthService\x129\n" +
 	"\n" +
 	"UserSignUp\x12\x13.auth.UserSignUpReq\x1a\x14.auth.UserSignUpResp\"\x00\x126\n" +

@@ -6,8 +6,10 @@ import (
 
 	pb "workout-tracker/proto/shared/auth"
 
-
+	"wt/pkg/logger"
 	myerrors "wt/pkg/my_errors"
+
+	// "wt/pkg/middleware"
 
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -16,15 +18,16 @@ import (
 type AuthController struct {
 	pb.UnimplementedAuthServiceServer
 	service *services.Service
+	logger  *logger.MyLogger
 }
 
-func NewAuthController(service *services.Service) *AuthController {
-	return &AuthController{service: service}
+func NewAuthController(service *services.Service, logger *logger.MyLogger) *AuthController {
+	return &AuthController{service: service, logger: logger}
 }
 
 func (a *AuthController) UserSignUp(ctx context.Context, in *pb.UserSignUpReq) (*pb.UserSignUpResp, error) {
 
-	createdAt, err := a.service.SignUp(ctx, in.Name, in.Email, in.Password, in.Role)
+	userId, createdAt, err := a.service.SignUp(ctx, in.Name, in.Email, in.Password, in.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +37,7 @@ func (a *AuthController) UserSignUp(ctx context.Context, in *pb.UserSignUpReq) (
 		Email:     in.Email,
 		Role:      in.Role,
 		CreatedAt: timestamppb.New(createdAt),
+		UserId:    userId,
 	}
 
 	return &r, nil
@@ -41,7 +45,7 @@ func (a *AuthController) UserSignUp(ctx context.Context, in *pb.UserSignUpReq) (
 
 func (a *AuthController) UserLogin(ctx context.Context, in *pb.UserLoginReq) (*pb.UserLoginResp, error) {
 
-	name, accesToken, UUID, err := a.service.Login(ctx, in.Email, in.Password)
+	userId, name, accesToken, UUID, err := a.service.Login(ctx, in.Email, in.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -52,6 +56,7 @@ func (a *AuthController) UserLogin(ctx context.Context, in *pb.UserLoginReq) (*p
 		Name:        name,
 		AccessToken: accesToken,
 		UUID:        UUID,
+		UserId:      userId,
 	}
 
 	return &r, nil

@@ -23,7 +23,7 @@ var (
 // NEED
 func (d *DBs) CreatePlan(ctx context.Context, userId string, planName string, exerciseIds []string) error {
 
-	trnx, err := d.PDB.Begin(ctx)
+	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error creating transaction : %w\n", err))
 	}
@@ -83,7 +83,7 @@ func (d *DBs) GetAllUserPlans(ctx context.Context, userId string) (*[]models.Pla
 		WHERE 
 			USER_ID = @userId
 		`
-	rows, err := d.PDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
+	rows, err := d.pDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
 	// defer rows.Close()
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (d *DBs) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]st
 			PLAN_ID = @planId
 	`
 
-	rows, err := d.PDB.Query(ctx, query, pgx.NamedArgs{"planId": planId})
+	rows, err := d.pDB.Query(ctx, query, pgx.NamedArgs{"planId": planId})
 	if err != nil {
 		return nil, myerrors.InternalServerErrMaker(fmt.Errorf("error getting exercises for the plan %v : %w", planId, err))
 	}
@@ -153,7 +153,7 @@ func (d *DBs) ReturnsPlanId(ctx context.Context, userId string, planName string)
 			user_id = @userId AND NAME = @name
 	`
 
-	err := d.PDB.QueryRow(ctx, query, pgx.NamedArgs{"userId": userId, "name": planName}).Scan(&planId)
+	err := d.pDB.QueryRow(ctx, query, pgx.NamedArgs{"userId": userId, "name": planName}).Scan(&planId)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -166,7 +166,7 @@ func (d *DBs) ReturnsPlanId(ctx context.Context, userId string, planName string)
 }
 func (d *DBs) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
 
-	trnx, err := d.PDB.Begin(ctx)
+	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error creating a transaction : %w", err))
 	}
@@ -196,7 +196,7 @@ func (d *DBs) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs
 }
 func (d *DBs) DeleteExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
 
-	trnx, err := d.PDB.Begin(ctx)
+	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error creating a transaction : %w", err))
 	}
@@ -225,7 +225,7 @@ func (d *DBs) DeleteExerciseFromPlan(ctx context.Context, planId string, exercis
 	return nil
 }
 func (d *DBs) DeletePlan(ctx context.Context, userId string, planId string) error {
-	trnx, err := d.PDB.Begin(ctx)
+	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error creating a transaction : %w", err))
 	}
@@ -268,7 +268,7 @@ func (d *DBs) CreateEmptyPlan(ctx context.Context, userId string) error {
 		INSERT INTO plans(user_id, name)
 		VALUES(@userId, @name)
 	`
-	_, err := d.PDB.Exec(ctx, query, pgx.NamedArgs{"userId": userId, "name": enum.EmptyPlanName})
+	_, err := d.pDB.Exec(ctx, query, pgx.NamedArgs{"userId": userId, "name": enum.EmptyPlanName})
 	if err != nil {
 		return fmt.Errorf("Error creating empty plan : %v", err)
 	}
@@ -277,7 +277,7 @@ func (d *DBs) CreateEmptyPlan(ctx context.Context, userId string) error {
 }
 func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.PDB.Ping(ctx)
+	err := r.pDB.Ping(ctx)
 	if err != nil {
 		return nil
 	}
@@ -288,7 +288,7 @@ func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 }
 func (r *DBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
-	err := r.RDB.Ping(ctx).Err()
+	err := r.rDB.Ping(ctx).Err()
 	if err != nil {
 		return nil
 	}

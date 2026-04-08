@@ -10,9 +10,10 @@ import (
 	"wt/pkg/utils"
 )
 
+var claimsContextKey contextKey = "get_claims"
+
 func JwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// get the access token from header
 		token := r.Header.Get("access-token")
 		if token == "" {
 			err := myerrors.NewAppErr(jwt.ErrTokenIsMissing, http.StatusBadRequest)
@@ -39,9 +40,15 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), jwt.Claimskey, claims)
+		ctx := context.WithValue(r.Context(), claimsContextKey, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 
 }
+
+func GetClaims(ctx context.Context) *jwt.JwtClaims {
+	claims := ctx.Value(claimsContextKey).(*jwt.JwtClaims)
+	return claims
+}
+

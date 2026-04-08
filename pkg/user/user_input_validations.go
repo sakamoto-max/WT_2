@@ -2,7 +2,7 @@ package user
 
 import "errors"
 
-type validatonErrs struct {
+type ValidationErrs struct {
 	Path    string `json:"path"`
 	Message string `json:"message"`
 	Type    string `json:"type,omitempty"`
@@ -13,28 +13,28 @@ var (
 )
 
 var (
-	errUserNameReq     = validatonErrs{Path: "name", Message: "required"}
-	errUserEmailReq    = validatonErrs{Path: "email", Message: "required"}
-	errUserPassWordReq = validatonErrs{Path: "password", Message: "required"}
-	errUUIDReq         = validatonErrs{Path: "UUID", Message: "required"}
-	ErrExerciseNameReq = validatonErrs{Path: "name", Message: "required"}
-	ErrBodyPartReq     = validatonErrs{Path: "body_part", Message: "required"}
-	ErrEquipmentReq    = validatonErrs{Path: "equipment", Message: "required"}
-	ErrWorkoutReq      = validatonErrs{Path: "workout", Message: "required"}
-	ErrExerciseIdReq   = validatonErrs{Path: "exercise_id", Message: "required"}
-	ErrTrackerReq      = validatonErrs{Path: "tracker", Message: "required", Type: "slice"}
-	ErrRepsReq         = validatonErrs{Path: "reps", Message: "required"}
-	ErrWeightReq       = validatonErrs{Path: "reps", Message: "required"}
-	ErrPlanNameReq     = validatonErrs{Path: "plan_name", Message: "required"}
-	ErrExercisesReq    = validatonErrs{Path: "exercises", Message: "required", Type: "slice"}
-	ErrOldPassReq = validatonErrs{Path: "old_password", Message: "required"}
-	ErrNewPassReq = validatonErrs{Path: "new_password", Message: "required"}
-	ErrOldEmailReq = validatonErrs{Path: "old_email", Message: "required"}
-	ErrNewEmailReq = validatonErrs{Path: "new_email", Message: "required"}
+	errUserNameReq     = ValidationErrs{Path: "name", Message: "required"}
+	errUserEmailReq    = ValidationErrs{Path: "email", Message: "required"}
+	errUserPassWordReq = ValidationErrs{Path: "password", Message: "required"}
+	errUUIDReq         = ValidationErrs{Path: "UUID", Message: "required"}
+	ErrExerciseNameReq = ValidationErrs{Path: "name", Message: "required"}
+	ErrBodyPartReq     = ValidationErrs{Path: "body_part", Message: "required"}
+	ErrEquipmentReq    = ValidationErrs{Path: "equipment", Message: "required"}
+	ErrWorkoutReq      = ValidationErrs{Path: "workout", Message: "required"}
+	ErrExerciseIdReq   = ValidationErrs{Path: "exercise_id", Message: "required"}
+	ErrTrackerReq      = ValidationErrs{Path: "tracker", Message: "required", Type: "slice"}
+	ErrRepsReq         = ValidationErrs{Path: "reps", Message: "required"}
+	ErrWeightReq       = ValidationErrs{Path: "reps", Message: "required"}
+	ErrPlanNameReq     = ValidationErrs{Path: "plan_name", Message: "required"}
+	ErrExercisesReq    = ValidationErrs{Path: "exercises", Message: "required", Type: "slice"}
+	ErrOldPassReq = ValidationErrs{Path: "old_password", Message: "required"}
+	ErrNewPassReq = ValidationErrs{Path: "new_password", Message: "required"}
+	ErrOldEmailReq = ValidationErrs{Path: "old_email", Message: "required"}
+	ErrNewEmailReq = ValidationErrs{Path: "new_email", Message: "required"}
 )
 
-func (c *ChangeEmail) Validate() (*[]validatonErrs, bool) {	
-	var validationErrs []validatonErrs
+func (c *ChangeEmail) Validate() (*[]ValidationErrs, bool) {	
+	var validationErrs []ValidationErrs
 
 	if c.OldEmail == "" {
 		validationErrs = append(validationErrs, ErrOldEmailReq)
@@ -51,9 +51,9 @@ func (c *ChangeEmail) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (t *Tracker) Validate() (*[]validatonErrs, bool) {
+func (t *Tracker) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	if len(t.Workout) == 0 {
 		validationErrs = append(validationErrs, ErrWorkoutReq)
@@ -88,9 +88,9 @@ func (t *Tracker) Validate() (*[]validatonErrs, bool) {
 
 }
 
-func (s *Signup) Validate() (*[]validatonErrs, bool) {
+func (s *Signup) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	if s.Name == "" {
 		validationErrs = append(validationErrs, errUserNameReq)
@@ -111,9 +111,9 @@ func (s *Signup) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (l *Login) Validate() (*[]validatonErrs, bool) {
+func (l *Login) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 	if l.Email == "" {
 		validationErrs = append(validationErrs, errUserEmailReq)
 	}
@@ -129,9 +129,9 @@ func (l *Login) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (u *UUIDReader) Validate() (*[]validatonErrs, bool) {
+func (u *UUIDReader) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	// uuid := u.UUID.String()
 
@@ -143,9 +143,9 @@ func (u *UUIDReader) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (e *ExerciseName) Validate() (*[]validatonErrs, bool) {
+func (e *ExerciseName) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	if e.Name == "" {
 		validationErrs = append(validationErrs, ErrExerciseNameReq)
@@ -158,9 +158,9 @@ func (e *ExerciseName) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (e *Exercise) Validate() (*[]validatonErrs, bool) {
+func (e *Exercise) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	if e.Name == "" {
 		validationErrs = append(validationErrs, ErrExerciseNameReq)
@@ -181,8 +181,8 @@ func (e *Exercise) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (p *Plan) Validate() (*[]validatonErrs, bool) {
-	var validationErrs []validatonErrs
+func (p *Plan) Validate() (*[]ValidationErrs, bool) {
+	var validationErrs []ValidationErrs
 
 	if p.PlanName == "" {
 		validationErrs = append(validationErrs, ErrPlanNameReq)
@@ -199,8 +199,8 @@ func (p *Plan) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (p *PlanName) Validate() (*[]validatonErrs, bool) {
-	var validationErrs []validatonErrs
+func (p *PlanName) Validate() (*[]ValidationErrs, bool) {
+	var validationErrs []ValidationErrs
 
 	if p.PlanName == "" {
 		validationErrs = append(validationErrs, ErrPlanNameReq)
@@ -213,9 +213,9 @@ func (p *PlanName) Validate() (*[]validatonErrs, bool) {
 	return nil, false
 }
 
-func (c *ChangePass) Validate() (*[]validatonErrs, bool) {
+func (c *ChangePass) Validate() (*[]ValidationErrs, bool) {
 
-	var validationErrs []validatonErrs
+	var validationErrs []ValidationErrs
 
 	if c.OldPass == "" {
 		validationErrs = append(validationErrs, ErrOldPassReq)

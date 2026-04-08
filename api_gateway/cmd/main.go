@@ -9,7 +9,6 @@ func main() {
 
 	env.LoadGateway()
 	
-	// httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
 	httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
 	httpSer.Run()
 }

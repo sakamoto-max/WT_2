@@ -4,6 +4,7 @@ import (
 	"context"
 	"exercise_service/internal/models"
 	"exercise_service/internal/repository"
+	"fmt"
 	"time"
 )
 
@@ -18,13 +19,28 @@ func NewService(r *repository.Repo) *Service {
 }
 
 func (s *Service) GetExerciseByNameSer(ctx context.Context, userID string, exerciseName string) (*models.Exercise2, error) {
-	// check if the execise exists
-	// transform the exercises
-	exercise, err := s.DB.GetExerciseByName(ctx, userID, exerciseName)
-	if err != nil {
-		return exercise, err
+	fmt.Println("entered service")
+	var Exercise *models.Exercise2
+	Exercise, err := s.DB.GetExerciseByNameR(ctx, userID, exerciseName)
+	if err != nil{
+		return nil, err
 	}
-	return exercise, nil
+	fmt.Println("redis completed")
+	fmt.Printf("exer after redis : %v", Exercise)
+
+	if Exercise == nil{
+		Exercise, err = s.DB.GetExerciseByName(ctx, userID, exerciseName)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.DB.SetExerciseByNameR(ctx, userID, Exercise)
+		if err != nil{
+			return nil, err
+		}
+	}
+
+	return Exercise, nil
 }
 
 func (s *Service) GetAllExercisesSer(ctx context.Context, userId string) (*[]models.Exercise2, error) {

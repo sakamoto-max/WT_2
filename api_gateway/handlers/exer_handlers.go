@@ -1,28 +1,30 @@
 package handlers
 
 import (
-	"api_gateway/user"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 	exerpb "workout-tracker/proto/shared/exercise"
+	"wt/pkg/middleware"
 	myerrors "wt/pkg/my_errors"
-	token "wt/pkg/jwt"
+	"wt/pkg/user"
 	"wt/pkg/utils"
+
+	"go.uber.org/zap"
 )
 
 func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+	claims := middleware.GetClaims(r.Context())
+
+	logger.Log.Infow("CREATE_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
 
 	var userInput user.Exercise
 
@@ -30,7 +32,7 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErr)
+		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
 
@@ -60,17 +62,18 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.CreatedWriter(w, resp)
+	logger.Log.Infow("EXERCISE_CREATION_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
 func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
+
+	claims := middleware.GetClaims(r.Context())
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
+	logger.Log.Infow("GET_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
 
 	var userInput user.ExerciseName
 
@@ -79,7 +82,7 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErr)
+		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
 
@@ -107,17 +110,18 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
+	logger.Log.Infow("GET_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
+	// logger.Info("USER_REQUESTED_EXERCISE_BY_NAME", "user_id", 1)
 }
 func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
+	claims := middleware.GetClaims(r.Context())
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
 
+	logger.Log.Infow("GET_ALL_EXERCISES_CALLED", zap.String("REQ_ID", reqId))
+	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
 
 	in := exerpb.GetAllExercisesREq{UserId: claims.UserId}
 
@@ -125,10 +129,9 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.BadReq(w, err)
 	}
-
-
+	
 	var resp user.AllExercisesResp
-
+	
 	for _, eachExer := range res.AllExericses {
 		exer := user.Exercise{
 			Id:        eachExer.Id,
@@ -138,39 +141,43 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: eachExer.CreatedAt.AsTime(),
 			UpdatedAt: eachExer.UpdatedAt.AsTime(),
 		}
-
+		
 		resp.Exercises = append(resp.Exercises, exer)
 	}
 
 	resp.NumberOfExercises = int(res.NumberOfExercises)
-	
+
 	utils.OkRespWriter(w, resp)
+	// logger.Info("USER_REQUESTED_ALL_EXERCISES", "user_id", 1)
+	logger.Log.Infow("GET_ALL_EXERCISES_SUCCESSFUL", zap.String("REQ_ID", reqId))
 }
 func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
+
+	claims := middleware.GetClaims(r.Context())
+	logger := middleware.GetLogger(r.Context())
+	reqId := middleware.GetReqId(r.Context())
+
+	logger.Log.Infow("DELETE_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
+	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-
-	t := token.JwtToken{}
-	claims, ok := t.GetClaimsFromContext(r.Context())
-	if !ok {
-		utils.InternalServerErr(w, myerrors.ErrGettingClaims)
-	}
-
+	
+	
 	var userInput user.ExerciseName
 
 	json.NewDecoder(r.Body).Decode(&userInput)
-
+	
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
-		utils.ValidationErrWriter(w, validationErr)
+		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
-
+	
 	in := exerpb.SendExerciseName{
 		ExerciseName: userInput.Name,
-		UserId: claims.UserId,
+		UserId:       claims.UserId,
 	}
-
+	
 	resp, err := h.exerClient.DeleteExercise(ctx, &in)
 	if err != nil {
 		myerrors.ErrMatcher(w, err)
@@ -178,5 +185,7 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.DeletedNotFoundWriter(w, resp)
+	// logger.Info("USER_DELETED_EXERCISE", "user_id", 1)
+	logger.Log.Infow("DELETE_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
 func (h *Handler) UpdateExercise(w http.ResponseWriter, r *http.Request) {}

@@ -13,6 +13,7 @@ var (
 	AuthService serviceName = "auth_service"
 	TrackerService serviceName = "tracker_service"
 	ExerciseService serviceName = "exercise_service"
+	EmailService serviceName = "email_service"
 )
 
 type taskStatus string
@@ -27,6 +28,7 @@ type taskName string
 
 var(
 	CreateEmptyPlanForUser taskName = "create_empty_plan_for_user"
+	SendEmailforSigningUp taskName = "send_welcome_email_to_user_after_signingup"
 )
 
 
@@ -53,6 +55,8 @@ type queueName string
 
 var (
 	PlanQueue queueName = "plan"
+	ResultQueue queueName = "result"
+	EmailQueue queueName = "email"
 )
 
 

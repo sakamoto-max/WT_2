@@ -5,7 +5,7 @@ import (
 	// "net/http"
 	"wt/pkg/middleware"
 
-	chimiddleware "github.com/go-chi/chi/middleware"
+	// chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -13,7 +13,11 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	r := chi.NewRouter()
 
-	r.Use(chimiddleware.Logger)
+
+	// r.Use(chimiddleware.Logger)
+	r.Use(middleware.ReqIdGenerator)
+	r.Use(middleware.Logger)
+	// r.Use(middleware.TracerStartMiddleware)
 
 	r.Get("/wt/health", h.GetHealth)
 
@@ -26,8 +30,8 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	r.With(middleware.JwtMiddleware).Get("/wt/exercises", h.GetAllExercises)
 	r.With(middleware.JwtMiddleware).Get("/wt/exercises/single", h.GetExerciseByName)
-	r.With(middleware.JwtMiddleware).Post("/wt/exercise", h.CreateExercise)
-	r.With(middleware.JwtMiddleware).Delete("/wt/exercise", h.DeleteExecise)
+	r.With(middleware.JwtMiddleware).Post("/wt/exercises", h.CreateExercise)
+	r.With(middleware.JwtMiddleware).Delete("/wt/exercises", h.DeleteExecise)
 
 	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
@@ -40,23 +44,8 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/workout", h.StartWorkoutWithPlan)
 	r.With(middleware.JwtMiddleware).Post("/wt/workout/end", h.EndWorkout)
 
-	// http.ListenAndServe(":5000", r)
 	return r
-
 }
-
-// func NewRouter() {
-// 	r := chi.NewRouter()
-
-// 	r.Post("/wt/user/signup")
-// 	r.Post("/wt/user/login")
-// 	r.Post("/wt/user/logout")
-// 	r.Post("/wt/user/refreshtoken")
-// 	r.Patch("/wt/user/changepass")
-// 	r.Patch("/wt/user/changeemail")
-
-// 	r.Get("/wt/exercise")
-// 	r.
 
 // }
 

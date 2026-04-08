@@ -13,13 +13,13 @@ type Exercise struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 type Exercise2 struct {
-	Id        string    `json:"id"`
-	Name      string    `json:"name"`
-	RestTime  int       `json:"restTime"`
-	BodyPart  string    `json:"bodyPart"`
-	Equipment string    `json:"equipment"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	Id        string    `json:"id" redis:"id"`
+	Name      string    `json:"name" redis:"exercise_name"`
+	RestTime  int       `json:"restTime" redis:"rest_time"`
+	BodyPart  string    `json:"bodyPart" redis:"body_part"`
+	Equipment string    `json:"equipment" redis:"equipment"`
+	CreatedAt time.Time `json:"createdAt" redis:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt" redis:"updated_at"`
 }
 
 type DelExerciseResp struct {

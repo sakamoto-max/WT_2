@@ -42,13 +42,14 @@ func (e *ExerController) GetAllExercises(ctx context.Context, in *exerpb.GetAllE
 
 	return &resp, nil
 }
-
 func (e *ExerController) GetOneExercise(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.OneExerciseResp, error) {
 
 	r, err := e.service.GetExerciseByNameSer(ctx, in.UserId, in.ExerciseName)
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("done service")
 
 	resp := exerpb.OneExerciseResp{
 		Id:        r.Id,
@@ -61,7 +62,6 @@ func (e *ExerController) GetOneExercise(ctx context.Context, in *exerpb.SendExer
 
 	return &resp, nil
 }
-
 func (e *ExerController) CreateExercise(ctx context.Context, in *exerpb.CreateExerciseReq) (*exerpb.CreateExerciseResp, error) {
 
 	fmt.Println(in)
@@ -84,7 +84,6 @@ func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExer
 	return &resp, nil
 
 }
-
 func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	var resp exerpb.ExerciseExistsReturnIdResp
 	fmt.Println(in.UserId)
@@ -112,7 +111,6 @@ func (e *ExerController) GetExerciseName(ctx context.Context, in *exerpb.SendExe
 
 	return &resp, nil
 }
-
 func (a *ExerController) PING(ctx context.Context, in *exerpb.PingExerReq) (*exerpb.PingExerResp, error) {
 	r := exerpb.PingExerResp{}
 

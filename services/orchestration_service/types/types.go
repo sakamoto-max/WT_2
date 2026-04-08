@@ -1,7 +1,9 @@
 package types
 
 import (
+	"fmt"
 	"time"
+
 	"wt/pkg/utils"
 )
 
@@ -12,15 +14,16 @@ type Data struct {
 	Status        string    `db:"status"`
 	Payload       any       `db:"payload"`
 	CreatedAt     time.Time `db:"created_at"`
-	NumberOfTries int       `db:"number_of_tries"`
+	NumberOfTries *int      `db:"number_of_tries"`
 }
 
-func (d *Data) Process() (*[]byte, error) {
+func (d *Data) ConvertToBytes() (*[]byte, error) {
 	// convert into bytes
 	dataInBytes, err := utils.ConvertIntoBytes(d)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while converting data into bytes : %w", err)
 	}
 
 	return dataInBytes, nil
 }
+

@@ -59,21 +59,34 @@ func (r *Repo) CreateUser(ctx context.Context, name string, email string, hashed
 		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
 	}
 
-	in := models.UserIdPayload{
+	dataForPlan := models.EmptyPayload{
 		UserId: userId,
 	}
 
-	payload, _ := utils.MakeJSONV2(in)
+	dataForEmail := models.EmailPayload{
+		Email: email,
+	}
+
+	payloadForPlan, _ := utils.MakeJSONV2(dataForPlan)
+	payloadForEmail, _ := utils.MakeJSONV2(dataForEmail)
 
 	query = `
-			INSERT INTO 
-				outbox(target_service, task, status, payload)
-			VALUES 
-				(@serviceName, @task, @status, @payload::JSONB)	
-	
+		INSERT INTO 
+			outbox(target_service, task, payload)
+		VALUES 
+			(@planService, @emptyPlan, @planPayload::JSONB),
+			(@emailService, @sendEmail, @emailPayload::JSONB)
 	`
 
-	_, err = trnx.Exec(ctx, query,pgx.NamedArgs{"serviceName" : enum.PlanService, "task" : enum.CreateEmptyPlanForUser, "status" : enum.TaskNotCompleted, "payload" : payload})
+	_, err = trnx.Exec(ctx, query,pgx.NamedArgs{
+		"planService" : enum.PlanService, 
+		"emptyPlan" : enum.CreateEmptyPlanForUser, 
+		"planPayload":payloadForPlan,
+		"emailService":enum.EmailService,
+		"sendEmail" : enum.SendEmailforSigningUp,
+		"emailPayload" : payloadForEmail,
+	})
+
 	if err != nil {
 		return userId, createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error inserting data into outbox : %w", err))
 	}
@@ -196,4 +209,8 @@ func (r *Repo) ChangePass(ctx context.Context, userId string, newPass string) er
 	}
 
 	return nil
+}
+
+func (r *Repo) GetUserId() {
+	
 }

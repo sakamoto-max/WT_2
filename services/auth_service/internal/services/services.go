@@ -8,29 +8,29 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	myerrors "wt/pkg/my_errors"
 	token "wt/pkg/jwt"
+	// "wt/pkg/logger"
+	myerrors "wt/pkg/my_errors"
 
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	repo       *repository.Repo
+	repo *repository.Repo
 }
 
 func NewService(r *repository.Repo) *Service {
 	return &Service{repo: r}
 }
 
-var(
-	ErrEmailDoesntMatch = errors.New("email user sent is wrong")
+var (
+	ErrEmailDoesntMatch  = errors.New("email user sent is wrong")
 	ErrPasswordIncorrect = errors.New("incorrect password")
-	ErrSameOldPass = errors.New("new password cannot be same as the old password")
-	ErrSameOldEmail = errors.New("new email cannot be same as the old email")
+	ErrSameOldPass       = errors.New("new password cannot be same as the old password")
+	ErrSameOldEmail      = errors.New("new email cannot be same as the old email")
 )
 
-// DONE
-func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (time.Time, error) {
+func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (string, time.Time, error) {
 
 	var CreatedAt time.Time
 
@@ -38,70 +38,67 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 
 	hashedPass, err := utils.HashThePassword(password)
 	if err != nil {
-		return CreatedAt, err
+		return "", CreatedAt, err
 	}
 
-	_, CreatedAt, err = s.repo.CreateUser(ctx, name, email, hashedPass, role)
+	userId, CreatedAt, err := s.repo.CreateUser(ctx, name, email, hashedPass, role)
 	if err != nil {
-		return CreatedAt, err
+		return "", CreatedAt, err
 	}
 
-	return CreatedAt, nil
+	return userId, CreatedAt, nil
 }
-
-// DONE
-func (s *Service) Login(ctx context.Context, email string, password string) (string, string, string, error) {
+func (s *Service) Login(ctx context.Context, email string, password string) (string, string, string, string, error) {
 
 	var refreshToken string
 	var UUID string
 
 	hashedPass, err := s.repo.FetchUserPass(ctx, email)
 	if err != nil {
-		return "", "" ,"" , err
+		return "", "", "", "", err
 	}
 
 	err = utils.MatchPasswords(password, hashedPass)
 	if err != nil {
-		return "", "" ,"" , err
+		return "", "", "", "", err
 	}
 
 	userId, roleID, name, err := s.repo.FetchUserIdRoleIdName(ctx, email)
 	if err != nil {
-		return "", "" ,"" , err
+		return "", "", "", "", err
 	}
 
 	token := token.JwtToken{}
 	AccessToken, err := token.GenerateAccessToken(userId, roleID)
 	if err != nil {
-		return "", "" ,"" , err
+		return "", "", "", "", err
 	}
 
 	exists, err := s.repo.RefreshExists(ctx, userId)
 	if err != nil {
-		return "", "" ,"" , err
+		return "", "", "", "", err
 	}
 
 	if exists {
 		UUID, err = s.repo.GetUUID(ctx, userId)
 		if err != nil {
-			return "", ""  ,"", err
+			return "", "", "", "", err
 		}
 	}
 
 	if !exists {
 		refreshToken, err = token.GenerateRefreshToken(userId, roleID)
 		if err != nil {
-			return "", ""  ,"", err
+			return "", "", "", "", err
 		}
 		UUID = uuid.NewString()
 		err := s.repo.SetRefreshTokenAndUUID(ctx, UUID, refreshToken, userId)
 		if err != nil {
-			return "",  ""  ,"", err
+			return "", "", "", "", err
 		}
 	}
-	return name, AccessToken, UUID, nil
+	return userId, name, AccessToken, UUID, nil
 }
-//DONE
 func (s *Service) Logout(ctx context.Context, userId string) error {
 
 	uuid, err := s.repo.GetUUID(ctx, userId)
@@ -116,7 +113,6 @@ func (s *Service) Logout(ctx context.Context, userId string) error {
 
 	return nil
 }
-
 func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string, error) {
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, UUID)
@@ -138,7 +134,6 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	return accessToken, nil
 }
-
 func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string, newPass string) error {
 
 	if oldPass == newPass {
@@ -167,7 +162,6 @@ func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string,
 
 	return nil
 }
-
 func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail string, newEmail string) error {
 
 	if oldEmail == newEmail {
@@ -190,7 +184,6 @@ func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail strin
 
 	return nil
 }
-
 func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
 
 	pgRespTime := s.repo.GetPostgresRespTime(ctx)

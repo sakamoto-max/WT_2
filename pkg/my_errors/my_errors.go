@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"wt/pkg/logger"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -31,20 +33,6 @@ func (a *AppErrs) AppErrWriter(w http.ResponseWriter) {
 	})
 }
 
-// jwt errors
-// var (
-// 	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")
-// 	// ErrUserExits2       = status.Error(codes.AlreadyExists, "user already exits")
-// 	ErrTokenMalformed   = errors.New("token is malformed. please check the token again")
-// 	ErrTokenInvalid     = errors.New("token is invalid")
-// 	ErrTokenIsMissing   = errors.New("token is missing, please provide the token")
-// 	ErrRefreshExpired   = errors.New("referesh token is expired, please login again")
-// 	ErrSignatureInvalid = errors.New("token's signature is invalid")
-// 	ErrOldPassNewPassSame = errors.New("the old pass and new pass cannot be the same")
-// )
-
-// claims error
-
 var (
 	ErrGettingClaims = errors.New("error getting claims from token")
 )
@@ -55,12 +43,11 @@ var (
 	ErrEmailAlreadyExits = errors.New("user with this email already exits")
 )
 
-// user_login
 var (
-	ErrEmailNotFound     = errors.New("email not found")
-	ErrIncorrectPassword = errors.New("password is incorrect")
+	ErrEmailNotFound        = errors.New("email not found")
+	ErrIncorrectPassword    = errors.New("password is incorrect")
 	ErrOldEmailNewEmailSame = errors.New("old email and new email shouldn't be the same")
-	ErrEmailDoesntMatch = errors.New("the email user sent is incorrect")
+	ErrEmailDoesntMatch     = errors.New("the email user sent is incorrect")
 )
 
 var (
@@ -71,7 +58,7 @@ var (
 	ErrWorkoutOngoing = errors.New("user has ongoing workout which is not ended")
 )
 
-var(
+var (
 	ErrExerciseNotFound = errors.New("exercise not found")
 )
 
@@ -81,8 +68,8 @@ var (
 
 var (
 	CodeInternalServer = 500
-	CodeBadRequest = 400
-	CodeNotFound = 404
+	CodeBadRequest     = 400
+	CodeNotFound       = 404
 )
 
 func ResourceNotFoundErrMaker(resource string) error {
@@ -139,18 +126,62 @@ func ErrMatcher(w http.ResponseWriter, err error) {
 	case codes.PermissionDenied:
 		appErr := &AppErrs{
 			code: CodeBadRequest,
-			Msg: st.Message(),
+			Msg:  st.Message(),
 		}
 		appErr.AppErrWriter(w)
 	case codes.NotFound:
 		appErr := &AppErrs{
 			code: CodeNotFound,
-			Msg: st.Message(),
+			Msg:  st.Message(),
 		}
 		appErr.AppErrWriter(w)
 	}
 }
-
+func ErrMatcher2(w http.ResponseWriter, err error, logger *logger.MyLogger) {
+	st, _ := status.FromError(err)
+	code := st.Code()
+	switch code {
+	case codes.AlreadyExists:
+		appErr := &AppErrs{
+			code: CodeBadRequest,
+			Msg:  st.Message(),
+		}
+		appErr.AppErrWriter(w)
+	case codes.Internal:
+		log.Printf("error occured : %v", err)
+		appErr := &AppErrs{
+			code: CodeInternalServer,
+			Msg:  st.Message(),
+		}
+		appErr.AppErrWriter(w)
+	case codes.Canceled:
+		log.Printf("error occured : %v", err.Error())
+		appErr := &AppErrs{
+			code: CodeInternalServer,
+			Msg:  "server encountered a problem",
+		}
+		appErr.AppErrWriter(w)
+	case codes.Unavailable:
+		log.Printf("error occured : %v", err.Error())
+		appErr := &AppErrs{
+			code: CodeInternalServer,
+			Msg:  "server encountered a problem",
+		}
+		appErr.AppErrWriter(w)
+	case codes.PermissionDenied:
+		appErr := &AppErrs{
+			code: CodeBadRequest,
+			Msg:  st.Message(),
+		}
+		appErr.AppErrWriter(w)
+	case codes.NotFound:
+		appErr := &AppErrs{
+			code: CodeNotFound,
+			Msg:  st.Message(),
+		}
+		appErr.AppErrWriter(w)
+	}
+}
 
 func ErrMaker(err error) error {
 	Err := &status.Status{}
@@ -176,7 +207,3 @@ func ErrMaker(err error) error {
 
 	return err
 }
-
-
-
-

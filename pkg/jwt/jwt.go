@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"context"
+	// "context"
 	"errors"
 	myerrors "wt/pkg/my_errors"
 	"fmt"
@@ -15,10 +15,10 @@ type ClaimsContext string
 var Claimskey ClaimsContext
 
 type JwtToken struct {
-	claims jwtClaims
+	claims JwtClaims
 }
 
-type jwtClaims struct {
+type JwtClaims struct {
 	UserId string
 	RoleId string
 	jwt.RegisteredClaims
@@ -27,7 +27,7 @@ type jwtClaims struct {
 type Token interface {
 	GenerateAccessToken(userId int, roleId int) (string, error)
 	GenerateRefreshToken(userId int, roleId int) (string, error)
-	ValidateToken(myToken string) (*jwtClaims, error)
+	ValidateToken(myToken string) (*JwtClaims, error)
 }
 
 func (j *JwtToken) GenerateAccessToken(userId string, roleId string) (string, error) {
@@ -72,9 +72,9 @@ func (j *JwtToken) GenerateRefreshToken(userId string, roleId string) (string, e
 	return refreshToken, nil
 }
 
-func (j *JwtToken) ValidateToken(myToken string) (*jwtClaims, error) {
+func (j *JwtToken) ValidateToken(myToken string) (*JwtClaims, error) {
 
-	claims := &jwtClaims{}
+	claims := &JwtClaims{}
 	
 	token, err := jwt.ParseWithClaims(myToken, claims, func(t *jwt.Token) (any, error) {
 		return []byte(os.Getenv("SECRET_KEY")), nil
@@ -100,10 +100,6 @@ func (j *JwtToken) ValidateToken(myToken string) (*jwtClaims, error) {
 	return claims, nil
 }
 
-func (j *JwtToken) GetClaimsFromContext(ctx context.Context) (*jwtClaims, bool) {
-	claims, ok := ctx.Value(Claimskey).(*jwtClaims)
-	return claims, ok
-}
 
 var (
 	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")

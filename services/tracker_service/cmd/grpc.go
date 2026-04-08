@@ -1,19 +1,16 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-	"time"
-
 	grpcclient "tracker_service/grpc_client"
 	"tracker_service/internal/controllers"
-	"tracker_service/internal/database"
 	"tracker_service/internal/repository"
 	"tracker_service/internal/services"
 	trackerpb "workout-tracker/proto/shared/tracker"
+	"wt/pkg/logger"
 
 	"google.golang.org/grpc"
 )
@@ -29,56 +26,57 @@ func NewgrpcServer(addr string) *grpcServer {
 }
 
 func (g *grpcServer) Run() {
+	logger := logger.NewLogger()
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	pool, redisClient, err := database.InitializeDBs(ctx)
+	lis, err := net.Listen("tcp", g.addr)
 	if err != nil {
-		log.Fatalf("error opening the dbs for plan grpc server: %v", err)
+		logger.Fatalf("failed to listen to tcp : %v", err)
 	}
 
-	lis, err := net.Listen("tcp", os.Getenv("GRPC_SERVER_ADDR"))
-
-	if err != nil {
-		log.Fatalf("failed to listen to tcp : %v", err)
-	}
+	logger.Infof("created TCP listener at %v", g.addr)
 
 	Client := grpcclient.New()
-	
-	repo := repository.NewDBs(pool, redisClient)
-	service := services.NewService(repo, Client.PlanClient, Client.ExerClient)
-	controller := controllers.NewTrackerController(service)
-	
-	grpcServer := grpc.NewServer()
-	trackerpb.RegisterTrackerServiceServer(grpcServer, controller)
 
-	go func() {
-		log.Printf("grpc server has started at %v", os.Getenv("GRPC_SERVER_ADDR"))
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("error listening to the grpc server : %v", err)
+	repo, err := repository.NewRepo()
+	if err != nil {
+		lis.Close()
+		logger.Fatalf("error opening the repos : %v", err)
+	}
+
+	logger.Info("created Db connections")
+
+	defer func() {
+		if err := repo.Close(); err != nil {
+			logger.Warnf("error closing the databases : %v", err)
 		}
 	}()
+
+	service := services.NewService(repo, Client.PlanClient, Client.ExerClient)
+	controller := controllers.NewTrackerController(service)
+
+	grpcServer := grpc.NewServer()
+	trackerpb.RegisterTrackerServiceServer(grpcServer, controller)
 
 	sigChan := make(chan os.Signal, 1)
 
 	signal.Notify(sigChan, os.Interrupt)
 
+	go func() {
+		logger.Infof("grpc server has started at %v", g.addr)
+		if err := grpcServer.Serve(lis); err != nil {
+			sigChan <- os.Interrupt
+			logger.Warnf("error listening to the grpc server : %v", err)
+		}
+	}()
+
 	sig := <-sigChan
 
 	log.Printf("shutdown signal received : %v", sig.String())
 
-
 	grpcServer.GracefulStop()
-
-	if err := repo.Close(); err != nil{
-		log.Println(err)
-	}
 
 	Client.Close()
 
-	
 	log.Println("gracefully shutdown")
-
 
 }
