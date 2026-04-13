@@ -4,18 +4,12 @@ import (
 	"context"
 	"fmt"
 	"time"
-	myerrors "wt/pkg/my_errors"
-	"wt/pkg/enum"
-
-	// customerrors "tracker_service/internal/custom_errors"
-	// "tracker_service/internal/models"
 	"tracker_service/internal/models"
 	"tracker_service/internal/repository"
-
-	// "tracker_service/internal/user"
 	exerpb "workout-tracker/proto/shared/exercise"
 	planpb "workout-tracker/proto/shared/plan"
-	// "github.com/redis/go-redis/v9"
+	"wt/pkg/enum"
+	myerrors "wt/pkg/my_errors"
 )
 
 type Service struct {
@@ -54,13 +48,18 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error
 	if err != nil {
 		return fmt.Errorf("error getting data from plan server : %w", err)
 	}
-	
+
+	err = s.Db.SetUserWorkingOutWithPlan(ctx, userID, false)
+	if err != nil {
+		return err
+	}
+
 	trackerId, err := s.Db.StartWorkout(ctx, userID, r.PlanId)
 	if err != nil {
 		return err
 	}
 
-	err = s.Db.SetTrackerId(ctx, userID, trackerId)
+	err = s.Db.SetTrackerIdAndOngoingWorkout(ctx, userID, trackerId)
 	if err != nil {
 		err := s.Db.RevertStartWorkout(ctx, trackerId)
 		if err != nil {
@@ -72,8 +71,6 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error
 }
 
 func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, planName string) (*[]string, error) {
-	// check if plan Name exists
-	// if exists get the plan_id
 
 	ongoing, err := s.Db.CheckIfWorkoutIsOngoing(ctx, userId)
 	if err != nil {
@@ -89,12 +86,24 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, pl
 		return nil, fmt.Errorf("error getting data from plan server : %w", err)
 	}
 
+	err = s.Db.SetPlanWithExercises(ctx, userId, planName, &r.ExerciseNames)
+	if err != nil {
+		return nil, err
+	}
+
+	// set user_id:%v:current_workout_plan_name
+
+	err = s.Db.SetUserWorkingOutWithPlan(ctx, userId, true)
+	if err != nil {
+		return nil, err
+	}
+
 	trackerId, err := s.Db.StartWorkout(ctx, userId, r.PlanId)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.Db.SetTrackerId(ctx, userId, trackerId)
+	err = s.Db.SetTrackerIdAndOngoingWorkout(ctx, userId, trackerId)
 	if err != nil {
 		err := s.Db.RevertStartWorkout(ctx, trackerId)
 		if err != nil {
@@ -107,7 +116,37 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, pl
 
 func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *models.Tracker) error {
 
-	// get tracker ID from redis
+	yes, err := s.Db.GetUserWorkingOutWithPlan(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	if yes {
+		// s.Db.GetPlanWithExercises(ctx, userId)
+		// check if all the exercises in the workout are performed
+		// what is performed
+		// atleast one set should be performed
+	}
+
+	for i := range len(data.Workout) {
+
+		exerciseName := data.Workout[i].ExerciseName
+
+		in := exerpb.SendExerciseName{
+			UserId:       userId,
+			ExerciseName: exerciseName,
+		}
+
+		resp, err := s.EClient.ExerciseExistsReturnId(ctx, &in)
+		if err != nil {
+			return err
+		}
+
+		a := resp.ExerciseId
+
+		data.Workout[i].ExerciseId = a
+	}
+
 	trackerId, err := s.Db.GetTrackerId(ctx, userId)
 	if err != nil {
 		return err
@@ -118,10 +157,15 @@ func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *models
 		return err
 	}
 	// del the tracker ID
-	err = s.Db.DelTrackerId(ctx, userId)
+	err = s.Db.DelTrackerIdAndOngoingWorkout(ctx, userId)
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
+
+func exercisesNotPerformed(data *models.Tracker, exerciseNames *[]string) {
+
+}
+

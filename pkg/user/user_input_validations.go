@@ -60,8 +60,8 @@ func (t *Tracker) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	for _, eachExer := range t.Workout {
-		var emptyExerId int
-		if eachExer.ExerciseId == emptyExerId {
+		var emptyExerId string
+		if eachExer.ExerciseName == emptyExerId {
 			validationErrs = append(validationErrs, ErrExerciseIdReq)
 		}
 

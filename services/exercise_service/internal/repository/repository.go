@@ -340,8 +340,6 @@ func (r *Repo) DeleteExecise(ctx context.Context, userId string,  exerciseName s
 	return nil
 }
 func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error) {
-	fmt.Println(userId)
-	fmt.Println(exerciseName)
 
 	query := `
 		SELECT 
@@ -361,7 +359,6 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerci
 	`
 	var id string
 	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
-	// err := r.PDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return id, myerrs.ResourceNotFoundErrMaker(exerciseName)

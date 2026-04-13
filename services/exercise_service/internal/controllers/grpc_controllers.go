@@ -86,7 +86,6 @@ func (e *ExerController) DeleteExercise(ctx context.Context, in *exerpb.SendExer
 }
 func (e *ExerController) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	var resp exerpb.ExerciseExistsReturnIdResp
-	fmt.Println(in.UserId)
 
 	id, err := e.service.ExerciseExistsReturnId(ctx, in.UserId, in.ExerciseName)
 	if err != nil {

@@ -10,7 +10,8 @@ type Reps struct {
 }
 
 type Workout struct {
-	ExerciseId int `json:"exercise_id"`
+	ExerciseId string `json:"exercise_id"`
+	ExerciseName string `json:"exercise_name"`
 	RepsWeight []Reps `json:"tracker"`
 }
 
@@ -28,3 +29,59 @@ type Plan struct{
 	PlanName string `json:"plan_name"`
 	Exercises []string `json:"exercises_in_plan"`
 }
+
+// {
+// 	"workout" : [
+// 		{
+// 			"exercise_name" : "push_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		},
+// 		{
+// 			"exercise_name" : "pull_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		},
+// 		{
+// 			"exercise_name" : "pull_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		}
+// 	]
+// }

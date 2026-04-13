@@ -10,7 +10,7 @@ type Reps struct {
 }
 
 type Workout struct {
-	ExerciseId int    `json:"exercise_id"`
+	ExerciseName string    `json:"exercise_name"`
 	RepsWeight []Reps `json:"tracker"`
 }
 

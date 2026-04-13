@@ -252,7 +252,7 @@ func (x *EndWorkoutReq) GetAllExerices() []*TrackerForEachExer {
 
 type TrackerForEachExer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ExerciseId    int64                  `protobuf:"varint,1,opt,name=exercise_id,json=exerciseId,proto3" json:"exercise_id,omitempty"`
+	ExerciseName  string                 `protobuf:"bytes,1,opt,name=exercise_name,json=exerciseName,proto3" json:"exercise_name,omitempty"`
 	SetsAndReps   []*SetsAndReps         `protobuf:"bytes,2,rep,name=sets_and_reps,json=setsAndReps,proto3" json:"sets_and_reps,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -288,11 +288,11 @@ func (*TrackerForEachExer) Descriptor() ([]byte, []int) {
 	return file_tracker_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *TrackerForEachExer) GetExerciseId() int64 {
+func (x *TrackerForEachExer) GetExerciseName() string {
 	if x != nil {
-		return x.ExerciseId
+		return x.ExerciseName
 	}
-	return 0
+	return ""
 }
 
 func (x *TrackerForEachExer) GetSetsAndReps() []*SetsAndReps {
@@ -613,10 +613,9 @@ const file_tracker_proto_rawDesc = "" +
 	"\rPingTrackResp\"h\n" +
 	"\rEndWorkoutReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12>\n" +
-	"\fall_exerices\x18\x02 \x03(\v2\x1b.tracker.TrackerForEachExerR\vallExerices\"o\n" +
-	"\x12TrackerForEachExer\x12\x1f\n" +
-	"\vexercise_id\x18\x01 \x01(\x03R\n" +
-	"exerciseId\x128\n" +
+	"\fall_exerices\x18\x02 \x03(\v2\x1b.tracker.TrackerForEachExerR\vallExerices\"s\n" +
+	"\x12TrackerForEachExer\x12#\n" +
+	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\x128\n" +
 	"\rsets_and_reps\x18\x02 \x03(\v2\x14.tracker.SetsAndRepsR\vsetsAndReps\"9\n" +
 	"\vSetsAndReps\x12\x16\n" +
 	"\x06weight\x18\x01 \x01(\x03R\x06weight\x12\x12\n" +

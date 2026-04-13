@@ -40,7 +40,7 @@ message EndWorkoutReq {
 }
 
 message TrackerForEachExer {
-    int64 exercise_id = 1;
+    string exercise_name = 1;
     repeated SetsAndReps sets_and_reps = 2;
 }
 

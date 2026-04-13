@@ -30,24 +30,24 @@ func (g *grpcServer) Run() {
 
 	lis, err := net.Listen("tcp", g.addr)
 	if err != nil {
-		logger.Fatalf("failed to listen to tcp : %v", err)
+		logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
-	logger.Infof("created TCP listener at %v", g.addr)
+	logger.Log.Infof("created TCP listener at %v", g.addr)
 
 	Client := grpcclient.New()
 
 	repo, err := repository.NewRepo()
 	if err != nil {
 		lis.Close()
-		logger.Fatalf("error opening the repos : %v", err)
+		logger.Log.Fatalf("error opening the repos : %v", err)
 	}
 
-	logger.Info("created Db connections")
+	logger.Log.Info("created Db connections")
 
 	defer func() {
 		if err := repo.Close(); err != nil {
-			logger.Warnf("error closing the databases : %v", err)
+			logger.Log.Warnf("error closing the databases : %v", err)
 		}
 	}()
 
@@ -62,10 +62,10 @@ func (g *grpcServer) Run() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	go func() {
-		logger.Infof("grpc server has started at %v", g.addr)
+		logger.Log.Infof("grpc server has started at %v", g.addr)
 		if err := grpcServer.Serve(lis); err != nil {
 			sigChan <- os.Interrupt
-			logger.Warnf("error listening to the grpc server : %v", err)
+			logger.Log.Warnf("error listening to the grpc server : %v", err)
 		}
 	}()
 

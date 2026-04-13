@@ -18,6 +18,19 @@ import (
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
+	// a := r.URL
+
+	// a.Query().Get()
+
+	// page
+	// limit
+	// order_by
+	// filter
+	// after_date
+	// before_date
+
+	
+
 	logger := middleware.GetLogger(r.Context())
 	reqId := middleware.GetReqId(r.Context())
 

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+		trackpb "workout-tracker/proto/shared/tracker"
 	"time"
-	trackpb "workout-tracker/proto/shared/tracker"
 	"wt/pkg/user"
 
 	// token "wt/pkg/jwt"
@@ -50,7 +50,7 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.GetLogger(r.Context())
 	reqId := middleware.GetReqId(r.Context())
 	
-	logger.Log.Infow("GET_PLAN_BY_NAME_SUCCESSFUL", zap.String("REQ_ID", reqId))
+	logger.Log.Infow("START_WORKOUT_WITH_PLAN_CALLED", zap.String("REQ_ID", reqId))
 	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
@@ -72,13 +72,13 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.trackClient.StartWorkoutWithPlan(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
 	utils.CreatedWriter(w, resp)
 
-	logger.Log.Infow("GET_PLAN_BY_NAME_SUCCESSFUL", zap.String("REQ_ID", reqId))
+	logger.Log.Infow("START_WORKOUT_WITH_PLAN_SUCCESSFUL", zap.String("REQ_ID", reqId))
 }
 
 func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
@@ -87,11 +87,10 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.GetLogger(r.Context())
 	reqId := middleware.GetReqId(r.Context())
 	
-	logger.Log.Infow("END_WORKOUT_TRACKED", zap.String("REQ_ID", reqId))
+	logger.Log.Infow("END_WORKOUT_CALLED", zap.String("REQ_ID", reqId))
 	
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
-
 
 	var userInput user.Tracker
 
@@ -108,7 +107,7 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	
 	for _, allExercises := range userInput.Workout {
 		allExer := trackpb.TrackerForEachExer{}
-		allExer.ExerciseId = int64(allExercises.ExerciseId)
+		allExer.ExerciseName = allExercises.ExerciseName
 		
 		for _, eachExer := range allExercises.RepsWeight {
 			rw := trackpb.SetsAndReps{}

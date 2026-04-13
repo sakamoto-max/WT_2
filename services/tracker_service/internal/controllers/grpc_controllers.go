@@ -52,7 +52,6 @@ func (t *TrackerController) StartWorkoutWithPlan(ctx context.Context, in *tracke
 		return nil, err
 	}
 
-
 	resp := trackerpb.StartWorkoutWithPlanResp{
 		Message:         fmt.Sprintf("workout with plan %v has started", in.PlanName),
 		PlanName:        in.PlanName,
@@ -62,21 +61,9 @@ func (t *TrackerController) StartWorkoutWithPlan(ctx context.Context, in *tracke
 }
 func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (*trackerpb.EndWorkoutResp, error) {
 
-	tracker := models.Tracker{}
+	// fmt.Println("in", in)
 
-	for _, eachExerWithidSetsandReps := range in.AllExerices {
-		a := models.Workout{}
-		a.ExerciseId = int(eachExerWithidSetsandReps.ExerciseId)
-		for _, eachExer := range a.RepsWeight {
-			reps := models.Reps{}
-			reps.Reps = int(eachExer.Reps)
-			reps.Weight = int(eachExer.Weight)
-
-			a.RepsWeight = append(a.RepsWeight, reps)
-		}
-
-		tracker.Workout = append(tracker.Workout, a)
-	}
+	tracker := convertToLocal(in)
 
 	err := t.service.EndWorkoutSer(ctx, in.UserId, &tracker)
 	if err != nil {
@@ -104,4 +91,30 @@ func (a *TrackerController) GetHealth(ctx context.Context, in *trackerpb.GetHeal
 	resp.RedisRespTime = durationpb.New(*redisRespTime)
 
 	return &resp, nil
+}
+
+
+
+func convertToLocal(in *trackerpb.EndWorkoutReq) models.Tracker {
+
+	main := models.Tracker{}
+
+	for _, eachExer := range in.AllExerices {
+		w := models.Workout{
+			ExerciseName: eachExer.ExerciseName,
+		}
+
+		for _, repsPlusWeight := range eachExer.SetsAndReps {
+
+			rPlusW := models.Reps{
+				Reps:   int(repsPlusWeight.Reps),
+				Weight: int(repsPlusWeight.Weight),
+			}
+
+			w.RepsWeight = append(w.RepsWeight, rPlusW)
+		}
+		main.Workout = append(main.Workout, w)
+	}
+
+	return main
 }

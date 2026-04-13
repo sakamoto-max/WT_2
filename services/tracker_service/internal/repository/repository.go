@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	myerrors "wt/pkg/my_errors"
 	"tracker_service/internal/models"
+	myerrors "wt/pkg/my_errors"
+
+	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 )
-
-
 
 func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
@@ -61,7 +61,7 @@ func (d *DBs) RevertStartWorkout(ctx context.Context, trackerId string) error {
 	return nil
 }
 
-func (d *DBs) SetTrackerId(ctx context.Context, userId string, trackerId string) error {
+func (d *DBs) SetTrackerIdAndOngoingWorkout(ctx context.Context, userId string, trackerId string) error {
 	keyforTrackId := fmt.Sprintf("user:%v:tracker_id", userId)
 	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
 
@@ -77,11 +77,19 @@ func (d *DBs) SetTrackerId(ctx context.Context, userId string, trackerId string)
 
 	return nil
 }
-func (d *DBs) DelTrackerId(ctx context.Context, userId string) error {
+func (d *DBs) DelTrackerIdAndOngoingWorkout(ctx context.Context, userId string) error {
+
 	key := fmt.Sprintf("user:%v:tracker_id", userId)
-	err := d.rDB.Del(ctx, key).Err()
+	keyforOngoingWorkout := fmt.Sprintf("user_id:%v:workout_ongoing", userId)
+
+	pipe := d.rDB.Pipeline()
+
+	pipe.Del(ctx, keyforOngoingWorkout)
+	pipe.Del(ctx, key)
+
+	_, err := pipe.Exec(ctx)
 	if err != nil {
-		return myerrors.InternalServerErrMaker(fmt.Errorf("error in deleting the tracker Id of user with id  %v : %w", userId, err))
+		return myerrors.InternalServerErrMaker(fmt.Errorf("error in deleting the tracker Id and ongoing workout of user with id  %v : %w", userId, err))
 	}
 	return nil
 }
@@ -115,7 +123,18 @@ func (d *DBs) CheckIfWorkoutIsOngoing(ctx context.Context, userId string) (bool,
 	return true, nil
 }
 
+func (d *DBs) DelOngoingWorkout() {
+
+}
+
 func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tracker) error {
+
+	query := `
+		INSERT INTO 
+			workout(tracker_id, exercise_id, set_number, weight, reps)
+		VALUES
+			(@tracker_id, @exercise_id, @set_number, @weight, @reps)			
+	`
 
 	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
@@ -124,28 +143,40 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tra
 
 	defer trnx.Rollback(ctx)
 
-	// planId := data.PlanId
+	for _, dataForEachExercise := range data.Workout {
+		exerciseId := dataForEachExercise.ExerciseId
+		for _, repsPlusWeight := range dataForEachExercise.RepsWeight {
 
-	for _, allExercises := range data.Workout {
-		for _, RepsWeights := range allExercises.RepsWeight {
+
 			currentSet := 1
-			_, err := trnx.Exec(ctx, `
-				INSERT INTO workout(tracker_id, exercise_id, set_number, weight, reps)
-				VALUES($1, $2, $3, $4, $5)			
-			`, trackerId, allExercises.ExerciseId, currentSet, RepsWeights.Weight, RepsWeights.Reps)
 
-			if err != nil {
-				return myerrors.InternalServerErrMaker(fmt.Errorf("error in inserting data into tracker : %w", err))
+			_, err := trnx.Exec(ctx, query, pgx.NamedArgs{
+				"tracker_id":  trackerId,
+				"exercise_id": exerciseId,
+				"set_number":  currentSet,
+				"weight":      repsPlusWeight.Weight,
+				"reps":        repsPlusWeight.Reps,
+			})
+
+			if err != nil{
+				return myerrors.InternalServerErrMaker(fmt.Errorf("failed to upload data into db : %w", err))
 			}
+
 			currentSet = currentSet + 1
 		}
+
 	}
 
-	_, err = trnx.Exec(ctx, `
-		UPDATE tracker
-		SET ended_at = NOW()
-		WHERE id = $1	
-	`, trackerId)
+	query = `
+		UPDATE
+			tracker
+		SET
+			ended_at = NOW()
+		WHERE
+			id = @tracker_id
+	`
+
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"tracker_id" : trackerId})
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error updating the ended time in tracker : %w", err))
 	}
@@ -158,16 +189,14 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tra
 	return nil
 }
 
-
-
 func (d *DBs) SetExerciseNameById(ctx context.Context, exerciseId string, exerciseName string) error {
 	key := fmt.Sprintf("exercise_id:%v:name", exerciseId)
-	
+
 	err := d.rDB.Set(ctx, key, exerciseName, 0).Err()
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("error setting exercise name : %w", err)
 	}
-	
+
 	return nil
 }
 func (d *DBs) GetExerciseNameById(ctx context.Context, exerciseId string) (string, error) {
@@ -175,9 +204,111 @@ func (d *DBs) GetExerciseNameById(ctx context.Context, exerciseId string) (strin
 
 	var exerciseName string
 	err := d.rDB.Get(ctx, key).Scan(&exerciseName)
-	if err != nil{
+	if err != nil {
 		return exerciseName, err
 	}
 
 	return exerciseId, nil
+}
+
+func (d *DBs) SetUserCurrentPlanName(ctx context.Context, userId int, planName string) error {
+	key := fmt.Sprintf("user_id:%v:current_workout_plan_name", userId)
+
+	err := d.rDB.Set(ctx, key, planName, 0).Err()
+
+	if err != nil{
+		return fmt.Errorf("error setting user current plan : %w", err)
+	}
+
+	return nil
+}
+func (d *DBs) GetUserCurrentPlanName(ctx context.Context, userId int) (string, error) {
+	key := fmt.Sprintf("user_id:%v:current_workout_plan_name", userId)
+
+	var planName string
+
+	err := d.rDB.Get(ctx, key).Scan(&planName)
+
+	if err != nil{
+		return "", fmt.Errorf("error getting user current plan : %w", err)
+	}
+
+	return planName, nil
+}
+
+func (d *DBs) SetPlanWithExercises(ctx context.Context, userId string, planName string, exerciseNames *[]string) error {
+	// key : user_id:%v:plan_name:%v
+	// field : exer_%v
+	// val : exercise_name
+
+	key := fmt.Sprintf("user_id:%v:plan_name:%v", userId, planName)
+	noOfExercisesKey := "number_of_exercises"
+	
+	pipe := d.rDB.Pipeline()
+	
+	for i, exerciseName := range *exerciseNames{
+		field := fmt.Sprintf("exer_%v", i)
+		pipe.HSet(ctx, key, field, exerciseName)
+	}
+	
+	pipe.HSet(ctx, key, noOfExercisesKey, len(*exerciseNames))
+	
+	_, err := pipe.Exec(ctx)
+	if err != nil{
+		return fmt.Errorf("error in setting plan in redis : %w", err)
+	}
+
+	return nil
+}
+
+// func (d *DBs) GetPlanWithExercises(ctx context.Context, userId int, planName string) {
+// 	key := fmt.Sprintf("user_id:%v:plan_name:%v", userId, planName)
+
+// 	cmd := d.rDB.HGetAll(ctx, key)
+// 	a, _ := cmd.Result()
+// 	fmt.Println(a)
+// }
+
+func (d *DBs) SetUserWorkingOutWithPlan(ctx context.Context, userId string, value bool) error {
+
+	key := fmt.Sprintf("user_id:%v:workout_with_plan", userId)
+	
+	err := d.rDB.Set(ctx, key, value, 0).Err()
+	if err != nil{
+		return fmt.Errorf("error setting user is working out with a plan : %w", err)
+	}
+	
+	return nil
+}
+
+func (d *DBs) GetUserWorkingOutWithPlan(ctx context.Context, userId string) (bool, error){
+	key := fmt.Sprintf("user_id:%v:workout_with_plan", userId)
+
+	cmd := d.rDB.Get(ctx, key)
+	res, err := cmd.Result()
+
+	if err != nil{
+		if errors.Is(err, redis.Nil){
+			return false, nil
+		}
+		return false,  fmt.Errorf("error getting user working out with plan : %w", err)
+	}
+
+	if res == "false" {
+		return false, nil
+	}
+
+	return true, nil
+	
+}
+
+func (d *DBs) DelUserWorkingOutWithPlan(ctx context.Context, userId string) error {
+	key := fmt.Sprintf("user_id:%v:workout_with_plan", userId)
+
+	err := d.rDB.Del(ctx, key).Err()
+	if err != nil{
+		return fmt.Errorf("error deleting user working out with plan : %w", err)
+	}
+
+	return nil
 }
