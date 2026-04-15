@@ -17,7 +17,18 @@ type Workout struct {
 
 type Tracker struct {
 	// PlanId int `json:"plan_id"`
+	UserResponse bool `json:"user_response"`
 	Workout []Workout `json:"workout"`
+}
+
+func (t *Tracker) GetAllExercises() *[]string {
+	var allExercises []string
+
+	for _, eachExer := range t.Workout{
+		allExercises = append(allExercises, eachExer.ExerciseName)
+	}
+
+	return &allExercises
 }
 
 type GeneralResp struct {
@@ -29,6 +40,18 @@ type Plan struct{
 	PlanName string `json:"plan_name"`
 	Exercises []string `json:"exercises_in_plan"`
 }
+
+type ExercisesNotPerformed struct {
+	Exercises []string `json:"exercises_not_performed"`
+}
+
+type UpdatePlanPayLoad struct {
+	UserId string `json:"user_id"`
+	PlanName string `json:"plan_name"`
+	ExerciseNames *[]string `json:"exercise_names"`
+}
+
+
 
 // {
 // 	"workout" : [

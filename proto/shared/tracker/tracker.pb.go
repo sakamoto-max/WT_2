@@ -22,6 +22,94 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type CancelWorkoutReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelWorkoutReq) Reset() {
+	*x = CancelWorkoutReq{}
+	mi := &file_tracker_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelWorkoutReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelWorkoutReq) ProtoMessage() {}
+
+func (x *CancelWorkoutReq) ProtoReflect() protoreflect.Message {
+	mi := &file_tracker_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelWorkoutReq.ProtoReflect.Descriptor instead.
+func (*CancelWorkoutReq) Descriptor() ([]byte, []int) {
+	return file_tracker_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CancelWorkoutReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type CancelWorkoutResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelWorkoutResp) Reset() {
+	*x = CancelWorkoutResp{}
+	mi := &file_tracker_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelWorkoutResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelWorkoutResp) ProtoMessage() {}
+
+func (x *CancelWorkoutResp) ProtoReflect() protoreflect.Message {
+	mi := &file_tracker_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelWorkoutResp.ProtoReflect.Descriptor instead.
+func (*CancelWorkoutResp) Descriptor() ([]byte, []int) {
+	return file_tracker_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CancelWorkoutResp) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type GetHealthReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -30,7 +118,7 @@ type GetHealthReq struct {
 
 func (x *GetHealthReq) Reset() {
 	*x = GetHealthReq{}
-	mi := &file_tracker_proto_msgTypes[0]
+	mi := &file_tracker_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +130,7 @@ func (x *GetHealthReq) String() string {
 func (*GetHealthReq) ProtoMessage() {}
 
 func (x *GetHealthReq) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[0]
+	mi := &file_tracker_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +143,7 @@ func (x *GetHealthReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHealthReq.ProtoReflect.Descriptor instead.
 func (*GetHealthReq) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{0}
+	return file_tracker_proto_rawDescGZIP(), []int{2}
 }
 
 type GetHealthResp struct {
@@ -70,7 +158,7 @@ type GetHealthResp struct {
 
 func (x *GetHealthResp) Reset() {
 	*x = GetHealthResp{}
-	mi := &file_tracker_proto_msgTypes[1]
+	mi := &file_tracker_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -82,7 +170,7 @@ func (x *GetHealthResp) String() string {
 func (*GetHealthResp) ProtoMessage() {}
 
 func (x *GetHealthResp) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[1]
+	mi := &file_tracker_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -95,7 +183,7 @@ func (x *GetHealthResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHealthResp.ProtoReflect.Descriptor instead.
 func (*GetHealthResp) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{1}
+	return file_tracker_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetHealthResp) GetServiceName() string {
@@ -134,7 +222,7 @@ type PingTrackReq struct {
 
 func (x *PingTrackReq) Reset() {
 	*x = PingTrackReq{}
-	mi := &file_tracker_proto_msgTypes[2]
+	mi := &file_tracker_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -146,7 +234,7 @@ func (x *PingTrackReq) String() string {
 func (*PingTrackReq) ProtoMessage() {}
 
 func (x *PingTrackReq) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[2]
+	mi := &file_tracker_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -159,7 +247,7 @@ func (x *PingTrackReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingTrackReq.ProtoReflect.Descriptor instead.
 func (*PingTrackReq) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{2}
+	return file_tracker_proto_rawDescGZIP(), []int{4}
 }
 
 type PingTrackResp struct {
@@ -170,7 +258,7 @@ type PingTrackResp struct {
 
 func (x *PingTrackResp) Reset() {
 	*x = PingTrackResp{}
-	mi := &file_tracker_proto_msgTypes[3]
+	mi := &file_tracker_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -182,7 +270,7 @@ func (x *PingTrackResp) String() string {
 func (*PingTrackResp) ProtoMessage() {}
 
 func (x *PingTrackResp) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[3]
+	mi := &file_tracker_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -195,20 +283,21 @@ func (x *PingTrackResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingTrackResp.ProtoReflect.Descriptor instead.
 func (*PingTrackResp) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{3}
+	return file_tracker_proto_rawDescGZIP(), []int{5}
 }
 
 type EndWorkoutReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	AllExerices   []*TrackerForEachExer  `protobuf:"bytes,2,rep,name=all_exerices,json=allExerices,proto3" json:"all_exerices,omitempty"`
+	UserResponse  bool                   `protobuf:"varint,3,opt,name=user_response,json=userResponse,proto3" json:"user_response,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EndWorkoutReq) Reset() {
 	*x = EndWorkoutReq{}
-	mi := &file_tracker_proto_msgTypes[4]
+	mi := &file_tracker_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -220,7 +309,7 @@ func (x *EndWorkoutReq) String() string {
 func (*EndWorkoutReq) ProtoMessage() {}
 
 func (x *EndWorkoutReq) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[4]
+	mi := &file_tracker_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -233,7 +322,7 @@ func (x *EndWorkoutReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndWorkoutReq.ProtoReflect.Descriptor instead.
 func (*EndWorkoutReq) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{4}
+	return file_tracker_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EndWorkoutReq) GetUserId() string {
@@ -250,6 +339,13 @@ func (x *EndWorkoutReq) GetAllExerices() []*TrackerForEachExer {
 	return nil
 }
 
+func (x *EndWorkoutReq) GetUserResponse() bool {
+	if x != nil {
+		return x.UserResponse
+	}
+	return false
+}
+
 type TrackerForEachExer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExerciseName  string                 `protobuf:"bytes,1,opt,name=exercise_name,json=exerciseName,proto3" json:"exercise_name,omitempty"`
@@ -260,7 +356,7 @@ type TrackerForEachExer struct {
 
 func (x *TrackerForEachExer) Reset() {
 	*x = TrackerForEachExer{}
-	mi := &file_tracker_proto_msgTypes[5]
+	mi := &file_tracker_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +368,7 @@ func (x *TrackerForEachExer) String() string {
 func (*TrackerForEachExer) ProtoMessage() {}
 
 func (x *TrackerForEachExer) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[5]
+	mi := &file_tracker_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +381,7 @@ func (x *TrackerForEachExer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrackerForEachExer.ProtoReflect.Descriptor instead.
 func (*TrackerForEachExer) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{5}
+	return file_tracker_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *TrackerForEachExer) GetExerciseName() string {
@@ -312,7 +408,7 @@ type SetsAndReps struct {
 
 func (x *SetsAndReps) Reset() {
 	*x = SetsAndReps{}
-	mi := &file_tracker_proto_msgTypes[6]
+	mi := &file_tracker_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -324,7 +420,7 @@ func (x *SetsAndReps) String() string {
 func (*SetsAndReps) ProtoMessage() {}
 
 func (x *SetsAndReps) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[6]
+	mi := &file_tracker_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -337,7 +433,7 @@ func (x *SetsAndReps) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetsAndReps.ProtoReflect.Descriptor instead.
 func (*SetsAndReps) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{6}
+	return file_tracker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SetsAndReps) GetWeight() int64 {
@@ -355,15 +451,19 @@ func (x *SetsAndReps) GetReps() int64 {
 }
 
 type EndWorkoutResp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Message         string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	RequestStatus   string                 `protobuf:"bytes,2,opt,name=request_status,json=requestStatus,proto3" json:"request_status,omitempty"`
+	Reason          string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	ExerciseNames   []string               `protobuf:"bytes,4,rep,name=exercise_names,json=exerciseNames,proto3" json:"exercise_names,omitempty"`
+	ConflictOccured bool                   `protobuf:"varint,5,opt,name=conflict_occured,json=conflictOccured,proto3" json:"conflict_occured,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *EndWorkoutResp) Reset() {
 	*x = EndWorkoutResp{}
-	mi := &file_tracker_proto_msgTypes[7]
+	mi := &file_tracker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +475,7 @@ func (x *EndWorkoutResp) String() string {
 func (*EndWorkoutResp) ProtoMessage() {}
 
 func (x *EndWorkoutResp) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[7]
+	mi := &file_tracker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +488,7 @@ func (x *EndWorkoutResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndWorkoutResp.ProtoReflect.Descriptor instead.
 func (*EndWorkoutResp) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{7}
+	return file_tracker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *EndWorkoutResp) GetMessage() string {
@@ -396,6 +496,34 @@ func (x *EndWorkoutResp) GetMessage() string {
 		return x.Message
 	}
 	return ""
+}
+
+func (x *EndWorkoutResp) GetRequestStatus() string {
+	if x != nil {
+		return x.RequestStatus
+	}
+	return ""
+}
+
+func (x *EndWorkoutResp) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *EndWorkoutResp) GetExerciseNames() []string {
+	if x != nil {
+		return x.ExerciseNames
+	}
+	return nil
+}
+
+func (x *EndWorkoutResp) GetConflictOccured() bool {
+	if x != nil {
+		return x.ConflictOccured
+	}
+	return false
 }
 
 type StartWorkoutWithPlanReq struct {
@@ -408,7 +536,7 @@ type StartWorkoutWithPlanReq struct {
 
 func (x *StartWorkoutWithPlanReq) Reset() {
 	*x = StartWorkoutWithPlanReq{}
-	mi := &file_tracker_proto_msgTypes[8]
+	mi := &file_tracker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -420,7 +548,7 @@ func (x *StartWorkoutWithPlanReq) String() string {
 func (*StartWorkoutWithPlanReq) ProtoMessage() {}
 
 func (x *StartWorkoutWithPlanReq) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[8]
+	mi := &file_tracker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -433,7 +561,7 @@ func (x *StartWorkoutWithPlanReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartWorkoutWithPlanReq.ProtoReflect.Descriptor instead.
 func (*StartWorkoutWithPlanReq) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{8}
+	return file_tracker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *StartWorkoutWithPlanReq) GetUserId() string {
@@ -461,7 +589,7 @@ type StartWorkoutWithPlanResp struct {
 
 func (x *StartWorkoutWithPlanResp) Reset() {
 	*x = StartWorkoutWithPlanResp{}
-	mi := &file_tracker_proto_msgTypes[9]
+	mi := &file_tracker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -473,7 +601,7 @@ func (x *StartWorkoutWithPlanResp) String() string {
 func (*StartWorkoutWithPlanResp) ProtoMessage() {}
 
 func (x *StartWorkoutWithPlanResp) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[9]
+	mi := &file_tracker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -486,7 +614,7 @@ func (x *StartWorkoutWithPlanResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartWorkoutWithPlanResp.ProtoReflect.Descriptor instead.
 func (*StartWorkoutWithPlanResp) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{9}
+	return file_tracker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *StartWorkoutWithPlanResp) GetMessage() string {
@@ -519,7 +647,7 @@ type StartEmptyWorkoutReq struct {
 
 func (x *StartEmptyWorkoutReq) Reset() {
 	*x = StartEmptyWorkoutReq{}
-	mi := &file_tracker_proto_msgTypes[10]
+	mi := &file_tracker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -531,7 +659,7 @@ func (x *StartEmptyWorkoutReq) String() string {
 func (*StartEmptyWorkoutReq) ProtoMessage() {}
 
 func (x *StartEmptyWorkoutReq) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[10]
+	mi := &file_tracker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -544,7 +672,7 @@ func (x *StartEmptyWorkoutReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartEmptyWorkoutReq.ProtoReflect.Descriptor instead.
 func (*StartEmptyWorkoutReq) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{10}
+	return file_tracker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *StartEmptyWorkoutReq) GetUserId() string {
@@ -563,7 +691,7 @@ type GeneralResp struct {
 
 func (x *GeneralResp) Reset() {
 	*x = GeneralResp{}
-	mi := &file_tracker_proto_msgTypes[11]
+	mi := &file_tracker_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -575,7 +703,7 @@ func (x *GeneralResp) String() string {
 func (*GeneralResp) ProtoMessage() {}
 
 func (x *GeneralResp) ProtoReflect() protoreflect.Message {
-	mi := &file_tracker_proto_msgTypes[11]
+	mi := &file_tracker_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -588,7 +716,7 @@ func (x *GeneralResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GeneralResp.ProtoReflect.Descriptor instead.
 func (*GeneralResp) Descriptor() ([]byte, []int) {
-	return file_tracker_proto_rawDescGZIP(), []int{11}
+	return file_tracker_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GeneralResp) GetMessage() string {
@@ -602,7 +730,11 @@ var File_tracker_proto protoreflect.FileDescriptor
 
 const file_tracker_proto_rawDesc = "" +
 	"\n" +
-	"\rtracker.proto\x12\atracker\x1a\x1egoogle/protobuf/duration.proto\"\x0e\n" +
+	"\rtracker.proto\x12\atracker\x1a\x1egoogle/protobuf/duration.proto\"+\n" +
+	"\x10CancelWorkoutReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"-\n" +
+	"\x11CancelWorkoutResp\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x0e\n" +
 	"\fGetHealthReq\"\xd6\x01\n" +
 	"\rGetHealthResp\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x16\n" +
@@ -610,18 +742,23 @@ const file_tracker_proto_rawDesc = "" +
 	"\x12postgres_resp_time\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x10postgresRespTime\x12A\n" +
 	"\x0fredis_resp_time\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\rredisRespTime\"\x0e\n" +
 	"\fPingTrackReq\"\x0f\n" +
-	"\rPingTrackResp\"h\n" +
+	"\rPingTrackResp\"\x8d\x01\n" +
 	"\rEndWorkoutReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12>\n" +
-	"\fall_exerices\x18\x02 \x03(\v2\x1b.tracker.TrackerForEachExerR\vallExerices\"s\n" +
+	"\fall_exerices\x18\x02 \x03(\v2\x1b.tracker.TrackerForEachExerR\vallExerices\x12#\n" +
+	"\ruser_response\x18\x03 \x01(\bR\fuserResponse\"s\n" +
 	"\x12TrackerForEachExer\x12#\n" +
 	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\x128\n" +
 	"\rsets_and_reps\x18\x02 \x03(\v2\x14.tracker.SetsAndRepsR\vsetsAndReps\"9\n" +
 	"\vSetsAndReps\x12\x16\n" +
 	"\x06weight\x18\x01 \x01(\x03R\x06weight\x12\x12\n" +
-	"\x04reps\x18\x02 \x01(\x03R\x04reps\"*\n" +
+	"\x04reps\x18\x02 \x01(\x03R\x04reps\"\xbb\x01\n" +
 	"\x0eEndWorkoutResp\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"O\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12%\n" +
+	"\x0erequest_status\x18\x02 \x01(\tR\rrequestStatus\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x12%\n" +
+	"\x0eexercise_names\x18\x04 \x03(\tR\rexerciseNames\x12)\n" +
+	"\x10conflict_occured\x18\x05 \x01(\bR\x0fconflictOccured\"O\n" +
 	"\x17StartWorkoutWithPlanReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tplan_name\x18\x02 \x01(\tR\bplanName\"}\n" +
@@ -632,14 +769,15 @@ const file_tracker_proto_rawDesc = "" +
 	"\x14StartEmptyWorkoutReq\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"'\n" +
 	"\vGeneralResp\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xf3\x02\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xbd\x03\n" +
 	"\x0eTrackerService\x12J\n" +
 	"\x11StartEmptyWorkout\x12\x1d.tracker.StartEmptyWorkoutReq\x1a\x14.tracker.GeneralResp\"\x00\x12]\n" +
 	"\x14StartWorkoutWithPlan\x12 .tracker.StartWorkoutWithPlanReq\x1a!.tracker.StartWorkoutWithPlanResp\"\x00\x12?\n" +
 	"\n" +
 	"EndWorkout\x12\x16.tracker.EndWorkoutReq\x1a\x17.tracker.EndWorkoutResp\"\x00\x127\n" +
 	"\x04PING\x12\x15.tracker.PingTrackReq\x1a\x16.tracker.PingTrackResp\"\x00\x12<\n" +
-	"\tGetHealth\x12\x15.tracker.GetHealthReq\x1a\x16.tracker.GetHealthResp\"\x00B\x10Z\x0eshared/trackerb\x06proto3"
+	"\tGetHealth\x12\x15.tracker.GetHealthReq\x1a\x16.tracker.GetHealthResp\"\x00\x12H\n" +
+	"\rCancelWorkout\x12\x19.tracker.CancelWorkoutReq\x1a\x1a.tracker.CancelWorkoutResp\"\x00B\x10Z\x0eshared/trackerb\x06proto3"
 
 var (
 	file_tracker_proto_rawDescOnce sync.Once
@@ -653,39 +791,43 @@ func file_tracker_proto_rawDescGZIP() []byte {
 	return file_tracker_proto_rawDescData
 }
 
-var file_tracker_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_tracker_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_tracker_proto_goTypes = []any{
-	(*GetHealthReq)(nil),             // 0: tracker.GetHealthReq
-	(*GetHealthResp)(nil),            // 1: tracker.GetHealthResp
-	(*PingTrackReq)(nil),             // 2: tracker.PingTrackReq
-	(*PingTrackResp)(nil),            // 3: tracker.PingTrackResp
-	(*EndWorkoutReq)(nil),            // 4: tracker.EndWorkoutReq
-	(*TrackerForEachExer)(nil),       // 5: tracker.TrackerForEachExer
-	(*SetsAndReps)(nil),              // 6: tracker.SetsAndReps
-	(*EndWorkoutResp)(nil),           // 7: tracker.EndWorkoutResp
-	(*StartWorkoutWithPlanReq)(nil),  // 8: tracker.StartWorkoutWithPlanReq
-	(*StartWorkoutWithPlanResp)(nil), // 9: tracker.StartWorkoutWithPlanResp
-	(*StartEmptyWorkoutReq)(nil),     // 10: tracker.StartEmptyWorkoutReq
-	(*GeneralResp)(nil),              // 11: tracker.GeneralResp
-	(*durationpb.Duration)(nil),      // 12: google.protobuf.Duration
+	(*CancelWorkoutReq)(nil),         // 0: tracker.CancelWorkoutReq
+	(*CancelWorkoutResp)(nil),        // 1: tracker.CancelWorkoutResp
+	(*GetHealthReq)(nil),             // 2: tracker.GetHealthReq
+	(*GetHealthResp)(nil),            // 3: tracker.GetHealthResp
+	(*PingTrackReq)(nil),             // 4: tracker.PingTrackReq
+	(*PingTrackResp)(nil),            // 5: tracker.PingTrackResp
+	(*EndWorkoutReq)(nil),            // 6: tracker.EndWorkoutReq
+	(*TrackerForEachExer)(nil),       // 7: tracker.TrackerForEachExer
+	(*SetsAndReps)(nil),              // 8: tracker.SetsAndReps
+	(*EndWorkoutResp)(nil),           // 9: tracker.EndWorkoutResp
+	(*StartWorkoutWithPlanReq)(nil),  // 10: tracker.StartWorkoutWithPlanReq
+	(*StartWorkoutWithPlanResp)(nil), // 11: tracker.StartWorkoutWithPlanResp
+	(*StartEmptyWorkoutReq)(nil),     // 12: tracker.StartEmptyWorkoutReq
+	(*GeneralResp)(nil),              // 13: tracker.GeneralResp
+	(*durationpb.Duration)(nil),      // 14: google.protobuf.Duration
 }
 var file_tracker_proto_depIdxs = []int32{
-	12, // 0: tracker.GetHealthResp.postgres_resp_time:type_name -> google.protobuf.Duration
-	12, // 1: tracker.GetHealthResp.redis_resp_time:type_name -> google.protobuf.Duration
-	5,  // 2: tracker.EndWorkoutReq.all_exerices:type_name -> tracker.TrackerForEachExer
-	6,  // 3: tracker.TrackerForEachExer.sets_and_reps:type_name -> tracker.SetsAndReps
-	10, // 4: tracker.TrackerService.StartEmptyWorkout:input_type -> tracker.StartEmptyWorkoutReq
-	8,  // 5: tracker.TrackerService.StartWorkoutWithPlan:input_type -> tracker.StartWorkoutWithPlanReq
-	4,  // 6: tracker.TrackerService.EndWorkout:input_type -> tracker.EndWorkoutReq
-	2,  // 7: tracker.TrackerService.PING:input_type -> tracker.PingTrackReq
-	0,  // 8: tracker.TrackerService.GetHealth:input_type -> tracker.GetHealthReq
-	11, // 9: tracker.TrackerService.StartEmptyWorkout:output_type -> tracker.GeneralResp
-	9,  // 10: tracker.TrackerService.StartWorkoutWithPlan:output_type -> tracker.StartWorkoutWithPlanResp
-	7,  // 11: tracker.TrackerService.EndWorkout:output_type -> tracker.EndWorkoutResp
-	3,  // 12: tracker.TrackerService.PING:output_type -> tracker.PingTrackResp
-	1,  // 13: tracker.TrackerService.GetHealth:output_type -> tracker.GetHealthResp
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
+	14, // 0: tracker.GetHealthResp.postgres_resp_time:type_name -> google.protobuf.Duration
+	14, // 1: tracker.GetHealthResp.redis_resp_time:type_name -> google.protobuf.Duration
+	7,  // 2: tracker.EndWorkoutReq.all_exerices:type_name -> tracker.TrackerForEachExer
+	8,  // 3: tracker.TrackerForEachExer.sets_and_reps:type_name -> tracker.SetsAndReps
+	12, // 4: tracker.TrackerService.StartEmptyWorkout:input_type -> tracker.StartEmptyWorkoutReq
+	10, // 5: tracker.TrackerService.StartWorkoutWithPlan:input_type -> tracker.StartWorkoutWithPlanReq
+	6,  // 6: tracker.TrackerService.EndWorkout:input_type -> tracker.EndWorkoutReq
+	4,  // 7: tracker.TrackerService.PING:input_type -> tracker.PingTrackReq
+	2,  // 8: tracker.TrackerService.GetHealth:input_type -> tracker.GetHealthReq
+	0,  // 9: tracker.TrackerService.CancelWorkout:input_type -> tracker.CancelWorkoutReq
+	13, // 10: tracker.TrackerService.StartEmptyWorkout:output_type -> tracker.GeneralResp
+	11, // 11: tracker.TrackerService.StartWorkoutWithPlan:output_type -> tracker.StartWorkoutWithPlanResp
+	9,  // 12: tracker.TrackerService.EndWorkout:output_type -> tracker.EndWorkoutResp
+	5,  // 13: tracker.TrackerService.PING:output_type -> tracker.PingTrackResp
+	3,  // 14: tracker.TrackerService.GetHealth:output_type -> tracker.GetHealthResp
+	1,  // 15: tracker.TrackerService.CancelWorkout:output_type -> tracker.CancelWorkoutResp
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name
@@ -702,7 +844,7 @@ func file_tracker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tracker_proto_rawDesc), len(file_tracker_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

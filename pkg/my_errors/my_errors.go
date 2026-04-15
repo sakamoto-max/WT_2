@@ -87,10 +87,35 @@ func BadReqErrMaker(err error) error {
 	return st.Err()
 }
 
+
 func AlreadyExitsErrMaker(resource string) error {
 	st := status.Newf(codes.AlreadyExists, "%v already exists", resource)
 	return st.Err()
 }
+
+
+var (
+	ErrNotPerformed = errors.New("some exercises are not performed")
+	ErrNewExercises = errors.New("new exercises are added to the plan. should we update the plan?")
+)
+
+type Conflict struct {
+	RequestStatus string `json:"request_status"`
+	Reason error `json:"reason"`
+	Message string `json:"message"`
+	ExerciseNames []string `json:"exercise_names,omitempty"`
+}
+
+
+func (c * Conflict) Error() string {
+	return c.Reason.Error()
+}
+
+// func ConflictErrMaker(data Conflict) *status.Status {
+// 	// st := 
+
+// 	// return st
+// }
 
 func ErrMatcher(w http.ResponseWriter, err error) {
 	st, _ := status.FromError(err)

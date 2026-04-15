@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"errors"
 	"fmt"
 
@@ -33,17 +33,3 @@ func MatchPasswords(password string, passFromDb string) error {
 	return nil
 }
 
-func MakeJSONV2(msg any) (*string, error) {
-
-	var data string
-
-	dataInBytes, err := json.Marshal(msg)
-	if err != nil{
-		return nil, fmt.Errorf("error occured while making json : %w", err)
-	}
-
-	data = string(dataInBytes)
-
-	return &data, nil
-}
- 

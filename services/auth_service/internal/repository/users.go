@@ -3,7 +3,7 @@ package repository
 import (
 	// customerrors "auth_service/internal/custom_errors"
 	"auth_service/internal/models"
-	"auth_service/internal/utils"
+	// "auth_service/internal/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"wt/pkg/enum"
 	myErrs "wt/pkg/my_errors"
 
+	"wt/pkg/utils"
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
 )

@@ -19,6 +19,16 @@ service TrackerService {
     rpc PING(PingTrackReq) returns (PingTrackResp) {};
     //
     rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
+    // 
+    rpc CancelWorkout(CancelWorkoutReq) returns (CancelWorkoutResp) {};
+}
+
+message CancelWorkoutReq {
+    string user_id = 1;
+}
+
+message CancelWorkoutResp {
+    string message = 1;
 }
 
 message GetHealthReq {}
@@ -37,6 +47,7 @@ message PingTrackResp{}
 message EndWorkoutReq {
     string user_id = 1;
   repeated TrackerForEachExer all_exerices = 2;
+    bool user_response = 3;
 }
 
 message TrackerForEachExer {
@@ -52,6 +63,10 @@ message SetsAndReps {
 
 message EndWorkoutResp {
     string message = 1;
+    string request_status = 2;
+    string reason = 3;
+    repeated string exercise_names = 4;
+    bool conflict_occured = 5;
 }
 
 

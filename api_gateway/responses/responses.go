@@ -8,3 +8,11 @@ type SignUpResp struct {
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+
+type TrackerConflict struct {
+	RequestStatus string `json:"request_status"`
+	Reason string `json:"reason"`
+	Message string `json:"message"`
+	ExerciseNames []string `json:"exercise_names"`
+}

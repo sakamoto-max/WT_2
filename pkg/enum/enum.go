@@ -29,6 +29,7 @@ type taskName string
 var(
 	CreateEmptyPlanForUser taskName = "create_empty_plan_for_user"
 	SendEmailforSigningUp taskName = "send_welcome_email_to_user_after_signingup"
+	UpdatePlan taskName = "update_plan_for_user"
 )
 
 

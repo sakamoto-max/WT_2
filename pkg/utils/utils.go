@@ -58,6 +58,12 @@ func OkRespWriter(w http.ResponseWriter, resp any) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func ConflictWriter(w http.ResponseWriter, resp any) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusConflict)
+	json.NewEncoder(w).Encode(resp)
+}
+
 func ConvertIntoBytes(payload any) (*[]byte, error) {
 
 	dataInBytes, err := json.Marshal(payload)
@@ -76,3 +82,18 @@ func ConvertIntoJosn(data *[]byte) *types.Data {
 
 	return &D
 }
+
+func MakeJSONV2(msg any) (*string, error) {
+
+	var data string
+
+	dataInBytes, err := json.Marshal(msg)
+	if err != nil{
+		return nil, fmt.Errorf("error occured while making json : %w", err)
+	}
+
+	data = string(dataInBytes)
+
+	return &data, nil
+}
+ 

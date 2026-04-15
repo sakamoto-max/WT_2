@@ -24,6 +24,7 @@ const (
 	TrackerService_EndWorkout_FullMethodName           = "/tracker.TrackerService/EndWorkout"
 	TrackerService_PING_FullMethodName                 = "/tracker.TrackerService/PING"
 	TrackerService_GetHealth_FullMethodName            = "/tracker.TrackerService/GetHealth"
+	TrackerService_CancelWorkout_FullMethodName        = "/tracker.TrackerService/CancelWorkout"
 )
 
 // TrackerServiceClient is the client API for TrackerService service.
@@ -35,6 +36,7 @@ type TrackerServiceClient interface {
 	EndWorkout(ctx context.Context, in *EndWorkoutReq, opts ...grpc.CallOption) (*EndWorkoutResp, error)
 	PING(ctx context.Context, in *PingTrackReq, opts ...grpc.CallOption) (*PingTrackResp, error)
 	GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error)
+	CancelWorkout(ctx context.Context, in *CancelWorkoutReq, opts ...grpc.CallOption) (*CancelWorkoutResp, error)
 }
 
 type trackerServiceClient struct {
@@ -95,6 +97,16 @@ func (c *trackerServiceClient) GetHealth(ctx context.Context, in *GetHealthReq, 
 	return out, nil
 }
 
+func (c *trackerServiceClient) CancelWorkout(ctx context.Context, in *CancelWorkoutReq, opts ...grpc.CallOption) (*CancelWorkoutResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelWorkoutResp)
+	err := c.cc.Invoke(ctx, TrackerService_CancelWorkout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrackerServiceServer is the server API for TrackerService service.
 // All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type TrackerServiceServer interface {
 	EndWorkout(context.Context, *EndWorkoutReq) (*EndWorkoutResp, error)
 	PING(context.Context, *PingTrackReq) (*PingTrackResp, error)
 	GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error)
+	CancelWorkout(context.Context, *CancelWorkoutReq) (*CancelWorkoutResp, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedTrackerServiceServer) PING(context.Context, *PingTrackReq) (*
 }
 func (UnimplementedTrackerServiceServer) GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetHealth not implemented")
+}
+func (UnimplementedTrackerServiceServer) CancelWorkout(context.Context, *CancelWorkoutReq) (*CancelWorkoutResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelWorkout not implemented")
 }
 func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
 func (UnimplementedTrackerServiceServer) testEmbeddedByValue()                        {}
@@ -240,6 +256,24 @@ func _TrackerService_GetHealth_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackerService_CancelWorkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelWorkoutReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).CancelWorkout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_CancelWorkout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).CancelWorkout(ctx, req.(*CancelWorkoutReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TrackerService_ServiceDesc is the grpc.ServiceDesc for TrackerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetHealth",
 			Handler:    _TrackerService_GetHealth_Handler,
+		},
+		{
+			MethodName: "CancelWorkout",
+			Handler:    _TrackerService_CancelWorkout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

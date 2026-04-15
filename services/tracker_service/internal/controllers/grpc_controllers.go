@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"tracker_service/internal/models"
 	"tracker_service/internal/services"
@@ -61,26 +62,46 @@ func (t *TrackerController) StartWorkoutWithPlan(ctx context.Context, in *tracke
 }
 func (t *TrackerController) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (*trackerpb.EndWorkoutResp, error) {
 
-	// fmt.Println("in", in)
-
 	tracker := convertToLocal(in)
 
-	err := t.service.EndWorkoutSer(ctx, in.UserId, &tracker)
+	msg, err := t.service.EndWorkoutSer(ctx, in.UserId, &tracker)
 	if err != nil {
+		var target *myerrors.Conflict
+		if errors.As(err, &target){
+
+			resp := trackerpb.EndWorkoutResp{
+				RequestStatus: target.RequestStatus,
+				Message: target.Message,
+				Reason: target.Reason.Error(),
+				ExerciseNames: target.ExerciseNames,
+				ConflictOccured: true,
+			}
+
+			return &resp, nil
+		}
+
 		return nil, err
 	}
+	
+	resp := trackerpb.EndWorkoutResp{}
 
-	resp := trackerpb.EndWorkoutResp{
-		Message: "workout ended successfully",
+	switch msg {
+	case nil:
+		resp.Message = "workout ended successfully"
+	default:
+		resp.Message = *msg
 	}
 
 	return &resp, nil
 }
+
 func (a *TrackerController) PING(ctx context.Context, in *trackerpb.PingTrackReq) (*trackerpb.PingTrackResp, error) {
 	r := trackerpb.PingTrackResp{}
 
 	return &r, nil
 }
+
+
 func (a *TrackerController) GetHealth(ctx context.Context, in *trackerpb.GetHealthReq) (*trackerpb.GetHealthResp, error) {
 
 	resp := trackerpb.GetHealthResp{}
@@ -93,11 +114,30 @@ func (a *TrackerController) GetHealth(ctx context.Context, in *trackerpb.GetHeal
 	return &resp, nil
 }
 
+func (a *TrackerController) CancelWorkout(ctx context.Context, in *trackerpb.CancelWorkoutReq) (*trackerpb.CancelWorkoutResp, error) {
+
+	err := a.service.CancelWorkout(ctx, in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := trackerpb.CancelWorkoutResp{
+		Message: "workout has been successfully canceled",
+	}
+
+	return &resp, nil
+}
+
 
 
 func convertToLocal(in *trackerpb.EndWorkoutReq) models.Tracker {
 
 	main := models.Tracker{}
+
+	if in.UserResponse {
+		main.UserResponse = in.UserResponse
+		return main
+	}
 
 	for _, eachExer := range in.AllExerices {
 		w := models.Workout{

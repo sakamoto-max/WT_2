@@ -15,6 +15,7 @@ type Workout struct {
 }
 
 type Tracker struct {
+	UserResponse string `json:"user_response"`
 	Workout []Workout `json:"workout"`
 }
 

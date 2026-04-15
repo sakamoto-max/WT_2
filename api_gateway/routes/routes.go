@@ -43,6 +43,7 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/workout/empty", h.StartEmptyWorkout)
 	r.With(middleware.JwtMiddleware).Post("/wt/workout", h.StartWorkoutWithPlan)
 	r.With(middleware.JwtMiddleware).Post("/wt/workout/end", h.EndWorkout)
+	r.With(middleware.JwtMiddleware).Post("/wt/workout/cancel", h.CancelWorkout)
 
 	return r
 }
