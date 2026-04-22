@@ -1,9 +1,9 @@
 package main
 
 import (
-	// "context"
 	"os"
 	"os/signal"
+	"plan_service/internal/client"
 	"plan_service/internal/mq_consumer/consumer"
 	"plan_service/internal/mq_consumer/worker"
 	"plan_service/internal/repository"
@@ -37,7 +37,9 @@ func main() {
 
 	jobs := make(chan types.Data, numberOfWorkers*2)
 
-	workers := worker.MakeWorkers(numberOfWorkers, repo, logger, jobs, resQueue)
+	exerClient := client.New()
+	
+	workers := worker.MakeWorkers(numberOfWorkers, repo, logger, jobs, resQueue, exerClient.Client)
 
 	var workerWg sync.WaitGroup
 
@@ -65,65 +67,3 @@ func main() {
 	}
 
 }
-
-// msgs, err := Planqueue.Ch.Consume(string(enum.PlanQueue), "", true, false, false, false, nil)
-// if err != nil {
-// 	fmt.Printf("error occured while getting data from mq : %v", err)
-// }
-
-// log.Println("plan consumer has started")
-
-// ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-// defer cancel()
-
-// for msg := range msgs {
-// 	switch msg.CorrelationId {
-// 	case string(enum.EmptyPlanCrrId):
-// 		data := utils.ConvertIntoJosn(&msg.Body)
-
-// 		_, err := service.CreateEmptyPlan(context.TODO(), data.Payload["user_id"])
-// 		if err != nil {
-
-// 			log.Printf("error creating empty plan for  %v : %v", data.Payload["user_id"], err)
-
-// 			data := &mq.TaskFailed{
-// 				Id:            data.Id,
-// 				TargerService: string(enum.PlanService),
-// 				OriginatedBy:  string(enum.AuthService),
-// 				TaskName:      data.Task,
-// 				DbUpdateValue: string(enum.TaskNotCompleted),
-// 			}
-
-// 			dataInBytes, _ := utils.ConvertIntoBytes(data)
-
-// 			err := ResQueue.Publish(ctx, dataInBytes, string(enum.ApplicationJsonType))
-
-// 			if err != nil {
-// 				log.Printf("task failed to send back : db_id : %v, originated_by : %v, err:%v", data.Id, data.OriginatedBy, err)
-// 			}
-
-// 			log.Println("data sent back to orc")
-// 		}
-
-// 		// d := queue.TaskStatus{
-// 		// 	Id:            data.Id,
-// 		// 	TargetService: string(enum.PlanService),
-// 		// 	OriginatedBy:  string(enum.AuthService),
-// 		// 	TaskName:      data.Task,
-// 		// 	DbUpdateValue: string(enum.TaskCompleted),
-// 		// }
-
-// 		// dataInBytes, _ := utils.ConvertIntoBytes(d)
-
-// 		// err = ResQueue.Publish(ctx, dataInBytes, string(enum.ApplicationJsonType))
-// 		// if err != nil {
-// 			// fmt.Println("err occured while sending back : %w", err)
-// 			// outbox this
-// 		// }
-
-// 		log.Println("data sent back to orc")
-// 	}
-
-// }
-
-// <-forever

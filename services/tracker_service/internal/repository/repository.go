@@ -136,14 +136,12 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tra
 
 	for _, dataForEachExercise := range data.Workout {
 		exerciseId := dataForEachExercise.ExerciseId
-		for _, repsPlusWeight := range dataForEachExercise.RepsWeight {
-
-			currentSet := 1
+		for i, repsPlusWeight := range dataForEachExercise.RepsWeight {
 
 			_, err := trnx.Exec(ctx, query, pgx.NamedArgs{
 				"tracker_id":  trackerId,
 				"exercise_id": exerciseId,
-				"set_number":  currentSet,
+				"set_number":  i + 1,
 				"weight":      repsPlusWeight.Weight,
 				"reps":        repsPlusWeight.Reps,
 			})
@@ -151,8 +149,6 @@ func (d *DBs) EndWorkout(ctx context.Context, trackerId string, data *models.Tra
 			if err != nil {
 				return myerrors.InternalServerErrMaker(fmt.Errorf("failed to upload data into db : %w", err))
 			}
-
-			currentSet = currentSet + 1
 		}
 
 	}
@@ -548,14 +544,15 @@ func (d *DBs) GetUserTrackerData(ctx context.Context, userId string) (*models.Tr
 				return nil, myerrors.InternalServerErrMaker(fmt.Errorf("error getting weight : %w", err))
 			}
 
-			weight, err := strconv.Atoi(weightString)
+			// weight, err := strconv.Atoi(weightString)
+			weight, err := strconv.ParseFloat(weightString, 32)
 			if err != nil {
-				return nil, myerrors.InternalServerErrMaker(fmt.Errorf("error converting weight from string to int : %w", err))
+				return nil, myerrors.InternalServerErrMaker(fmt.Errorf("error converting weight from string to float : %w", err))
 			}
 
 			rW := models.Reps{
 				Reps:   reps,
-				Weight: weight,
+				Weight: float32(weight),
 			}
 
 			repsAndWeight = append(repsAndWeight, rW)

@@ -3,9 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
-
 	myErrs "wt/pkg/my_errors"
-
 	"github.com/jackc/pgx/v5"
 )
 

@@ -29,7 +29,7 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Patch("/wt/user/email", h.ChangeEmail)
 
 	r.With(middleware.JwtMiddleware).Get("/wt/exercises", h.GetAllExercises)
-	r.With(middleware.JwtMiddleware).Get("/wt/exercises/single", h.GetExerciseByName)
+	r.With(middleware.JwtMiddleware).Get("/wt/exercises/{exerciseName}", h.GetExerciseByName)
 	r.With(middleware.JwtMiddleware).Post("/wt/exercises", h.CreateExercise)
 	r.With(middleware.JwtMiddleware).Delete("/wt/exercises", h.DeleteExecise)
 

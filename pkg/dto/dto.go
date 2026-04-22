@@ -1,6 +1,5 @@
 package dto
 
-// import "time"
 
 type OverAllStatus struct {
 	Status      string             `json:"status"`

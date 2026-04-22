@@ -47,8 +47,11 @@ func JwtMiddleware(next http.Handler) http.Handler {
 
 }
 
-func GetClaims(ctx context.Context) *jwt.JwtClaims {
-	claims := ctx.Value(claimsContextKey).(*jwt.JwtClaims)
-	return claims
+func GetClaims(ctx context.Context) (*jwt.JwtClaims, error) {
+	claims, ok := ctx.Value(claimsContextKey).(*jwt.JwtClaims)
+	if !ok {
+		return nil, fmt.Errorf("error getting claims")
+	}
+	return claims, nil
 }
 

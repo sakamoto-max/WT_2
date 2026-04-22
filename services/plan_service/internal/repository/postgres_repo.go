@@ -52,7 +52,6 @@ func (d *DBs) CreatePlan(ctx context.Context, userId string, planName string, ex
 	`
 
 	for _, exerciseId := range exerciseIds {
-		fmt.Println(exerciseId)
 		_, err := trnx.Exec(ctx, query, pgx.NamedArgs{"planId": planId, "exerciseId": exerciseId})
 		if err != nil {
 			var pgErr *pgConn.PgError

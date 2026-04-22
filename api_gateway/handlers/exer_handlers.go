@@ -17,9 +17,18 @@ import (
 
 func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
-	claims := middleware.GetClaims(r.Context())
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("CREATE_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
 
@@ -45,7 +54,7 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.exerClient.CreateExercise(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -64,39 +73,40 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 	utils.CreatedWriter(w, resp)
 	logger.Log.Infow("EXERCISE_CREATION_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
+
 func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
 	logger.Log.Infow("GET_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
 
-	var userInput user.ExerciseName
-
-	json.NewDecoder(r.Body).Decode(&userInput)
-	fmt.Println(userInput)
-
-	validationErr, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErr)
-		return
-	}
+	Name := r.PathValue("exerciseName")
 
 	fmt.Println("making the in")
 
 	in := exerpb.SendExerciseName{
-		ExerciseName: userInput.Name,
+		ExerciseName: Name,
 		UserId:       claims.UserId,
 	}
 
 	fmt.Println("sending the in")
 	res, err := h.exerClient.GetOneExercise(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -111,15 +121,24 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 
 	utils.OkRespWriter(w, resp)
 	logger.Log.Infow("GET_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
-	// logger.Info("USER_REQUESTED_EXERCISE_BY_NAME", "user_id", 1)
 }
+
 func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("GET_ALL_EXERCISES_CALLED", zap.String("REQ_ID", reqId))
-	
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
@@ -127,11 +146,12 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.exerClient.GetAllExercises(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
+		return
 	}
-	
+
 	var resp user.AllExercisesResp
-	
+
 	for _, eachExer := range res.AllExericses {
 		exer := user.Exercise{
 			Id:        eachExer.Id,
@@ -141,7 +161,7 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: eachExer.CreatedAt.AsTime(),
 			UpdatedAt: eachExer.UpdatedAt.AsTime(),
 		}
-		
+
 		resp.Exercises = append(resp.Exercises, exer)
 	}
 
@@ -151,33 +171,42 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 	// logger.Info("USER_REQUESTED_ALL_EXERCISES", "user_id", 1)
 	logger.Log.Infow("GET_ALL_EXERCISES_SUCCESSFUL", zap.String("REQ_ID", reqId))
 }
+
 func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("DELETE_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
-	
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-	
-	
+
 	var userInput user.ExerciseName
 
 	json.NewDecoder(r.Body).Decode(&userInput)
-	
+
 	validationErr, errOccured := userInput.Validate()
 	if errOccured {
 		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
-	
+
 	in := exerpb.SendExerciseName{
 		ExerciseName: userInput.Name,
 		UserId:       claims.UserId,
 	}
-	
+
 	resp, err := h.exerClient.DeleteExercise(ctx, &in)
 	if err != nil {
 		myerrors.ErrMatcher(w, err)
@@ -185,7 +214,7 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.DeletedNotFoundWriter(w, resp)
-	// logger.Info("USER_DELETED_EXERCISE", "user_id", 1)
 	logger.Log.Infow("DELETE_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
+
 func (h *Handler) UpdateExercise(w http.ResponseWriter, r *http.Request) {}

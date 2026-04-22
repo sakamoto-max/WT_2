@@ -20,9 +20,18 @@ import (
 
 func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("START_EMPTY_WORKOUT_CALLED", zap.String("REQ_ID", reqId))
 
@@ -47,9 +56,18 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("START_WORKOUT_WITH_PLAN_CALLED", zap.String("REQ_ID", reqId))
 
@@ -84,9 +102,18 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("END_WORKOUT_CALLED", zap.String("REQ_ID", reqId))
 
@@ -145,7 +172,7 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 		for _, eachExer := range allExercises.RepsWeight {
 			rw := trackpb.SetsAndReps{}
 			rw.Reps = int64(eachExer.Reps)
-			rw.Weight = int64(eachExer.Weight)
+			rw.Weight = eachExer.Weight
 
 			allExer.SetsAndReps = append(allExer.SetsAndReps, &rw)
 		}
@@ -183,8 +210,6 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	utils.OkRespWriter(w, resp)
 
 	logger.Log.Infow("END_WORKOUT_TRACKED", zap.String("REQ_ID", reqId))
-	return
-
 	// validationErrs, errOccured := userInput.Validate()
 	// if errOccured {
 	// 	utils.ValidationErrWriter(w, *validationErrs)
@@ -194,19 +219,26 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CancelWorkout(w http.ResponseWriter, r *http.Request) {
 
-	claims := middleware.GetClaims(r.Context())
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("CANCEL_WORKOUT_CALLED", zap.String("REQ_ID", reqId))
-	
-	
+
 	in := trackpb.CancelWorkoutReq{
 		UserId: claims.UserId,
 	}
-	
 
-	ctx, cancel := context.WithTimeout(r.Context(), time.Second * 5)
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
 	resp, err := h.trackClient.CancelWorkout(ctx, &in)
@@ -216,9 +248,10 @@ func (h *Handler) CancelWorkout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.OkRespWriter(w, resp)
-	
+
 	logger.Log.Infow("CANCEL_WORKOUT_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
+
 // {
 // 	"exercises" : [
 // 		{

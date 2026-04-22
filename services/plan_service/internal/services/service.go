@@ -83,6 +83,8 @@ func (s *Service) GetAllPlansSer(ctx context.Context, userId string) (int, *[]mo
 
 }
 
+// planName -> planid
+// 
 // DONE
 func (s *Service) GetPlanByNameSer(ctx context.Context, userId string, planName string) (string, string, *[]string, error) {
 

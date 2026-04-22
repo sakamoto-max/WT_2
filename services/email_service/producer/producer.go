@@ -30,7 +30,7 @@ func (p *Producer) TaskFailed(dBId string, originatedBy string, taskName string)
 	d := queue.NewTaskStatus(dBId, targerService, originatedBy, taskName, dbUpdateValue)
 	dataInBytes := d.ConvertToBytes()
 
-	err := p.resQueue.Publish(context.TODO(), dataInBytes, string(enum.ApplicationJsonType))
+	err := p.resQueue.Publish(context.TODO(), dataInBytes)
 	if err != nil{
 		p.logger.Log.Errorw(
 			"failed to push to result queue",
@@ -49,7 +49,7 @@ func (p *Producer) TaskCompleted(dBId string, originatedBy string, taskName stri
 	d := queue.NewTaskStatus(dBId, targerService, originatedBy, taskName, dbUpdateValue)
 	dataInBytes := d.ConvertToBytes()
 
-	err := p.resQueue.Publish(context.TODO(), dataInBytes, string(enum.ApplicationJsonType))
+	err := p.resQueue.Publish(context.TODO(), dataInBytes)
 	if err != nil{
 		p.logger.Log.Errorw(
 			"failed to push to result queue",

@@ -59,10 +59,20 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 
 		switch msg.Task{
 		case string(enum.SendEmailforSigningUp):
-			err := w.service.SendWelcomeEmail(msg.Payload["email"])
+
+			email, err := msg.GetEmail()
+			if err != nil {
+				w.logger.Log.Errorw(
+					"error getting email",
+					zap.Int("worker_id", w.id),
+					zap.Error(err),
+				)
+			}
+
+			err = w.service.SendWelcomeEmail(email)
 			if err != nil{
 				w.producer.TaskFailed(msg.Id, string(enum.AuthService), msg.Task)
-				w.logger.Log.Errorw("error occured while sending email", zap.Int("worker_id", w.id), zap.String("email", msg.Payload["email"]), zap.Error(err))
+				w.logger.Log.Errorw("error occured while sending email", zap.Int("worker_id", w.id), zap.String("email", email), zap.Error(err))
 			}
 		}
 

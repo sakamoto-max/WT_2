@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"wt/pkg/logger"
 )
@@ -20,8 +21,11 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-func GetLogger(ctx context.Context) *logger.MyLogger {
-	logger := ctx.Value(loggerContextKey).(*logger.MyLogger)
+func GetLogger(ctx context.Context) (*logger.MyLogger, error) {
+	logger, ok := ctx.Value(loggerContextKey).(*logger.MyLogger)
+	if !ok {
+		return nil, fmt.Errorf("error getting the logger")
+	}
 
-	return logger
+	return logger, nil
 }

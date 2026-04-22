@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	myerrors "wt/pkg/my_errors"
-
-	// "github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 

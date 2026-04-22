@@ -5,7 +5,7 @@ type PlanName struct {
 }
 
 type Reps struct {
-	Weight int `json:"weight"`
+	Weight float32 `json:"weight"`
 	Reps int `json:"reps"`
 }
 

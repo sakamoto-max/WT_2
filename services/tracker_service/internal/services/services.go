@@ -102,11 +102,6 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, pl
 
 func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *models.Tracker) (*string, error) {
 
-	// yes, err := s.Db.CheckIfWorkoutIsOngoing(ctx, userId)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	trackerId, err := s.db.GetTrackerId(ctx, userId)
 	if err != nil {
 		return nil, err

@@ -18,21 +18,14 @@ import (
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
-	// a := r.URL
-
-	// a.Query().Get()
-
-	// page
-	// limit
-	// order_by
-	// filter
-	// after_date
-	// before_date
-
-	
-
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
@@ -80,8 +73,14 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
 
 	logger.Log.Infow("USER_LOGIN_CALLED", zap.String("REQ_ID", reqId))
 
@@ -114,17 +113,25 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
-	
+
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+
 	logger.Log.Infow("USER_LOGOUT_CALLED", zap.String("REQ_ID", reqId))
-	
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	claims := middleware.GetClaims(ctx)
-	
 	in := authpb.SendUserId{
 		UserId: claims.UserId,
 	}
@@ -137,21 +144,27 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	utils.OkRespWriter(w, resp)
 	logger.Log.Infow("USER_LOGOUT_SUCCESSFULL", zap.String("REQ_ID", reqId))
-	
+
 }
 
 func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
-	
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
-	
+
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+
 	logger.Log.Infow("NEW_ACCESS_TOKEN_CALLED", zap.String("REQ_ID", reqId))
-	
+
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-	
+
 	var userInput user.UUIDReader
-	
+
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	validationErr, errOccured := userInput.Validate()
@@ -159,32 +172,40 @@ func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 		utils.ValidationErrWriter(w, *validationErr)
 		return
 	}
-	
+
 	in := authpb.SendUUID{
 		UUID: userInput.UUID,
 	}
-	
+
 	resp, err := h.authClient.GetNewAccessToken(ctx, &in)
 	if err != nil {
 		utils.BadReq(w, err)
 		return
 	}
-	
+
 	utils.CreatedWriter(w, resp)
 
 	logger.Log.Infow("NEW_ACCESS_TOKEN_CREATED", zap.String("REQ_ID", reqId))
 }
 
 func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
-	
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
-	
+
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+
 	logger.Log.Infow("USER_PASSWORD_CHANGE_CALLED", zap.String("REQ_ID", reqId))
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-	
-	claims := middleware.GetClaims(ctx)
 
 	var userInput user.ChangePass
 
@@ -201,7 +222,7 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 		OldPass: userInput.OldPass,
 		NewPass: userInput.NewPass,
 	}
-	
+
 	resp, err := h.authClient.ChangePass(ctx, &in)
 	if err != nil {
 		utils.BadReq(w, err)
@@ -214,15 +235,23 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 
-	logger := middleware.GetLogger(r.Context())
-	reqId := middleware.GetReqId(r.Context())
-	
+	logger, err := middleware.GetLogger(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	reqId, err := middleware.GetReqId(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+	claims, err := middleware.GetClaims(r.Context())
+	if err != nil {
+		utils.InternalServerErr(w, err)
+	}
+
 	logger.Log.Infow("USER_EMAIL_CHANGE_CALLED", zap.String("REQ_ID", reqId))
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
-	
-	claims := middleware.GetClaims(ctx)
 
 	var userInput user.ChangeEmail
 
@@ -244,7 +273,7 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		myerrors.ErrMatcher(w, err)
 		return
 	}
-	
+
 	utils.OkRespWriter(w, resp)
 	logger.Log.Infow("USER_EMAIL_CHANGE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }

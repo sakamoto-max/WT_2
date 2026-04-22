@@ -1,16 +1,13 @@
 package repository
 
 import (
-	// customerrors "auth_service/internal/custom_errors"
-	"auth_service/internal/models"
-	// "auth_service/internal/utils"
+	"auth_service/internal/domain"
 	"context"
 	"errors"
 	"fmt"
 	"time"
 	"wt/pkg/enum"
 	myErrs "wt/pkg/my_errors"
-
 	"wt/pkg/utils"
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
@@ -60,11 +57,12 @@ func (r *Repo) CreateUser(ctx context.Context, name string, email string, hashed
 		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
 	}
 
-	dataForPlan := models.EmptyPayload{
+
+	dataForPlan := domain.EmptyPayload{
 		UserId: userId,
 	}
 
-	dataForEmail := models.EmailPayload{
+	dataForEmail := domain.EmailPayload{
 		Email: email,
 	}
 

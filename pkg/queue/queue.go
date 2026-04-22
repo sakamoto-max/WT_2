@@ -40,21 +40,20 @@ type TaskSuccess struct {
 
 type TaskStatus struct {
 	Id string
-	targetService string
-	originatedBy string
+	SentBy string
+	TargetService string
 	taskName string
 	dbUpdateValue string
 	taskStatus string
 }
 
-func NewTaskStatus(id string, targerService string, originatedBy string, taskName string, dbUpdateValue string) *TaskStatus {
+func NewTaskStatus(id string, sentBy string, targerService string, taskName string, dbUpdateValue string) *TaskStatus {
 	return &TaskStatus{
 		Id: id,
-		targetService: targerService,
-		originatedBy: originatedBy,
+		SentBy: sentBy,
+		TargetService: targerService,
 		taskName: taskName,
 		dbUpdateValue: dbUpdateValue,
-		// taskStatus: taskStatus,
 	}
 }
 
@@ -72,9 +71,9 @@ func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
 	return &MessageQueue{Ch: channel, queue: &queue}
 }
 
-func (m *MessageQueue) Publish(ctx context.Context, data *[]byte, contentType string) error {
+func (m *MessageQueue) Publish(ctx context.Context, data *[]byte) error {
 	msg := amqp.Publishing{
-		ContentType: contentType,
+		ContentType: string(enum.ApplicationJsonType),
 		Body:        *data,
 		CorrelationId: string(enum.EmptyPlanCrrId),
 	}

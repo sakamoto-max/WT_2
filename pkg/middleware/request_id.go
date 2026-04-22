@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -22,10 +23,13 @@ func ReqIdGenerator(next http.Handler) http.Handler {
 	})
 }
 
-func GetReqId(ctx context.Context) (string) {
+func GetReqId(ctx context.Context) (string, error) {
 
-	reqId := ctx.Value(ReqIdContextKey).(string)
-	return reqId
+	reqId, ok := ctx.Value(ReqIdContextKey).(string)
+	if !ok {
+		return "", fmt.Errorf("error getting the req id")
+	}
+	return reqId, nil
 
 }
 

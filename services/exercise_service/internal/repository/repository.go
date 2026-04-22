@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"exercise_service/internal/models"
+	"exercise_service/internal/domain"
 	"fmt"
 	"time"
 	enum "wt/pkg/enum"
@@ -11,9 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	// "github.com/redis/go-redis/v9"
 )
-
 
 func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
@@ -37,9 +35,9 @@ func (r *Repo) GetRedisRespTime(ctx context.Context) *time.Duration {
 
 	return &timeEnd
 }
-func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*models.Exercise2, error) {
+func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
 
-	var exercise models.Exercise2
+	var exercise domain.Exercise
 	query := `
 			SELECT 
 			EXERCISES.ID, 
@@ -81,17 +79,19 @@ func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseNam
 }
 
 var (
-	id string = "id"
-	bodyPart string = "body_part"
+	id        string = "id"
+	bodyPart  string = "body_part"
 	equipment string = "equipment"
 	createdAt string = "created_at"
 	updatedAt string = "updated_at"
 )
-func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*models.Exercise2, error) {
+
+func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
+	
 	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerciseName)
 
 	res, err := r.rDB.HGetAll(ctx, key).Result()
-	if err != nil{
+	if err != nil {
 		return nil, fmt.Errorf("failed to get exercise by name from cache : %w", err)
 	}
 
@@ -108,10 +108,10 @@ func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseNa
 	bodyPart := res[bodyPart]
 	equipment := res[equipment]
 
-	data := models.Exercise2{
-		Id: id,
-		Name: name,
-		BodyPart: bodyPart,
+	data := domain.Exercise{
+		Id:        id,
+		Name:      name,
+		BodyPart:  bodyPart,
 		Equipment: equipment,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
@@ -120,11 +120,23 @@ func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseNa
 	return &data, nil
 }
 
-func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *models.Exercise2) error {
-	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerData.Name)
+func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *domain.Exercise) error {
+	mainKey := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerData.Name)
+	idKey := "id"
+	bodyPartKey := "body_part"
+	equipmentKey := "equipment"
+	createdAtKey := "created_at"
+	updatedAtKey := "updated_at"
 
-	err := r.rDB.HSet(ctx, key, id, exerData.Id, bodyPart, exerData.BodyPart, equipment, exerData.Equipment, createdAt, exerData.CreatedAt, updatedAt, exerData.UpdatedAt).Err()
-	if err != nil{
+	err := r.rDB.HSet(ctx, mainKey,
+		idKey, exerData.Id,
+		bodyPartKey, exerData.BodyPart,
+		equipmentKey, exerData.Equipment,
+		createdAtKey, exerData.CreatedAt,
+		updatedAtKey, exerData.UpdatedAt,
+	).Err()
+
+	if err != nil {
 		return fmt.Errorf("error setting exercise %v in redis : %w", exerData.Name, err)
 	}
 
@@ -187,9 +199,8 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 
 	return Id.String(), nil
 }
-func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Exercise2, error) {
-	// HSET ALLEXERCISES EXERCISE_NAME 
-
+func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error) {
+	// HSET ALLEXERCISES EXERCISE_NAME
 
 	query := `
 		SELECT 
@@ -219,7 +230,7 @@ func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Ex
 			(CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL;
 	`
 
-	var allExercises []models.Exercise2
+	var allExercises []domain.Exercise
 
 	rows, err := r.pDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
 	if err != nil {
@@ -243,7 +254,7 @@ func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]models.Ex
 			return nil, myerrs.InternalServerErrMaker(err)
 		}
 
-		exercise := models.Exercise2{
+		exercise := domain.Exercise{
 			Id:        id,
 			Name:      exerciseName,
 			BodyPart:  bodyPart,
@@ -276,7 +287,7 @@ func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (stri
 
 	return exerciseName, nil
 }
-func (r *Repo) DeleteExecise(ctx context.Context, userId string,  exerciseName string) error {
+func (r *Repo) DeleteExecise(ctx context.Context, userId string, exerciseName string) error {
 	// if the exercise's created by is NULL -> move it to user nullified
 	// else delete the exercise
 
@@ -358,11 +369,11 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerci
 			TABLE_2.EXERCISE_ID IS NULL;	
 	`
 	var id string
-	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId" : userId}).Scan(&id)
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"exerciseName": exerciseName, "userId": userId}).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return id, myerrs.ResourceNotFoundErrMaker(exerciseName)
-		}    
+		}
 		return id, myerrs.InternalServerErrMaker(fmt.Errorf("error checking if the exericse exists : %v", err))
 	}
 

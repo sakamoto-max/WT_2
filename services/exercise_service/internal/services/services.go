@@ -2,9 +2,8 @@ package services
 
 import (
 	"context"
-	"exercise_service/internal/models"
+	"exercise_service/internal/domain"
 	"exercise_service/internal/repository"
-	"fmt"
 	"time"
 )
 
@@ -18,15 +17,13 @@ func NewService(r *repository.Repo) *Service {
 	}
 }
 
-func (s *Service) GetExerciseByNameSer(ctx context.Context, userID string, exerciseName string) (*models.Exercise2, error) {
-	fmt.Println("entered service")
-	var Exercise *models.Exercise2
+func (s *Service) GetExerciseByName(ctx context.Context, userID string, exerciseName string) (*domain.Exercise, error) {
+
+	var Exercise *domain.Exercise
 	Exercise, err := s.DB.GetExerciseByNameR(ctx, userID, exerciseName)
 	if err != nil{
 		return nil, err
 	}
-	fmt.Println("redis completed")
-	fmt.Printf("exer after redis : %v", Exercise)
 
 	if Exercise == nil{
 		Exercise, err = s.DB.GetExerciseByName(ctx, userID, exerciseName)
@@ -43,7 +40,7 @@ func (s *Service) GetExerciseByNameSer(ctx context.Context, userID string, exerc
 	return Exercise, nil
 }
 
-func (s *Service) GetAllExercisesSer(ctx context.Context, userId string) (*[]models.Exercise2, error) {
+func (s *Service) GetAllExercisesSer(ctx context.Context, userId string) (*[]domain.Exercise, error) {
 	allExercises, err := s.DB.GetAllExercises(ctx, userId)
 	if err != nil {
 		return allExercises, err

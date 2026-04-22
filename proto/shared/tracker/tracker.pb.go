@@ -400,7 +400,7 @@ func (x *TrackerForEachExer) GetSetsAndReps() []*SetsAndReps {
 
 type SetsAndReps struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Weight        int64                  `protobuf:"varint,1,opt,name=weight,proto3" json:"weight,omitempty"`
+	Weight        float32                `protobuf:"fixed32,1,opt,name=weight,proto3" json:"weight,omitempty"`
 	Reps          int64                  `protobuf:"varint,2,opt,name=reps,proto3" json:"reps,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -436,7 +436,7 @@ func (*SetsAndReps) Descriptor() ([]byte, []int) {
 	return file_tracker_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *SetsAndReps) GetWeight() int64 {
+func (x *SetsAndReps) GetWeight() float32 {
 	if x != nil {
 		return x.Weight
 	}
@@ -751,7 +751,7 @@ const file_tracker_proto_rawDesc = "" +
 	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\x128\n" +
 	"\rsets_and_reps\x18\x02 \x03(\v2\x14.tracker.SetsAndRepsR\vsetsAndReps\"9\n" +
 	"\vSetsAndReps\x12\x16\n" +
-	"\x06weight\x18\x01 \x01(\x03R\x06weight\x12\x12\n" +
+	"\x06weight\x18\x01 \x01(\x02R\x06weight\x12\x12\n" +
 	"\x04reps\x18\x02 \x01(\x03R\x04reps\"\xbb\x01\n" +
 	"\x0eEndWorkoutResp\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12%\n" +
