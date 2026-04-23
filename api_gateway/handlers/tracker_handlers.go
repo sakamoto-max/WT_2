@@ -8,13 +8,10 @@ import (
 	"net/http"
 	"time"
 	trackpb "workout-tracker/proto/shared/tracker"
-	"wt/pkg/user"
-
-	// token "wt/pkg/jwt"
+	"api_gateway/user"
 	"wt/pkg/middleware"
 	myerrors "wt/pkg/my_errors"
 	"wt/pkg/utils"
-
 	"go.uber.org/zap"
 )
 
@@ -78,12 +75,11 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
-
 	in := trackpb.StartWorkoutWithPlanReq{
 		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,

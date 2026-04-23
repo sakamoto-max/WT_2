@@ -10,7 +10,8 @@ import (
 	"wt/pkg/enum"
 	"wt/pkg/middleware"
 	myerrors "wt/pkg/my_errors"
-	"wt/pkg/user"
+
+	"api_gateway/user"
 	"wt/pkg/utils"
 
 	"go.uber.org/zap"
@@ -36,9 +37,9 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -55,7 +56,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.authClient.UserSignUp(ctx, &in)
 	if err != nil {
-		myerrors.ErrMatcher2(w, err, logger)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -91,9 +92,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErr, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErr)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -167,9 +168,9 @@ func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErr, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErr)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -211,9 +212,9 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -257,9 +258,9 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 

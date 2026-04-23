@@ -51,6 +51,7 @@ func (j *JwtToken) GenerateAccessToken(userId string, roleId string) (string, er
 	return accessToken, nil
 }
 
+
 func (j *JwtToken) GenerateRefreshToken(userId string, roleId string) (string, error) {
 
 	var refreshToken string

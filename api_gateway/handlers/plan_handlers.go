@@ -8,7 +8,9 @@ import (
 	planpb "workout-tracker/proto/shared/plan"
 	"wt/pkg/middleware"
 	myerrors "wt/pkg/my_errors"
-	"wt/pkg/user"
+
+	// "wt/pkg/user"
+	"api_gateway/user"
 	"wt/pkg/utils"
 
 	"go.uber.org/zap"
@@ -37,9 +39,9 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -115,12 +117,11 @@ func (h *Handler) GetPLanByName(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
-
 	in := planpb.GetPlanByNameReq{
 		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,
@@ -159,9 +160,9 @@ func (h *Handler) AddExercisesToPlan(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -203,9 +204,9 @@ func (h *Handler) DeleteExerciseFromPlan(w http.ResponseWriter, r *http.Request)
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -248,12 +249,11 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErrs, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErrs)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
-
 	in := planpb.DeletePlanReq{
 		UserId:   claims.UserId,
 		PlanName: userInput.PlanName,

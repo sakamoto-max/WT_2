@@ -9,7 +9,9 @@ import (
 	exerpb "workout-tracker/proto/shared/exercise"
 	"wt/pkg/middleware"
 	myerrors "wt/pkg/my_errors"
-	"wt/pkg/user"
+
+	// "wt/pkg/user"
+	"api_gateway/user"
 	"wt/pkg/utils"
 
 	"go.uber.org/zap"
@@ -39,9 +41,9 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErr, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErr)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -196,9 +198,9 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
-	validationErr, errOccured := userInput.Validate()
-	if errOccured {
-		utils.ValidationErrWriter(w, *validationErr)
+	err = userInput.Validate()
+	if err != nil {
+		user.ValidationErrWriter(w, err)
 		return
 	}
 

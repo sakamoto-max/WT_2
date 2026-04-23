@@ -10,8 +10,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-
-
 func NewConn() *amqp.Connection {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
@@ -26,33 +24,28 @@ type MessageQueue struct {
 	queue *amqp.Queue
 }
 
-type TaskFailed struct {
-	Id string
-	TargerService string
-	OriginatedBy string
-	TaskName string
-	DbUpdateValue string
-}
+func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
+	channel := createChannel(conn)
+	queue := createQueue(channel, QueueName)
 
-type TaskSuccess struct {
-
+	return &MessageQueue{Ch: channel, queue: &queue}
 }
 
 type TaskStatus struct {
-	Id string
-	SentBy string
+	Id            string
+	SentBy        string
 	TargetService string
-	taskName string
+	taskName      string
 	dbUpdateValue string
-	taskStatus string
+	taskStatus    string
 }
 
 func NewTaskStatus(id string, sentBy string, targerService string, taskName string, dbUpdateValue string) *TaskStatus {
 	return &TaskStatus{
-		Id: id,
-		SentBy: sentBy,
+		Id:            id,
+		SentBy:        sentBy,
 		TargetService: targerService,
-		taskName: taskName,
+		taskName:      taskName,
 		dbUpdateValue: dbUpdateValue,
 	}
 }
@@ -62,19 +55,12 @@ func (t *TaskStatus) ConvertToBytes() *[]byte {
 	return dataInBytes
 }
 
-type ConsumerChan chan <-amqp.Delivery
-
-func NewMessageQueue(conn *amqp.Connection, QueueName string) *MessageQueue {
-	channel := createChannel(conn)
-	queue := createQueue(channel, QueueName)
-
-	return &MessageQueue{Ch: channel, queue: &queue}
-}
+type ConsumerChan chan<- amqp.Delivery
 
 func (m *MessageQueue) Publish(ctx context.Context, data *[]byte) error {
 	msg := amqp.Publishing{
-		ContentType: string(enum.ApplicationJsonType),
-		Body:        *data,
+		ContentType:   string(enum.ApplicationJsonType),
+		Body:          *data,
 		CorrelationId: string(enum.EmptyPlanCrrId),
 	}
 
@@ -86,7 +72,6 @@ func (m *MessageQueue) Publish(ctx context.Context, data *[]byte) error {
 	return nil
 }
 
-
 func (m *MessageQueue) Consume(queueName string) (<-chan amqp.Delivery, error) {
 	consumerChan, err := m.Ch.Consume(queueName, "", true, false, false, false, nil)
 	if err != nil {
@@ -95,8 +80,6 @@ func (m *MessageQueue) Consume(queueName string) (<-chan amqp.Delivery, error) {
 
 	return consumerChan, nil
 }
-
-
 
 func createChannel(conn *amqp.Connection) *amqp.Channel {
 	ch, err := conn.Channel()
@@ -114,5 +97,3 @@ func createQueue(ch *amqp.Channel, queueName string) amqp.Queue {
 
 	return queue
 }
-
-

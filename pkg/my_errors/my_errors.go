@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"wt/pkg/logger"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -87,12 +86,10 @@ func BadReqErrMaker(err error) error {
 	return st.Err()
 }
 
-
 func AlreadyExitsErrMaker(resource string) error {
 	st := status.Newf(codes.AlreadyExists, "%v already exists", resource)
 	return st.Err()
 }
-
 
 var (
 	ErrNotPerformed = errors.New("some exercises are not performed")
@@ -100,69 +97,17 @@ var (
 )
 
 type Conflict struct {
-	RequestStatus string `json:"request_status"`
-	Reason error `json:"reason"`
-	Message string `json:"message"`
+	RequestStatus string   `json:"request_status"`
+	Reason        error    `json:"reason"`
+	Message       string   `json:"message"`
 	ExerciseNames []string `json:"exercise_names,omitempty"`
 }
 
-
-func (c * Conflict) Error() string {
+func (c *Conflict) Error() string {
 	return c.Reason.Error()
 }
 
-// func ConflictErrMaker(data Conflict) *status.Status {
-// 	// st := 
-
-// 	// return st
-// }
-
 func ErrMatcher(w http.ResponseWriter, err error) {
-	st, _ := status.FromError(err)
-	code := st.Code()
-	switch code {
-	case codes.AlreadyExists:
-		appErr := &AppErrs{
-			code: CodeBadRequest,
-			Msg:  st.Message(),
-		}
-		appErr.AppErrWriter(w)
-	case codes.Internal:
-		log.Printf("error occured : %v", err)
-		appErr := &AppErrs{
-			code: CodeInternalServer,
-			Msg:  st.Message(),
-		}
-		appErr.AppErrWriter(w)
-	case codes.Canceled:
-		log.Printf("error occured : %v", err.Error())
-		appErr := &AppErrs{
-			code: CodeInternalServer,
-			Msg:  "server encountered a problem",
-		}
-		appErr.AppErrWriter(w)
-	case codes.Unavailable:
-		log.Printf("error occured : %v", err.Error())
-		appErr := &AppErrs{
-			code: CodeInternalServer,
-			Msg:  "server encountered a problem",
-		}
-		appErr.AppErrWriter(w)
-	case codes.PermissionDenied:
-		appErr := &AppErrs{
-			code: CodeBadRequest,
-			Msg:  st.Message(),
-		}
-		appErr.AppErrWriter(w)
-	case codes.NotFound:
-		appErr := &AppErrs{
-			code: CodeNotFound,
-			Msg:  st.Message(),
-		}
-		appErr.AppErrWriter(w)
-	}
-}
-func ErrMatcher2(w http.ResponseWriter, err error, logger *logger.MyLogger) {
 	st, _ := status.FromError(err)
 	code := st.Code()
 	switch code {
@@ -229,6 +174,6 @@ func ErrMaker(err error) error {
 		Err = status.Newf(codes.Internal, "some internal error occured : %v", err)
 	}
 	err = Err.Err()
-
+	
 	return err
 }

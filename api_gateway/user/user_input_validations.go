@@ -1,6 +1,10 @@
 package user
 
-import "errors"
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+)
 
 type ValidationErrs struct {
 	Path    string `json:"path"`
@@ -8,9 +12,19 @@ type ValidationErrs struct {
 	Type    string `json:"type,omitempty"`
 }
 
+type validationErrs []ValidationErrs
+
+func (v validationErrs) Error() string {
+	return "validation error occured"
+}
+
 var (
 	ErrValidationErr = errors.New("validation error occured")
 )
+
+type Validatable interface{
+	Validate() (error)
+}
 
 var (
 	errUserNameReq     = ValidationErrs{Path: "name", Message: "required"}
@@ -27,14 +41,14 @@ var (
 	ErrWeightReq       = ValidationErrs{Path: "reps", Message: "required"}
 	ErrPlanNameReq     = ValidationErrs{Path: "plan_name", Message: "required"}
 	ErrExercisesReq    = ValidationErrs{Path: "exercises", Message: "required", Type: "slice"}
-	ErrOldPassReq = ValidationErrs{Path: "old_password", Message: "required"}
-	ErrNewPassReq = ValidationErrs{Path: "new_password", Message: "required"}
-	ErrOldEmailReq = ValidationErrs{Path: "old_email", Message: "required"}
-	ErrNewEmailReq = ValidationErrs{Path: "new_email", Message: "required"}
+	ErrOldPassReq      = ValidationErrs{Path: "old_password", Message: "required"}
+	ErrNewPassReq      = ValidationErrs{Path: "new_password", Message: "required"}
+	ErrOldEmailReq     = ValidationErrs{Path: "old_email", Message: "required"}
+	ErrNewEmailReq     = ValidationErrs{Path: "new_email", Message: "required"}
 )
 
-func (c *ChangeEmail) Validate() (*[]ValidationErrs, bool) {	
-	var validationErrs []ValidationErrs
+func (c *ChangeEmail) Validate() (error) {
+	var validationErrs validationErrs
 
 	if c.OldEmail == "" {
 		validationErrs = append(validationErrs, ErrOldEmailReq)
@@ -45,15 +59,15 @@ func (c *ChangeEmail) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (t *Tracker) Validate() (*[]ValidationErrs, bool) {
+func (t *Tracker) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 
 	if len(t.Workout) == 0 {
 		validationErrs = append(validationErrs, ErrWorkoutReq)
@@ -81,16 +95,16 @@ func (t *Tracker) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 
 }
 
-func (s *Signup) Validate() (*[]ValidationErrs, bool) {
+func (s *Signup) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 
 	if s.Name == "" {
 		validationErrs = append(validationErrs, errUserNameReq)
@@ -105,15 +119,15 @@ func (s *Signup) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (l *Login) Validate() (*[]ValidationErrs, bool) {
+func (l *Login) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 	if l.Email == "" {
 		validationErrs = append(validationErrs, errUserEmailReq)
 	}
@@ -123,44 +137,42 @@ func (l *Login) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (u *UUIDReader) Validate() (*[]ValidationErrs, bool) {
+func (u *UUIDReader) Validate() (error) {
 
-	var validationErrs []ValidationErrs
-
-	// uuid := u.UUID.String()
+	var validationErrs validationErrs
 
 	if u.UUID == "" {
 		validationErrs = append(validationErrs, errUUIDReq)
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (e *ExerciseName) Validate() (*[]ValidationErrs, bool) {
+func (e *ExerciseName) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 
 	if e.Name == "" {
 		validationErrs = append(validationErrs, ErrExerciseNameReq)
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (e *Exercise) Validate() (*[]ValidationErrs, bool) {
+func (e *Exercise) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 
 	if e.Name == "" {
 		validationErrs = append(validationErrs, ErrExerciseNameReq)
@@ -175,14 +187,14 @@ func (e *Exercise) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (p *Plan) Validate() (*[]ValidationErrs, bool) {
-	var validationErrs []ValidationErrs
+func (p *Plan) Validate() (error) {
+	var validationErrs validationErrs
 
 	if p.PlanName == "" {
 		validationErrs = append(validationErrs, ErrPlanNameReq)
@@ -193,29 +205,29 @@ func (p *Plan) Validate() (*[]ValidationErrs, bool) {
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (p *PlanName) Validate() (*[]ValidationErrs, bool) {
-	var validationErrs []ValidationErrs
+func (p *PlanName) Validate() (error) {
+	var validationErrs validationErrs
 
 	if p.PlanName == "" {
 		validationErrs = append(validationErrs, ErrPlanNameReq)
 	}
 
 	if len(validationErrs) > 0 {
-		return &validationErrs, true
+		return validationErrs
 	}
 
-	return nil, false
+	return nil
 }
 
-func (c *ChangePass) Validate() (*[]ValidationErrs, bool) {
+func (c *ChangePass) Validate() (error) {
 
-	var validationErrs []ValidationErrs
+	var validationErrs validationErrs
 
 	if c.OldPass == "" {
 		validationErrs = append(validationErrs, ErrOldPassReq)
@@ -225,10 +237,16 @@ func (c *ChangePass) Validate() (*[]ValidationErrs, bool) {
 		validationErrs = append(validationErrs, ErrNewPassReq)
 	}
 
-	if len(validationErrs) > 0{
-		return &validationErrs, true
+	if len(validationErrs) > 0 {
+		return validationErrs
 	}
 
-	return &validationErrs, false
+	return nil
 
+}
+
+func ValidationErrWriter(w http.ResponseWriter, err error) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(err)
 }

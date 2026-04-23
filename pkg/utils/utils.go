@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"wt/pkg/types"
-	"wt/pkg/user"
 )
 
 func InternalServerErr(w http.ResponseWriter, err error) {
@@ -39,12 +38,7 @@ func DeletedNotFoundWriter(w http.ResponseWriter, resp any) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func ValidationErrWriter(w http.ResponseWriter, resp []user.ValidationErrs) {
 
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-	json.NewEncoder(w).Encode(resp)
-}
 
 func CreatedWriter(w http.ResponseWriter, resp any) {
 	w.Header().Set("Content-type", "application/json")
