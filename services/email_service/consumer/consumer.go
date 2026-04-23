@@ -1,11 +1,12 @@
 package consumer
 
 import (
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	"wt/pkg/queue"
-	"wt/pkg/types"
-	"wt/pkg/utils"
+
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/types"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 
 	"github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"

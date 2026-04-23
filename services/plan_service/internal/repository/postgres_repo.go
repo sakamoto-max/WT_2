@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"plan_service/internal/models"
 	"time"
-	"wt/pkg/enum"
-	myerrors "wt/pkg/my_errors"
+	// "wt/pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	// myerrors "wt/pkg/my_errors"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 
 	// "plan_service/internal/models"
 

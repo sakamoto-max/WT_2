@@ -7,8 +7,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"wt/pkg/logger"
-	pb "workout-tracker/proto/shared/auth"
+	// "wt/pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	// pb "workout-tracker/proto/shared/auth"
+	pb "github.com/sakamoto-max/wt_2-proto/shared/auth"
 	"google.golang.org/grpc"
 )
 

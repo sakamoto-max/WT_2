@@ -2,14 +2,14 @@ package client
 
 import (
 	"log"
-	exerpb "workout-tracker/proto/shared/exercise"
-
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type exerciseClient struct{
-	conn *grpc.ClientConn
+type exerciseClient struct {
+	conn   *grpc.ClientConn
 	Client exerpb.ExerciseServiceClient
 }
 
@@ -30,7 +30,7 @@ func New() *exerciseClient {
 	client := exerpb.NewExerciseServiceClient(conn)
 
 	return &exerciseClient{
-		conn: conn,
+		conn:   conn,
 		Client: client,
 	}
 }

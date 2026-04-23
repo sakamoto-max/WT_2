@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"api_gateway/handlers"
+	"github.com/sakamoto-max/wt_2/api_gateway/handlers"
 	// "net/http"
-	"wt/pkg/middleware"
+	// "wt/pkg/middleware"
+	"github.com/sakamoto-max/wt_2-pkg/middleware"
 
 	// chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"

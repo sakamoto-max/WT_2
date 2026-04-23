@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	token "wt/pkg/jwt"
-	myerrors "wt/pkg/my_errors"
+	// token "wt/pkg/jwt"
+	token "github.com/sakamoto-max/wt_2-pkg/jwt"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	// myerrors "wt/pkg/my_errors"
 	"github.com/google/uuid"
 )
 

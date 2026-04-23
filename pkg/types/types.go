@@ -12,7 +12,7 @@ type Data struct {
 	Status        string            `db:"status"`
 	Payload       map[string]any `db:"payload"`
 	CreatedAt     time.Time         `db:"created_at"`
-	NumberOfTries *int              `db:"number_of_tries"`
+	NumberOfTries *int              `db:"number_of_tries"`	
 }
 
 func (d *Data) GetUserId() (string, error) {

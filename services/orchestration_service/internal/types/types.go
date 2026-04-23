@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"wt/pkg/utils"
+	// "wt/pkg/utils"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 )
 
 type Data struct {

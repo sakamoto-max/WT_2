@@ -8,11 +8,15 @@ import (
 	"plan_service/internal/mq_consumer/worker"
 	"plan_service/internal/repository"
 	"sync"
-	"wt/pkg/enum"
-	"wt/pkg/env"
-	"wt/pkg/logger"
-	mq "wt/pkg/queue"
-	"wt/pkg/types"
+
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/env"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/types"
+	// planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+
+	// exerpb "workout-tracker/proto/shared/exercise"
 
 	"go.uber.org/zap"
 )
@@ -22,7 +26,6 @@ const numberOfWorkers = 5
 func main() {
 
 	env.Load("../../.env")
-
 	logger := logger.NewLogger()
 	defer logger.Log.Sync()
 
@@ -38,7 +41,7 @@ func main() {
 	jobs := make(chan types.Data, numberOfWorkers*2)
 
 	exerClient := client.New()
-	
+
 	workers := worker.MakeWorkers(numberOfWorkers, repo, logger, jobs, resQueue, exerClient.Client)
 
 	var workerWg sync.WaitGroup

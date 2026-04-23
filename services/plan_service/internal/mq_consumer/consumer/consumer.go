@@ -1,12 +1,11 @@
 package consumer
 
 import (
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	mq "wt/pkg/queue"
-	"wt/pkg/types"
-	"wt/pkg/utils"
-
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/types"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

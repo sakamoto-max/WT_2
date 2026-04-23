@@ -6,7 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	myErrs "wt/pkg/my_errors"
+	// myErrs "wt/pkg/my_errors"
+	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
 )
 
 var (

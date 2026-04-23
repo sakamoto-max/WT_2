@@ -2,8 +2,10 @@ package client
 
 import (
 	"log"
-	planpb "workout-tracker/proto/shared/plan"
-	exerpb "workout-tracker/proto/shared/exercise"
+	// planpb "workout-tracker/proto/shared/plan"
+	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

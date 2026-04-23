@@ -1,17 +1,21 @@
 package handlers
 
 import (
-	"api_gateway/responses"
+	"github.com/sakamoto-max/wt_2/api_gateway/responses"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
-	trackpb "workout-tracker/proto/shared/tracker"
-	"api_gateway/user"
-	"wt/pkg/middleware"
-	myerrors "wt/pkg/my_errors"
-	"wt/pkg/utils"
+
+	trackpb "github.com/sakamoto-max/wt_2-proto/shared/tracker"
+	"github.com/sakamoto-max/wt_2/api_gateway/user"
+	"github.com/sakamoto-max/wt_2-pkg/middleware"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
+	// "wt/pkg/middleware"
+	// myerrors "wt/pkg/my_errors"
+	// "wt/pkg/utils"
 	"go.uber.org/zap"
 )
 

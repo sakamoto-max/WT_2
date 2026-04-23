@@ -3,9 +3,9 @@ package handler
 import (
 	"auth_service/internal/services"
 	"context"
-	pb "workout-tracker/proto/shared/auth"
-	"wt/pkg/logger"
-	myerrors "wt/pkg/my_errors"
+	pb "github.com/sakamoto-max/wt_2-proto/shared/auth"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

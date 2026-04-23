@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"plan_service/internal/repository"
-	pb "workout-tracker/proto/shared/plan"
+	// pb "workout-tracker/proto/shared/plan"
+	pb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+
 )
 
 type PlanService struct {

@@ -12,10 +12,10 @@ import (
 	"os/signal"
 	"sync"
 	"time"
-	"wt/pkg/enum"
-	"wt/pkg/env"
-	"wt/pkg/logger"
-	mq "wt/pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/env"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
 
 	"go.uber.org/zap"
 

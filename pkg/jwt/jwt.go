@@ -1,13 +1,12 @@
 package jwt
 
 import (
-	// "context"
 	"errors"
-	myerrors "wt/pkg/my_errors"
 	"fmt"
 	"os"
 	"time"
 	"github.com/golang-jwt/jwt/v5"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 )
 
 type ClaimsContext string

@@ -6,16 +6,12 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/redis/go-redis/v9 v9.18.0
+	github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9
+	github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab
 	golang.org/x/crypto v0.48.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
-	workout-tracker/proto v0.0.0
-	wt/pkg v0.0.0
 )
-
-replace wt/pkg => ../../pkg
-
-replace workout-tracker/proto => ../../proto
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

@@ -1,4 +1,4 @@
-module github.com/sakamoto-max/proto
+module github.com/sakamoto-max/wt_2-proto
 
 go 1.24.1
 

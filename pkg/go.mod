@@ -1,4 +1,4 @@
-module wt/pkg
+module github.com/sakamoto-max/wt_2-pkg
 
 go 1.25.4
 

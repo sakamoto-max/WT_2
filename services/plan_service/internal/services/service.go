@@ -9,7 +9,8 @@ import (
 	"plan_service/internal/repository"
 	"strings"
 	"time"
-	exerpb "workout-tracker/proto/shared/exercise"
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	// myerrors "wt/pkg/my_errors"
 )
 

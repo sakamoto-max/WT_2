@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"wt/pkg/types"
+	"github.com/sakamoto-max/wt_2-pkg/types"
 )
 
 func InternalServerErr(w http.ResponseWriter, err error) {

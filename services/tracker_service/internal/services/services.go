@@ -7,10 +7,14 @@ import (
 	"time"
 	"tracker_service/internal/models"
 	"tracker_service/internal/repository"
-	exerpb "workout-tracker/proto/shared/exercise"
-	planpb "workout-tracker/proto/shared/plan"
-	"wt/pkg/enum"
-	myerrors "wt/pkg/my_errors"
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	// planpb "workout-tracker/proto/shared/plan"
+	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	// "wt/pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	// myerrors "wt/pkg/my_errors"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 )
 
 type Service struct {

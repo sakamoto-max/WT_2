@@ -1,16 +1,17 @@
 package main
 
 import (
-	grpcclient "api_gateway/grpc_client"
-	"api_gateway/handlers"
-	"api_gateway/routes"
+	grpcclient "github.com/sakamoto-max/wt_2/api_gateway/grpc_client"
+	"github.com/sakamoto-max/wt_2/api_gateway/handlers"
+	"github.com/sakamoto-max/wt_2/api_gateway/routes"
 	"context"
 	"errors"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-	"wt/pkg/logger"
+
+	"github.com/sakamoto-max/wt_2-pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -40,24 +41,23 @@ func (h *httpServer) Run() {
 	logger.Log.Info("connected to the grpc clients")
 
 	handler := handlers.NewHandler(
-		client.AuthClient, 
-		client.PlanClient, 
-		client.ExerClient, 
+		client.AuthClient,
+		client.PlanClient,
+		client.ExerClient,
 		client.TrackClient,
 	)
 
 	router := routes.NewRouter(handler)
 
 	logger.Log.Info("created the handlers")
-	
+
 	server := http.Server{
 		Addr:    h.addr,
 		Handler: router,
 	}
-	
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
-
 
 	go func() {
 		logger.Log.Infow("server has started", zap.String("addr", h.addr))

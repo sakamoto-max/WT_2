@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-	planpb "workout-tracker/proto/shared/plan"
-	"wt/pkg/middleware"
-	myerrors "wt/pkg/my_errors"
-
-	// "wt/pkg/user"
-	"api_gateway/user"
-	"wt/pkg/utils"
-
+	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	"github.com/sakamoto-max/wt_2-pkg/middleware"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
+	"github.com/sakamoto-max/wt_2/api_gateway/user"
 	"go.uber.org/zap"
 )
 

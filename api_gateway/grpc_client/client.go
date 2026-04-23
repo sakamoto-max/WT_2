@@ -3,11 +3,11 @@ package grpcclient
 import (
 	"fmt"
 	"os"
-	authpb "workout-tracker/proto/shared/auth"
-	exerpb "workout-tracker/proto/shared/exercise"
-	planpb "workout-tracker/proto/shared/plan"
-	trackpb "workout-tracker/proto/shared/tracker"
-	"wt/pkg/logger"
+	authpb "github.com/sakamoto-max/wt_2-proto/shared/auth"
+	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	trackpb "github.com/sakamoto-max/wt_2-proto/shared/tracker"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

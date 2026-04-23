@@ -2,7 +2,8 @@ package main
 
 import (
 	"os"
-	"wt/pkg/env"
+	"github.com/sakamoto-max/wt_2-pkg/env"
+
 )
 
 func main() {

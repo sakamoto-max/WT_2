@@ -3,7 +3,8 @@ package main
 import (
 	"os"
 	"tracker_service/internal/bootstrap"
-	env "wt/pkg/env"
+	// env "wt/pkg/env"
+	"github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

@@ -6,9 +6,8 @@ import (
 	"exercise_service/internal/domain"
 	"fmt"
 	"time"
-	enum "wt/pkg/enum"
-	myerrs "wt/pkg/my_errors"
-
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	myerrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )

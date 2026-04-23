@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"orchestration_service/internal/types"
 	"time"
-	"wt/pkg/enum"
+	// "wt/pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
 
 	"github.com/jackc/pgx/v5"
 )

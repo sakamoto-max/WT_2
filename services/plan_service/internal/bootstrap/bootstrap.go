@@ -9,8 +9,10 @@ import (
 	"plan_service/internal/repository"
 	"plan_service/internal/services"
 	// pb "workout-tracker/proto/shared/auth"
-	pb "workout-tracker/proto/shared/plan"
-	"wt/pkg/logger"
+	// pb "workout-tracker/proto/shared/plan"
+	pb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	// "wt/pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
 
 	"google.golang.org/grpc"
 )

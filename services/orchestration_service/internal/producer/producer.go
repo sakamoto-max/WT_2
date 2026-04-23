@@ -9,8 +9,10 @@ import (
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
-	"wt/pkg/logger"
-	mq "wt/pkg/queue"
+	// "wt/pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	// mq "wt/pkg/queue"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
 )
 
 type producer struct {

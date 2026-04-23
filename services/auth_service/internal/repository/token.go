@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	myerrors "wt/pkg/my_errors"
+	// myerrors "wt/pkg/my_errors"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 	"github.com/redis/go-redis/v9"
 )
 

@@ -4,7 +4,8 @@ import (
 	"auth_service/internal/bootstrap"
 	"os"
 
-	env "wt/pkg/env"
+	// env "wt/pkg/env"
+	env "github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

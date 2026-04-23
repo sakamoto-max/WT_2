@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	myerrors "wt/pkg/my_errors"
-	"wt/pkg/jwt"
-	"wt/pkg/utils"
+
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/sakamoto-max/wt_2-pkg/jwt"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 )
 
 var claimsContextKey contextKey = "get_claims"

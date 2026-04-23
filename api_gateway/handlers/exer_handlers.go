@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	exerpb "workout-tracker/proto/shared/exercise"
-	"wt/pkg/middleware"
-	myerrors "wt/pkg/my_errors"
-
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	"github.com/sakamoto-max/wt_2-pkg/middleware"
+	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 	// "wt/pkg/user"
-	"api_gateway/user"
-	"wt/pkg/utils"
+	"github.com/sakamoto-max/wt_2/api_gateway/user"
+	// "wt/pkg/utils"
 
 	"go.uber.org/zap"
 )

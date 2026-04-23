@@ -1,7 +1,9 @@
 package services
 
 import (
-	"wt/pkg/logger"
+	
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+
 
 	"go.uber.org/zap"
 )

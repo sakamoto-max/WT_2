@@ -4,9 +4,10 @@ import (
 	"email_service/producer"
 	"email_service/services"
 	"sync"
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	"wt/pkg/types"
+
+		"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/types"
 
 	"go.uber.org/zap"
 )

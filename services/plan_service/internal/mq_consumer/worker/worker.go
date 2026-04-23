@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"plan_service/internal/repository"
 	"sync"
-	exerpb "workout-tracker/proto/shared/exercise"
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	"wt/pkg/queue"
-	mq "wt/pkg/queue"
-	"wt/pkg/types"
-
+	// exerpb "workout-tracker/proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/types"
 	"go.uber.org/zap"
 )
 
@@ -176,7 +175,7 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 
 func (w *worker) SendDataToResQ(id string, sentBy string, targetService string, taskName string, taskStatus string) error {
 
-	d := queue.NewTaskStatus(
+	d := mq.NewTaskStatus(
 		id,
 		sentBy,
 		targetService,

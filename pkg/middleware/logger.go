@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"wt/pkg/logger"
+
+	"github.com/sakamoto-max/wt_2-pkg/logger"
 )
 
 var loggerContextKey contextKey = "my_logger"

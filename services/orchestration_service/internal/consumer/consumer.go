@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"orchestration_service/internal/repository"
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	"wt/pkg/queue"
-	mq "wt/pkg/queue"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/wt_2-pkg/queue"
 
 	// "wt/pkg/utils"
 
@@ -54,7 +53,7 @@ func (c *consumer) Operate(ctx context.Context, msgs <-chan amqp.Delivery) {
 			
 			c.logger.Log.Infoln("consumer got data")
 
-			var data queue.TaskStatus
+			var data mq.TaskStatus
 
 			_ = json.Unmarshal(msg.Body, &data)
 

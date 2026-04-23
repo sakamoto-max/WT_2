@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"wt/pkg/enum"
-	"wt/pkg/utils"
-
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/utils"
 )
 
 func NewConn() *amqp.Connection {

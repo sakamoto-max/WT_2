@@ -2,9 +2,9 @@ package producer
 
 import (
 	"context"
-	"wt/pkg/enum"
-	"wt/pkg/logger"
-	"wt/pkg/queue"
+		"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2-pkg/queue"
 
 	"go.uber.org/zap"
 )

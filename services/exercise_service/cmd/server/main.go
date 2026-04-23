@@ -3,7 +3,7 @@ package main
 import (
 	"exercise_service/internal/bootstrap"
 	"os"
-	env "wt/pkg/env"
+	"github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

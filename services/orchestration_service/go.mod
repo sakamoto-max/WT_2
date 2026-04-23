@@ -4,8 +4,9 @@ go 1.25.4
 
 require (
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/redis/go-redis/v9 v9.18.0
+	github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9
 	go.uber.org/zap v1.27.1
 )
 
@@ -23,7 +24,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
-	wt/pkg v0.0.0
 )
 
 replace wt/pkg => ../../pkg

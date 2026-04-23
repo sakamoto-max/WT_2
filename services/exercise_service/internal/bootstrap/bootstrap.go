@@ -7,8 +7,9 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"wt/pkg/logger"
-	pb "workout-tracker/proto/shared/exercise"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+		pb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+
 	"google.golang.org/grpc"
 )
 
