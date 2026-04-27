@@ -4,7 +4,6 @@ import (
 	"github.com/sakamoto-max/wt_2/api_gateway/responses"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -38,8 +37,6 @@ func (h *Handler) StartEmptyWorkout(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
-
-	fmt.Printf("user Id : %v\n", claims.UserId)
 
 	in := trackpb.StartEmptyWorkoutReq{
 		UserId: claims.UserId,

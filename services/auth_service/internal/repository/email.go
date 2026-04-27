@@ -8,28 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *Repo) EmailExists(ctx context.Context, email string) (bool, error) {
-
-	var id int
-
-	err := r.pDB.QueryRow(ctx, `
-		SELECT ID FROM USERS
-		WHERE EMAIL = $1	
-	`, email).Scan(&id)
-
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return false, myErrs.ErrEmailNotFound
-		}
-
-		return false, fmt.Errorf("error checking if email %v exists : %w\n", email, err)
-	}
-
-	return true, nil
-}
-
-// DONE
-func (r *Repo) GetEmail(ctx context.Context, userId string) (string, error) {
+func (r *repo) GetEmail(ctx context.Context, userId string) (string, error) {
 	
 	var email string
 
@@ -50,8 +29,7 @@ func (r *Repo) GetEmail(ctx context.Context, userId string) (string, error) {
 	return email, nil
 }
 
-
-func (r *Repo) ChangeEmail(ctx context.Context, userId string, newEmail string) error {
+func (r *repo) ChangeEmail(ctx context.Context, userId string, newEmail string) error {
 
 	query := `
 		UPDATE users

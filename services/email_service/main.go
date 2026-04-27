@@ -53,19 +53,6 @@ func main() {
 	msgs := consumer.Start()
 	go consumer.PushToJobs(msgs)
 
-	// msgs, err := emailQueue.Consume(string(enum.EmailQueue))
-	// if err != nil {
-	// 	log.Fatalf("error consuming from the email queue : %v", err)
-	// }
-
-	// log.Printf("email consumer has started")
-
-	// for msg := range msgs {
-	// 	data := utils.ConvertIntoJosn(&msg.Body)
-	// 	email := data.Payload["email"]
-	// 	log.Printf("sending email to : %v", email)
-	// 	continue
-	// }
 
 
 	sigChan := make(chan os.Signal, 1)

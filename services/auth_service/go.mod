@@ -5,9 +5,11 @@ go 1.25.4
 require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
+	github.com/pashagolub/pgxmock/v5 v5.0.1
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9
 	github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.48.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
@@ -23,6 +25,7 @@ require (
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260120221211-b8f7ae30c516 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

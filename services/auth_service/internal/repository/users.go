@@ -6,19 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	// "wt/pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
-	// myErrs "wt/pkg/my_errors"
 	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
-	// "wt/pkg/utils"
 	"github.com/sakamoto-max/wt_2-pkg/utils"
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
 )
 
 
-// DONE
-func (r *Repo) CreateUser(ctx context.Context, name string, email string, hashedPass string, role string) (string, time.Time, error) {
+
+func (r *repo) CreateUser(ctx context.Context, name string, email string, hashedPass string, role string) (string, time.Time, error) {
 	
 	trnx, err := r.pDB.Begin(ctx)
 	if err != nil {
@@ -105,7 +102,7 @@ func (r *Repo) CreateUser(ctx context.Context, name string, email string, hashed
 
 
 // DONE
-func (r *Repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string, string, string, error) {
+func (r *repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string, string, string, error) {
 
 	query := `
 		SELECT 
@@ -131,7 +128,7 @@ func (r *Repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string,
 	return userID, roleID, name, nil
 }
 
-func (r *Repo) UserLogout(ctx context.Context, userId string, uuid string) error {
+func (r *repo) UserLogout(ctx context.Context, userId string, uuid string) error {
 	// del refresh
 	refreshKey := fmt.Sprintf("%v_refresh", uuid)
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
@@ -150,7 +147,7 @@ func (r *Repo) UserLogout(ctx context.Context, userId string, uuid string) error
 }
 
 // DONE
-func (r *Repo) FetchUserPass(ctx context.Context, email string) (string, error) {
+func (r *repo) FetchUserPass(ctx context.Context, email string) (string, error) {
 
 	var hashedPass string
 
@@ -171,7 +168,7 @@ func (r *Repo) FetchUserPass(ctx context.Context, email string) (string, error) 
 }
 
 // DONE
-func (r *Repo) FetchUserPassById(ctx context.Context, userId string) (string, error) {
+func (r *repo) FetchUserPassById(ctx context.Context, userId string) (string, error) {
 
 	var hashedPass string
 
@@ -193,7 +190,7 @@ func (r *Repo) FetchUserPassById(ctx context.Context, userId string) (string, er
 }
 
 // DONE
-func (r *Repo) ChangePass(ctx context.Context, userId string, newPass string) error {
+func (r *repo) ChangePass(ctx context.Context, userId string, newPass string) error {
 	
 	query := `
 		UPDATE 
@@ -213,6 +210,6 @@ func (r *Repo) ChangePass(ctx context.Context, userId string, newPass string) er
 	return nil
 }
 
-func (r *Repo) GetUserId() {
+func (r *repo) GetUserId() {
 	
 }

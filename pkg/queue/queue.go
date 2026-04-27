@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/utils"
 )
 
 func NewConn() *amqp.Connection {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(os.Getenv("MQ_URL"))
 	if err != nil {
 		log.Fatalf("error opening a connection to rabbit mq : %v", err)
 	}

@@ -9,8 +9,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// DONE
-func (r *Repo) RefreshExists(ctx context.Context, userId string) (bool, error) {
+
+func (r *repo) RefreshExists(ctx context.Context, userId string) (bool, error) {
 
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
 
@@ -32,8 +32,7 @@ func (r *Repo) RefreshExists(ctx context.Context, userId string) (bool, error) {
 
 	return true, nil
 }
-// DONE
-func (r *Repo) GetUUID(ctx context.Context, userId string) (string, error) {
+func (r *repo) GetUUID(ctx context.Context, userId string) (string, error) {
 
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
 
@@ -44,8 +43,7 @@ func (r *Repo) GetUUID(ctx context.Context, userId string) (string, error) {
 
 	return uuid, nil
 }
-// DONE
-func (r *Repo) SetUUID(ctx context.Context, uuid string, userId string) error {
+func (r *repo) SetUUID(ctx context.Context, uuid string, userId string) error {
 
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
 
@@ -56,8 +54,7 @@ func (r *Repo) SetUUID(ctx context.Context, uuid string, userId string) error {
 
 	return nil
 }
-// DONE
-func (r *Repo) SetRefreshTokenAndUUID(ctx context.Context, uuid string, Refreshtoken string, userId string) error {
+func (r *repo) SetRefreshTokenAndUUID(ctx context.Context, uuid string, Refreshtoken string, userId string) error {
 	uuidKey := fmt.Sprintf("user_id:%v:uuid", userId)
 	refreshKey := fmt.Sprintf("%v_refresh", uuid)
 
@@ -73,9 +70,7 @@ func (r *Repo) SetRefreshTokenAndUUID(ctx context.Context, uuid string, Refresht
 
 	return nil
 }
-
-// DONE
-func (r *Repo) GetRefreshToken(ctx context.Context, uuid string) (string, error) {
+func (r *repo) GetRefreshToken(ctx context.Context, uuid string) (string, error) {
 
 	var refreshToken string
 

@@ -103,7 +103,6 @@ func (j *JwtToken) ValidateToken(myToken string) (*JwtClaims, error) {
 
 var (
 	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")
-	// ErrUserExits2       = status.Error(codes.AlreadyExists, "user already exits")
 	ErrTokenMalformed   = errors.New("token is malformed. please check the token again")
 	ErrTokenInvalid     = errors.New("token is invalid")
 	ErrTokenIsMissing   = errors.New("token is missing, please provide the token")

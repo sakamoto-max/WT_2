@@ -2,24 +2,15 @@ package routes
 
 import (
 	"github.com/sakamoto-max/wt_2/api_gateway/handlers"
-	// "net/http"
-	// "wt/pkg/middleware"
 	"github.com/sakamoto-max/wt_2-pkg/middleware"
-
-	// chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
 func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	r := chi.NewRouter()
-
-
-	// r.Use(chimiddleware.Logger)
 	r.Use(middleware.ReqIdGenerator)
 	r.Use(middleware.Logger)
-	// r.Use(middleware.TracerStartMiddleware)
-
 	r.Get("/wt/health", h.GetHealth)
 
 	r.Post("/wt/user/signup", h.SignUp)

@@ -1,15 +1,17 @@
 package bootstrap
 
 import (
+	"auth_service/internal/database"
 	"auth_service/internal/handler"
 	"auth_service/internal/repository"
 	"auth_service/internal/services"
 	"net"
 	"os"
 	"os/signal"
-	// "wt/pkg/logger"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	// pb "workout-tracker/proto/shared/auth"
+	"go.uber.org/zap"
 	pb "github.com/sakamoto-max/wt_2-proto/shared/auth"
 	"google.golang.org/grpc"
 )
@@ -18,16 +20,25 @@ type app struct {
 	Addr    string
 	Handler *handler.Handler
 	Logger  *logger.MyLogger
+	pool *pgxpool.Pool
+	redisClient *redis.Client
 }
 
 func NewApp(addr string) *app {
 
 	logger := logger.NewLogger()
 
-	repo, err := repository.NewRepo()
+	pool, err := database.NewPgConn()
 	if err != nil {
-		logger.Log.Fatalf("error opening the repos : %v", err)
+		logger.Log.Fatalw("failed to connet to postgres db", zap.Error(err))
 	}
+
+	redisClient, err := database.NewRedisConn()
+	if err != nil {
+		logger.Log.Fatalw("failed to make redis client", zap.Error(err))
+	}
+
+	repo := repository.NewRepo(pool, redisClient)
 
 	service := services.NewService(repo)
 	handler := handler.NewHandler(service, logger)
@@ -36,16 +47,28 @@ func NewApp(addr string) *app {
 		Addr:    addr,
 		Handler: handler,
 		Logger:  logger,
+		redisClient: redisClient,
+		pool: pool,
 	}
 
 }
 
 func (a *app) Run() {
+
+	defer func(){
+		err := a.redisClient.Close()
+		if err != nil {
+			a.Logger.Log.Errorw("error in closing redis", zap.Error(err))
+		}
+	}()
+
+	defer a.pool.Close()
+	
 	lis, err := net.Listen("tcp", a.Addr)
 	if err != nil {
 		a.Logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
-
+	
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, a.Handler)
 
@@ -65,6 +88,7 @@ func (a *app) Run() {
 	a.Logger.Log.Infof("shutdown signal received : %v", sig.String())
 
 	grpcServer.GracefulStop()
+
 
 	a.Logger.Log.Infof("server is closed")
 }

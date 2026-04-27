@@ -7,13 +7,8 @@ import (
 	"time"
 	"tracker_service/internal/models"
 	"tracker_service/internal/repository"
-	// exerpb "workout-tracker/proto/shared/exercise"
 	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
-	// planpb "workout-tracker/proto/shared/plan"
 	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
-	// "wt/pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	// myerrors "wt/pkg/my_errors"
 	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 )
 
@@ -47,12 +42,14 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error
 		return myerrors.ErrWorkoutOngoing
 	}
 
-	r, err := s.pClient.GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: userID, PlanName: string(enum.EmptyPlanName)})
+	r, err := s.pClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: userID})
+	// r, err := s.pClient.GetEmptyPlanId().GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: userID, PlanName: string(enum.EmptyPlanName)})
 	if err != nil {
 		return fmt.Errorf("error getting data from plan server : %w", err)
 	}
 
-	trackerId, err = s.db.StartWorkout(ctx, userID, r.PlanId)
+
+	trackerId, err = s.db.StartWorkout(ctx, userID, r.EmptyPlanId)
 	if err != nil {
 		return err
 	}

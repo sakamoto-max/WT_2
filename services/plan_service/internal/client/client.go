@@ -2,7 +2,7 @@ package client
 
 import (
 	"log"
-	// exerpb "workout-tracker/proto/shared/exercise"
+	"os"
 	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -13,16 +13,12 @@ type exerciseClient struct {
 	Client exerpb.ExerciseServiceClient
 }
 
-// func NewExerciseServiceClient() *exerciseClient {
-// 	return &exerciseClient{}
-// }
-
 func New() *exerciseClient {
 	var opts []grpc.DialOption
 
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	conn, err := grpc.NewClient("localhost:6003", opts...)
+	conn, err := grpc.NewClient(os.Getenv("EXERCISE_GRPC_SERVER_ADDR"), opts...)
 	if err != nil {
 		log.Fatalf("failed to create the client : %v", err)
 	}
