@@ -5,19 +5,14 @@ import (
 	"os/signal"
 	"plan_service/internal/client"
 	"plan_service/internal/mq_consumer/consumer"
+	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/mq_consumer/worker"
 	"plan_service/internal/repository"
 	"sync"
-
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/env"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
-	"github.com/sakamoto-max/wt_2-pkg/types"
-	// planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
-
-	// exerpb "workout-tracker/proto/shared/exercise"
-
+	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 	"go.uber.org/zap"
 )
 

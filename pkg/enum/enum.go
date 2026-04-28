@@ -22,6 +22,7 @@ var (
 	TaskCompleted taskStatus = "completed"
 	TaskPending taskStatus = "pending"
 	TaskNotCompleted taskStatus = "not_completed"
+	TaskFailed taskStatus = "failed"
 )
 
 type taskName string

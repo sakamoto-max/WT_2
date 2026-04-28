@@ -7,11 +7,8 @@ import (
 	"orchestration_service/internal/repository"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
-
-	// "wt/pkg/utils"
-
 	amqp "github.com/rabbitmq/amqp091-go"
+	mq "github.com/sakamoto-max/rabbit_mq/queue"
 )
 
 type consumer struct {
@@ -29,7 +26,7 @@ func NewConsumer(db *repository.DB, resQueue *mq.MessageQueue, logger *logger.My
 }
 
 
-func (c *consumer) GetData() <-chan amqp.Delivery {
+func (c *consumer) GetData() <-chan amqp.Delivery {	
 
 	c.logger.Log.Infoln("consumer has started")
 
@@ -63,10 +60,9 @@ func (c *consumer) Operate(ctx context.Context, msgs <-chan amqp.Delivery) {
 			if err != nil {
 				c.logger.Log.Errorf("error : unable to update the task status : %v", err)
 			}
-
 		case <-ctx.Done():
+			c.logger.Log.Infoln("consumer is closing")
 			return			
 		}
 	}
-
 }

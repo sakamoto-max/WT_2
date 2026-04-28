@@ -4,7 +4,8 @@ import (
 	"context"
 		"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	"github.com/sakamoto-max/wt_2-pkg/queue"
+	// "github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/rabbit_mq/queue" 
 
 	"go.uber.org/zap"
 )

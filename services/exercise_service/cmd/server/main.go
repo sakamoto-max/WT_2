@@ -2,8 +2,9 @@ package main
 
 import (
 	"exercise_service/internal/bootstrap"
+	"exercise_service/internal/env"
 	"os"
-	"github.com/sakamoto-max/wt_2-pkg/env"
+	// "github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

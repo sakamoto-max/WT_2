@@ -6,8 +6,9 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/redis/go-redis/v9 v9.18.0
-	github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9
-	github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab
+	github.com/sakamoto-max/rabbit_mq v0.0.0-20260428095648-b074b30e8056
+	github.com/sakamoto-max/wt_2-pkg v0.1.0
+	github.com/sakamoto-max/wt_2-proto v0.1.1
 	go.uber.org/zap v1.27.1
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11

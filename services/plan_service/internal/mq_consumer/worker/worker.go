@@ -3,14 +3,13 @@ package worker
 import (
 	"context"
 	"fmt"
+	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/repository"
 	"sync"
-	// exerpb "workout-tracker/proto/shared/exercise"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
-	"github.com/sakamoto-max/wt_2-pkg/types"
+	mq "github.com/sakamoto-max/rabbit_mq/queue" 
+	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"go.uber.org/zap"
 )
 
@@ -73,8 +72,9 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			if err != nil {
 				w.logger.Log.Infow("failed to create empty plan for the user", zap.Int("worker", w.id), zap.Error(err))
 
+				
 				w.SendDataToResQ(
-					msg.Id,
+					msg.DbId,
 					string(enum.PlanService),
 					string(enum.AuthService),
 					msg.Task,
@@ -85,7 +85,7 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			}
 
 			err = w.SendDataToResQ(
-				msg.Id,
+				msg.DbId,
 				string(enum.PlanService),
 				string(enum.AuthService),
 				msg.Task,
@@ -114,8 +114,9 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			if err != nil {
 				w.logger.Log.Infow("failed to get plan_id for the user", zap.Int("worker", w.id), zap.Error(err))
 
+				fmt.Println(msg.DbId)
 				err := w.SendDataToResQ(
-					msg.Id,
+					msg.DbId,
 					string(enum.PlanService),
 					string(enum.TrackerService),
 					msg.Task,
@@ -149,7 +150,7 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			if err != nil {
 				w.logger.Log.Infow("failed to update plan for the user", zap.Int("worker", w.id), zap.Error(err))
 				w.SendDataToResQ(
-					msg.Id,
+					msg.DbId,
 					string(enum.PlanService),
 					string(enum.TrackerService),
 					msg.Task,
@@ -160,7 +161,7 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			}
 
 			err = w.SendDataToResQ(
-				msg.Id,
+				msg.DbId,
 				string(enum.PlanService),
 				string(enum.TrackerService),
 				msg.Task,
@@ -174,6 +175,8 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 }
 
 func (w *worker) SendDataToResQ(id string, sentBy string, targetService string, taskName string, taskStatus string) error {
+
+	fmt.Println("msg.id", id)
 
 	d := mq.NewTaskStatus(
 		id,

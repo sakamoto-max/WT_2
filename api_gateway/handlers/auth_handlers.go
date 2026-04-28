@@ -1,16 +1,20 @@
 package handlers
 
 import (
-	"github.com/sakamoto-max/wt_2/api_gateway/responses"
 	"context"
 	"encoding/json"
 	"net/http"
 	"time"
-	authpb "github.com/sakamoto-max/wt_2-proto/shared/auth"
+
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/middleware"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
+	authpb "github.com/sakamoto-max/wt_2-proto/shared/auth"
+	"github.com/sakamoto-max/wt_2/api_gateway/responses"
+	"github.com/sakamoto-max/wt_2/api_gateway/utils"
+
+	// "github.com/sakamoto-max/wt_2-pkg/utils"
 	"github.com/sakamoto-max/wt_2-pkg/my_errors"
+	// "api_gateway/utils"
 
 	"github.com/sakamoto-max/wt_2/api_gateway/user"
 
@@ -21,6 +25,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	logger, err := middleware.GetLogger(r.Context())
 	if err != nil {
+		// utils.BadReq()
 		utils.InternalServerErr(w, err)
 	}
 	reqId, err := middleware.GetReqId(r.Context())

@@ -5,8 +5,8 @@ go 1.25.4
 require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/redis/go-redis/v9 v9.18.0
-	github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9
-	github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab
+	github.com/sakamoto-max/wt_2-pkg v0.1.0
+	github.com/sakamoto-max/wt_2-proto v0.1.1
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 	wt/pkg v0.0.0

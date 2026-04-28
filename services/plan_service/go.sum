@@ -38,10 +38,12 @@ github.com/rabbitmq/amqp091-go v1.11.0 h1:HxIctVm9Gid/Vtn706necmZ7Wj6pgGI2eqplRb
 github.com/rabbitmq/amqp091-go v1.11.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
 github.com/redis/go-redis/v9 v9.18.0 h1:pMkxYPkEbMPwRdenAzUNyFNrDgHx9U+DrBabWNfSRQs=
 github.com/redis/go-redis/v9 v9.18.0/go.mod h1:k3ufPphLU5YXwNTUcCRXGxUoF1fqxnhFQmscfkCoDA0=
-github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9 h1:ZqPOe253eafXUGAZzkTooqacm9yANaaTZvOW/G45bxg=
-github.com/sakamoto-max/wt_2-pkg v0.0.0-20260423105329-b39c15b46ba9/go.mod h1:G8KGDUYT8VFMXowRuvcUsjHrjj9FU51k9xfYQAcB65I=
-github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab h1:tc10latG92do7b8MBJGd76XLDvdZ+KYCC1zpbDj9xBc=
-github.com/sakamoto-max/wt_2-proto v0.0.0-20260423111215-23274f30d8ab/go.mod h1:9lH7fpjFnS9RbMDJcBtWZ1UQjyoR9dLm4e4LhgEBGBU=
+github.com/sakamoto-max/rabbit_mq v0.0.0-20260428095648-b074b30e8056 h1:MgOKc1Q/6Jp7hDuE3aSEcmZ1wvU6TX5A9MtMJUZBzp4=
+github.com/sakamoto-max/rabbit_mq v0.0.0-20260428095648-b074b30e8056/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
+github.com/sakamoto-max/wt_2-pkg v0.1.0 h1:O5U8gJCUl5ZKaxF7KsfwMb7oUdDovQi5P/X6izqxtEE=
+github.com/sakamoto-max/wt_2-pkg v0.1.0/go.mod h1:G8KGDUYT8VFMXowRuvcUsjHrjj9FU51k9xfYQAcB65I=
+github.com/sakamoto-max/wt_2-proto v0.1.1 h1:rv8QqyA/ufMJbrlYcjD/VhrVZpnCB8xWHKz3ZfpEdAg=
+github.com/sakamoto-max/wt_2-proto v0.1.1/go.mod h1:OV5XoLqLM8I3guvTPrpR7gEbCv/CYEG2ibUKAp3dReI=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=

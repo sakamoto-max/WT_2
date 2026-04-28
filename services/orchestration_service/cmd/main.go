@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	// "errors"
 	"orchestration_service/internal/consumer"
+	"orchestration_service/internal/env"
 	"orchestration_service/internal/producer"
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
@@ -12,21 +12,18 @@ import (
 	"os/signal"
 	"sync"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/env"
+	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
-
 	"go.uber.org/zap"
-
-	// amqp "github.com/rabbitmq/amqp091-go"
 )
 
 const NumberOfWorkers = 5
 
 func main() {
 
-	env.LoadNoLookUp("../.env")
+
+	env.Load("../.env")
 
 	logger := logger.NewLogger()
 	defer logger.Log.Sync()
@@ -35,6 +32,7 @@ func main() {
 	if err != nil {
 		logger.Log.Fatal(err)
 	}
+
 	// rabbit mq
 
 	conn := mq.NewConn()
@@ -60,22 +58,23 @@ func main() {
 		go worker.Work(ctx, &workersWg)
 	}
 
-	ticker := time.NewTicker(time.Second * 5)
-
+	
 	// consumer
-
+	
 	consumer := consumer.NewConsumer(Db, resultQueue, logger)
-
+	
 	msgs := consumer.GetData()
-
+	
 	go consumer.Operate(ctx, msgs)
-
+	
 	// producer
-
+	
 	targetServices := []string{string(enum.AuthService), string(enum.TrackerService)}
-
+	
 	producer := producer.NewProducer(Db, planQueue, emailQueue, logger)
 
+	ticker := time.NewTicker(time.Second * 5)
+	
 	go producer.Start(ctx, &workersWg, ticker.C, jobs, &targetServices)
 
 	// shutdown
@@ -92,25 +91,7 @@ func main() {
 	close(jobs)
 }
 
-// func ExponentialBackoff(targetFunc func(*[]byte, *mq.MessageQueue) error, a *[]byte, b *mq.MessageQueue) error {
 
-// 	time.Sleep(time.Millisecond * 100)
-
-// 	err := targetFunc(a, b)
-// 	if err != nil {
-// 		if err == amqp.ErrClosed {
-// 			time.Sleep(time.Millisecond * 200)
-// 			err := targetFunc(a, b)
-// 			if err != nil {
-// 				if errors.Is(err, amqp.ErrClosed) {
-// 					time.Sleep(time.Millisecond * 300)
-// 					err := targetFunc(a, b)
-// 					if err != nil {
-// 						return err
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return nil
-// }
+// what if a operation fails -> 
+// retry 3 times -> send back to db -> fetch after some time -> try again -> 
+// if retry > 5 -> move it to failed 

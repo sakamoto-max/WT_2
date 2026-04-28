@@ -3,16 +3,12 @@ package producer
 import (
 	"context"
 	"errors"
-
-	// "fmt"
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
-	// "wt/pkg/logger"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	// mq "wt/pkg/queue"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
+	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 )
 
 type producer struct {
@@ -59,7 +55,7 @@ func (p *producer) Start(ctx context.Context, wg *sync.WaitGroup, tickerChan <-c
 				data := <-DataChan
 				switch data {
 				case nil:
-					p.logger.Log.Infoln("no rows found")
+					p.logger.Log.Infoln("no rows found") // in what service?
 				default:
 					for _, v := range *data {
 						p.logger.Log.Infoln("sent data to jobs chan")
@@ -82,7 +78,10 @@ func FetchData(p *producer, targetService string, dataChan chan<- *[]types.Data,
 
 	defer wg.Done()
 
-	Data, err := p.db.FetchData(targetService)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 2)
+	defer cancel()
+
+	Data, err := p.db.FetchData(ctx, targetService)
 
 	if err != nil {
 		if errors.Is(err, repository.ErrNoRowsFound) {

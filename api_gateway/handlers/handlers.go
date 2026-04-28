@@ -5,18 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-		authpb "github.com/sakamoto-max/wt_2-proto/shared/auth"
-	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
+	authpb "github.com/sakamoto-max/wt_2-proto/shared/auth"
 	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
 	trackpb "github.com/sakamoto-max/wt_2-proto/shared/tracker"
-	// authpb "workout-tracker/proto/shared/auth"
-	// exerpb "workout-tracker/proto/shared/exercise"
-	// planpb "workout-tracker/proto/shared/plan"
-	// trackpb "workout-tracker/proto/shared/tracker"
-	"github.com/sakamoto-max/wt_2-pkg/dto"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
+	"github.com/sakamoto-max/wt_2/api_gateway/domain"
+	"github.com/sakamoto-max/wt_2/api_gateway/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,9 +32,9 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	var health dto.OverAllStatus
+	var health domain.OverAllStatus
 	
-	authStatus := dto.OneServiceStatus{}
+	authStatus := domain.OneServiceStatus{}
 	authStatus.ServiceName = string(enum.AuthService)
 
 	inForAuth := authpb.GetHealthReq{}
@@ -67,7 +62,7 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		health.AllServices = append(health.AllServices, authStatus)
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	exerStatus := dto.OneServiceStatus{}
+	exerStatus := domain.OneServiceStatus{}
 	exerStatus.ServiceName = string(enum.ExerciseService)
 
 	inForExer := exerpb.GetHealthReq{}
@@ -95,7 +90,7 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		health.AllServices = append(health.AllServices, exerStatus)
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	planStatus := dto.OneServiceStatus{}
+	planStatus := domain.OneServiceStatus{}
 	planStatus.ServiceName = string(enum.PlanService)
 
 	inForPlan := planpb.GetHealthReq{}
@@ -123,7 +118,7 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		health.AllServices = append(health.AllServices, planStatus)
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	trackerStatus := dto.OneServiceStatus{}
+	trackerStatus := domain.OneServiceStatus{}
 	trackerStatus.ServiceName = string(enum.TrackerService)
 
 	inForTracker := trackpb.GetHealthReq{}
@@ -198,7 +193,7 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 // inForAuth := authpb.GetHealthReq{}
 // auth, _ := h.authClient.GetHealth(ctx, &inForAuth)
 
-// authStatus := dto.OneServiceStatus{}
+// authStatus := domain.OneServiceStatus{}
 
 // authStatus.ServiceName = string(enum.AuthService)
 

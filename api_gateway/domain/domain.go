@@ -1,5 +1,4 @@
-package dto
-
+package domain
 
 type OverAllStatus struct {
 	Status      string             `json:"status"`
@@ -12,5 +11,3 @@ type OneServiceStatus struct {
 	PGRespTime    *float64 `json:"postgres_response_time_in_seconds"`
 	RedisRespTime *float64 `json:"redis_response_time_in_seconds"`
 }
-
-

@@ -3,14 +3,15 @@ package repository
 import (
 	"auth_service/internal/domain"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
+
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
 )
 
 
@@ -57,33 +58,44 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
 	}
 
-
 	dataForPlan := domain.EmptyPayload{
 		UserId: userId,
 	}
 
+	planDataInBytes, err := json.Marshal(dataForPlan)
+	if err != nil {
+		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
+	}
+
+	planPayload := string(planDataInBytes)
+	
 	dataForEmail := domain.EmailPayload{
 		Email: email,
 	}
+	
+	emailDataInBytes, err := json.Marshal(dataForEmail)
+	if err != nil {
+		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
+	}
 
-	payloadForPlan, _ := utils.MakeJSONV2(dataForPlan)
-	payloadForEmail, _ := utils.MakeJSONV2(dataForEmail)
+	emailPayload := string(emailDataInBytes)
 
 	query = `
 		INSERT INTO 
-			outbox(target_service, task, payload)
+			outbox(target_service, created_by, task, payload)
 		VALUES 
-			(@planService, @emptyPlan, @planPayload::JSONB),
-			(@emailService, @sendEmail, @emailPayload::JSONB)
+			(@planService, @createdBy, @emptyPlan, @planPayload::JSONB),
+			(@emailService, @createdBy, @sendEmail, @emailPayload::JSONB)
 	`
 
 	_, err = trnx.Exec(ctx, query,pgx.NamedArgs{
 		"planService" : enum.PlanService, 
 		"emptyPlan" : enum.CreateEmptyPlanForUser, 
-		"planPayload":payloadForPlan,
+		"planPayload":planPayload,
 		"emailService":enum.EmailService,
 		"sendEmail" : enum.SendEmailforSigningUp,
-		"emailPayload" : payloadForEmail,
+		"emailPayload" : emailPayload,
+		"createdBy" : "auth_service",
 	})
 
 	if err != nil {

@@ -6,13 +6,13 @@ import (
 )
 
 type Data struct {
-	Id            string            `db:"id"`
-	TargetService string            `db:"target_service"`
-	Task          string            `db:"task"`
-	Status        string            `db:"status"`
+	DbId          string         `db:"id"`
+	TargetService string         `db:"target_service"`
+	Task          string         `db:"task"`
+	Status        string         `db:"status"`
 	Payload       map[string]any `db:"payload"`
-	CreatedAt     time.Time         `db:"created_at"`
-	NumberOfTries *int              `db:"number_of_tries"`	
+	CreatedAt     time.Time      `db:"created_at"`
+	NumberOfTries int            `db:"number_of_tries"`
 }
 
 func (d *Data) GetUserId() (string, error) {
@@ -51,7 +51,6 @@ func (d *Data) GetNewExercises() ([]string, error) {
 
 	return data, nil
 }
-
 func (d *Data) GetEmail() (string, error) {
 	data, ok := d.Payload["email"].(string)
 	if !ok {
@@ -60,10 +59,3 @@ func (d *Data) GetEmail() (string, error) {
 
 	return data, nil
 }
-
-
-type queueName string
-
-var (
-	PlanQueue queueName = "plan_queue"
-)

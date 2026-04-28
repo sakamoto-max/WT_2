@@ -2,13 +2,13 @@ package main
 
 import (
 	"os"
-	"github.com/sakamoto-max/wt_2-pkg/env"
 
+	"github.com/sakamoto-max/wt_2/api_gateway/env"
 )
 
 func main() {
-
-	env.LoadGateway()
+	env.Load("../.env")
+	
 	
 	httpSer := NewHttpServer(os.Getenv("HTTP_SERVER_ADDR"))
 	httpSer.Run()

@@ -4,14 +4,6 @@ import (
 	"time"
 )
 
-// type Exercise struct {
-// 	Id        int       `json:"id,omitempty"`
-// 	Name      string    `json:"name"`
-// 	RestTime  int       `json:"rest_time_in_seconds"`
-// 	BodyPart  string    `json:"body_part"`
-// 	Equipment string    `json:"equipment"`
-// 	CreatedAt time.Time `json:"created_at"`
-// }
 type Exercise struct {
 	Id        string    `json:"id" redis:"id"`
 	Name      string    `json:"name" redis:"exercise_name"`

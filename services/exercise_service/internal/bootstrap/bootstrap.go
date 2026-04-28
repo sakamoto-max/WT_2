@@ -8,8 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-		pb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
-
+	pb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"google.golang.org/grpc"
 )
 

@@ -5,15 +5,11 @@ import (
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
 	"sync"
-	// "wt/pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	// "wt/pkg/logger"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
-	// mq "wt/pkg/queue"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
 
+	"github.com/sakamoto-max/wt_2-pkg/enum"
+	"github.com/sakamoto-max/wt_2-pkg/logger"
+	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 	"go.uber.org/zap"
-	// "golang.org/x/text/cases"
 )
 
 type worker struct {
@@ -51,25 +47,39 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
+
 		data, ok := <-w.Jobs
 
 		if !ok {
+			w.logger.Log.Infow("worker stopped", zap.Int("id", w.id), zap.String("reason", "shutdown"))
 			return
+		}
+
+		w.logger.Log.Infow("worker received a task", zap.Int("worker_id", w.id), zap.String("task_name", data.Task), zap.String("created_by", data.CreatedBy))
+
+		if data.NumberOfTries > 3 {
+
+			err := w.Db.TaskFailed(ctx, data.CreatedBy, data.DbId)
+			if err != nil {
+				w.logger.Log.Errorw(
+					"failed to update task to failed",
+					zap.Error(err),
+				)
+			}
 		}
 
 		dataInBytes, _ := data.ConvertToBytes()
 
 		err := w.PushToQueue(ctx, dataInBytes, data.TargetService, data.Task)
 		if err != nil {
-
-			err := w.Db.TaskNotCompleted(ctx, data.TargetService, data.Id)
+			err := w.Db.TaskNotCompletedUpdateTries(ctx, data.CreatedBy, data.DbId)
 			if err != nil {
 				w.logger.Log.Errorw(
 					"error in updating the task to not completed",
 					zap.Int("worker_id", w.id),
 					zap.Error(err),
 				)
-				return
+				continue
 			}
 		}
 
@@ -97,7 +107,6 @@ func (w *worker) PushToQueue(ctx context.Context, data *[]byte, targetService st
 			)
 			return err
 		}
-
 	case string(enum.EmailService):
 		err := w.EmailQueue.Publish(ctx, data)
 		if err != nil {
@@ -111,6 +120,5 @@ func (w *worker) PushToQueue(ctx context.Context, data *[]byte, targetService st
 			return err
 		}
 	}
-
 	return nil
 }

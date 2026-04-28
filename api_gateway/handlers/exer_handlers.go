@@ -9,7 +9,9 @@ import (
 	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
 	"github.com/sakamoto-max/wt_2-pkg/middleware"
 	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
+	// "github.com/sakamoto-max/wt_2-pkg/utils"
+	// "api_gateway/utils"
+	"github.com/sakamoto-max/wt_2/api_gateway/utils"
 	"github.com/sakamoto-max/wt_2/api_gateway/user"
 	"go.uber.org/zap"
 )

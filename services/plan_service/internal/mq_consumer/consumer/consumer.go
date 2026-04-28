@@ -1,12 +1,14 @@
 package consumer
 
 import (
+	"encoding/json"
+	"fmt"
+	"plan_service/internal/mq_consumer/types"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/wt_2-pkg/queue"
-	"github.com/sakamoto-max/wt_2-pkg/types"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
-	amqp "github.com/rabbitmq/amqp091-go"
+	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 )
 
 type consumer struct {
@@ -42,9 +44,18 @@ func (c *consumer) PushDataToJobs(msgs <-chan amqp.Delivery) {
 			return
 		}
 
-		data := utils.ConvertIntoJosn(&msg.Body)
+		data := ConvertIntoJosn(&msg.Body)
+		fmt.Println("data.Id",data.DbId)
 
-		c.jobs <- *data
-
+		c.jobs <- data
 	}
+}
+
+func ConvertIntoJosn(data *[]byte) types.Data {
+
+	var D types.Data
+
+	_ = json.Unmarshal(*data, &D)
+
+	return D
 }

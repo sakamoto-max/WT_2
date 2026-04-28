@@ -12,7 +12,8 @@ import (
 
 	"github.com/sakamoto-max/wt_2-pkg/enum"
 	"github.com/sakamoto-max/wt_2-pkg/logger"
-	"github.com/sakamoto-max/wt_2-pkg/queue"
+	// "github.com/sakamoto-max/wt_2-pkg/queue"
+	"github.com/sakamoto-max/rabbit_mq/queue" 
 	"github.com/sakamoto-max/wt_2-pkg/types"
 
 
@@ -22,6 +23,8 @@ import (
 const NumberOfWorkers = 5
 
 func main() {
+
+	
 
 	conn := queue.NewConn()
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -9,8 +10,6 @@ import (
 	"tracker_service/internal/models"
 	"wt/pkg/enum"
 	myerrors "wt/pkg/my_errors"
-
-	"wt/pkg/utils"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
@@ -242,10 +241,12 @@ func (d *DBs) EndWorkoutWithOutbox(ctx context.Context, userId string, trackerId
 		ExerciseNames: newExerciseNames,
 	}
 
-	jsonData, err := utils.MakeJSONV2(payload)
+	dataInBytes, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return myerrors.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
 	}
+
+	jsonData := string(dataInBytes)
 
 	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
 		"target_service": enum.PlanService,
