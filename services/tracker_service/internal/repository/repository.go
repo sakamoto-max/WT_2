@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 	"tracker_service/internal/models"
-	"wt/pkg/enum"
-	myerrors "wt/pkg/my_errors"
 
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 )
@@ -46,6 +46,7 @@ func (d *DBs) StartWorkout(ctx context.Context, userId string, planId string) (s
 		RETURNING id	
 	`, userId, planId).Scan(&trackerId)
 	if err != nil {
+		
 		return trackerId, myerrors.InternalServerErrMaker(fmt.Errorf("error starting an empty workout : %w\n", err))
 	}
 
@@ -249,8 +250,8 @@ func (d *DBs) EndWorkoutWithOutbox(ctx context.Context, userId string, trackerId
 	jsonData := string(dataInBytes)
 
 	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
-		"target_service": enum.PlanService,
-		"task":           enum.UpdatePlan,
+		"target_service": enum.ServiceName_PLAN_SERVICE.String(),
+		"task":           enum.TaskName_UPDATE_PLAN.String(),
 		"payload":        jsonData,
 	})
 

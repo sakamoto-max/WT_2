@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )

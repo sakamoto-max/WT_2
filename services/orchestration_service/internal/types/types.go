@@ -2,8 +2,9 @@ package types
 
 import (
 	"fmt"
+	"orchestration_service/internal/utils"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/utils"
+	// "github.com/sakamoto-max/wt_2-pkg/utils"
 )
 
 type Data struct {

@@ -2,8 +2,8 @@ package client
 
 import (
 	"log"
-	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

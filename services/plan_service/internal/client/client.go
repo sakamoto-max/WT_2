@@ -3,7 +3,7 @@ package client
 import (
 	"log"
 	"os"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

@@ -13,15 +13,14 @@ import (
 	"sync"
 	"time"
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	"go.uber.org/zap"
 )
 
 const NumberOfWorkers = 5
 
 func main() {
-
 
 	env.Load("../.env")
 
@@ -37,11 +36,11 @@ func main() {
 
 	conn := mq.NewConn()
 
-	planQueue := mq.NewMessageQueue(conn, string(enum.PlanQueue))
+	planQueue := mq.NewMessageQueue(conn, enum.QueueName_PLAN_QUEUE.String())
 
-	emailQueue := mq.NewMessageQueue(conn, string(enum.EmailQueue))
+	emailQueue := mq.NewMessageQueue(conn, enum.QueueName_EMAIL_QUEUE.String())
 
-	resultQueue := mq.NewMessageQueue(conn, string(enum.ResultQueue))
+	resultQueue := mq.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
 
 	// job & workers
 
@@ -58,23 +57,22 @@ func main() {
 		go worker.Work(ctx, &workersWg)
 	}
 
-	
 	// consumer
-	
+
 	consumer := consumer.NewConsumer(Db, resultQueue, logger)
-	
+
 	msgs := consumer.GetData()
-	
+
 	go consumer.Operate(ctx, msgs)
-	
+
 	// producer
-	
-	targetServices := []string{string(enum.AuthService), string(enum.TrackerService)}
-	
+
+	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
+
 	producer := producer.NewProducer(Db, planQueue, emailQueue, logger)
 
 	ticker := time.NewTicker(time.Second * 5)
-	
+
 	go producer.Start(ctx, &workersWg, ticker.C, jobs, &targetServices)
 
 	// shutdown
@@ -91,7 +89,6 @@ func main() {
 	close(jobs)
 }
 
-
-// what if a operation fails -> 
-// retry 3 times -> send back to db -> fetch after some time -> try again -> 
-// if retry > 5 -> move it to failed 
+// what if a operation fails ->
+// retry 3 times -> send back to db -> fetch after some time -> try again ->
+// if retry > 5 -> move it to failed

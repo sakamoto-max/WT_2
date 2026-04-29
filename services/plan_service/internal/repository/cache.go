@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
 func (r *DBs) SetUserEmptyPlanIdR(ctx context.Context, userId string, planId string) error {

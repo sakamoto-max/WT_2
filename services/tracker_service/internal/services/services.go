@@ -7,9 +7,9 @@ import (
 	"time"
 	"tracker_service/internal/models"
 	"tracker_service/internal/repository"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
-	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
 type Service struct {

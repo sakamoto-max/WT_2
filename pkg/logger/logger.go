@@ -10,6 +10,7 @@ type MyLogger struct {
 
 
 func NewLogger() *MyLogger {
+
 	log := zap.Must(zap.NewDevelopment())
 
 	logger :=  log.Sugar()

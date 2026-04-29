@@ -1,6 +1,7 @@
 package services
 
 import (
+	"auth_service/internal/jwt"
 	"auth_service/internal/repository"
 	"auth_service/internal/utils"
 	"context"
@@ -8,11 +9,11 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	// token "wt/pkg/jwt"
-	token "github.com/sakamoto-max/wt_2-pkg/jwt"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
-	// myerrors "wt/pkg/my_errors"
+
+	// token "github.com/sakamoto-max/wt_2_pkg/jwt"
+
 	"github.com/google/uuid"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
 type Service struct {
@@ -32,6 +33,7 @@ var (
 
 func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (string, time.Time, error) {
 
+	
 	var CreatedAt time.Time
 
 	email = strings.ToLower(email)
@@ -68,8 +70,8 @@ func (s *Service) Login(ctx context.Context, email string, password string) (str
 		return "", "", "", "", err
 	}
 
-	token := token.JwtToken{}
-	AccessToken, err := token.GenerateAccessToken(userId, roleID)
+	// token := token.JwtToken{}
+	AccessToken, err := jwt.GenerateAccessToken(userId, roleID)
 	if err != nil {
 		return "", "", "", "", err
 	}
@@ -87,7 +89,7 @@ func (s *Service) Login(ctx context.Context, email string, password string) (str
 	}
 
 	if !exists {
-		refreshToken, err = token.GenerateRefreshToken(userId, roleID)
+		refreshToken, err = jwt.GenerateRefreshToken(userId, roleID)
 		if err != nil {
 			return "", "", "", "", err
 		}
@@ -117,17 +119,17 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, UUID)
 	if err != nil {
-		return "", fmt.Errorf("error getting token from repo : %w", err)
+		return "", fmt.Errorf("error getting  from repo : %w", err)
 	}
 
-	token := token.JwtToken{}
+	// token := token.JwtToken{}
 
-	claims, err := token.ValidateToken(refreshToken)
+	claims, err := jwt.ValidateToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
 
-	accessToken, err := token.GenerateAccessToken(claims.UserId, claims.RoleId)
+	accessToken, err := jwt.GenerateAccessToken(claims.UserId, claims.RoleId)
 	if err != nil {
 		return "", err
 	}

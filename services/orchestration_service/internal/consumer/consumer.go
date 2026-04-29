@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"orchestration_service/internal/repository"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
 	amqp "github.com/rabbitmq/amqp091-go"
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 )
@@ -29,8 +29,8 @@ func NewConsumer(db *repository.DB, resQueue *mq.MessageQueue, logger *logger.My
 func (c *consumer) GetData() <-chan amqp.Delivery {	
 
 	c.logger.Log.Infoln("consumer has started")
-
-	msgs, err := c.resultQueue.Consume(string(enum.ResultQueue))
+	
+	msgs, err := c.resultQueue.Consume(enum.QueueName_RESULT_QUEUE.String())
 	if err != nil {
 		c.logger.Log.Fatalf("unable to open the consumer : %v", err)
 	}

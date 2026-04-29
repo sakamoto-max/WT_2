@@ -8,19 +8,20 @@ import (
 	"net"
 	"os"
 	"os/signal"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	pb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"go.uber.org/zap"
-	pb "github.com/sakamoto-max/wt_2-proto/shared/auth"
 	"google.golang.org/grpc"
 )
 
 type app struct {
-	Addr    string
-	Handler *handler.Handler
-	Logger  *logger.MyLogger
-	pool *pgxpool.Pool
+	Addr        string
+	Handler     *handler.Handler
+	Logger      *logger.MyLogger
+	pool        *pgxpool.Pool
 	redisClient *redis.Client
 }
 
@@ -44,18 +45,18 @@ func NewApp(addr string) *app {
 	handler := handler.NewHandler(service, logger)
 
 	return &app{
-		Addr:    addr,
-		Handler: handler,
-		Logger:  logger,
+		Addr:        addr,
+		Handler:     handler,
+		Logger:      logger,
 		redisClient: redisClient,
-		pool: pool,
+		pool:        pool,
 	}
 
 }
 
 func (a *app) Run() {
 
-	defer func(){
+	defer func() {
 		err := a.redisClient.Close()
 		if err != nil {
 			a.Logger.Log.Errorw("error in closing redis", zap.Error(err))
@@ -63,12 +64,12 @@ func (a *app) Run() {
 	}()
 
 	defer a.pool.Close()
-	
+
 	lis, err := net.Listen("tcp", a.Addr)
 	if err != nil {
 		a.Logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
-	
+
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, a.Handler)
 
@@ -88,7 +89,6 @@ func (a *app) Run() {
 	a.Logger.Log.Infof("shutdown signal received : %v", sig.String())
 
 	grpcServer.GracefulStop()
-
 
 	a.Logger.Log.Infof("server is closed")
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -153,27 +152,27 @@ func ErrMatcher(w http.ResponseWriter, err error) {
 	}
 }
 
-func ErrMaker(err error) error {
-	Err := &status.Status{}
-	switch {
-	case errors.Is(err, ErrEmailAlreadyExits):
-		Err = status.Newf(codes.AlreadyExists, "user with the email already exists")
-	case errors.Is(err, ErrNameAlreadyExits):
-		Err = status.Newf(codes.AlreadyExists, "user with the name already exists")
-	case errors.Is(err, PlanServerNotResponding):
-		Err = status.New(codes.Canceled, err.Error())
-	case errors.Is(err, ErrIncorrectPassword):
-		Err = status.New(codes.PermissionDenied, "the password is incorrect")
-	case errors.Is(err, ErrOldEmailNewEmailSame):
-		Err = status.New(codes.InvalidArgument, err.Error())
-	case errors.Is(err, ErrEmailDoesntMatch):
-		Err = status.New(codes.InvalidArgument, err.Error())
-	case errors.Is(err, ErrEmailNotFound):
-		Err = status.New(codes.NotFound, err.Error())
-	default:
-		Err = status.Newf(codes.Internal, "some internal error occured : %v", err)
-	}
-	err = Err.Err()
+// func ErrMaker(err error) error {
+// 	Err := &status.Status{}
+// 	switch {
+// 	case errors.Is(err, ErrEmailAlreadyExits):
+// 		Err = status.Newf(codes.AlreadyExists, "user with the email already exists")
+// 	case errors.Is(err, ErrNameAlreadyExits):
+// 		Err = status.Newf(codes.AlreadyExists, "user with the name already exists")
+// 	case errors.Is(err, PlanServerNotResponding):
+// 		Err = status.New(codes.Canceled, err.Error())
+// 	case errors.Is(err, ErrIncorrectPassword):
+// 		Err = status.New(codes.PermissionDenied, "the password is incorrect")
+// 	case errors.Is(err, ErrOldEmailNewEmailSame):
+// 		Err = status.New(codes.InvalidArgument, err.Error())
+// 	case errors.Is(err, ErrEmailDoesntMatch):
+// 		Err = status.New(codes.InvalidArgument, err.Error())
+// 	case errors.Is(err, ErrEmailNotFound):
+// 		Err = status.New(codes.NotFound, err.Error())
+// 	default:
+// 		Err = status.Newf(codes.Internal, "some internal error occured : %v", err)
+// 	}
+// 	err = Err.Err()
 	
-	return err
-}
+// 	return err
+// }

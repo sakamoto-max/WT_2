@@ -4,11 +4,8 @@ import (
 	"context"
 	"fmt"
 	"plan_service/internal/services"
-	// planpb "workout-tracker/proto/shared/plan"
-	// "wt/pkg/logger"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
-	planpb "github.com/sakamoto-max/wt_2-proto/shared/plan"
-
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 

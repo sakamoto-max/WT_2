@@ -7,7 +7,7 @@ import (
 	"plan_service/internal/repository"
 	"strings"
 	"time"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 )
 
 type ServiceIface interface {

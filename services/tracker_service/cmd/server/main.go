@@ -4,8 +4,6 @@ import (
 	"os"
 	"tracker_service/internal/bootstrap"
 	"tracker_service/internal/env"
-	// env "wt/pkg/env"
-	// "github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

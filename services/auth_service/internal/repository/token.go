@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	// myerrors "wt/pkg/my_errors"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
-	"github.com/redis/go-redis/v9"
-)
 
+	// myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/redis/go-redis/v9"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
+)
 
 func (r *repo) RefreshExists(ctx context.Context, userId string) (bool, error) {
 
@@ -22,7 +22,7 @@ func (r *repo) RefreshExists(ctx context.Context, userId string) (bool, error) {
 
 		return false, myerrors.InternalServerErrMaker(fmt.Errorf("error checking if uuid exists for user : %v", userId))
 	}
-	
+
 	refreshKey := fmt.Sprintf("%v_refresh", uuid)
 
 	_, err = r.rDB.Get(ctx, refreshKey).Result()

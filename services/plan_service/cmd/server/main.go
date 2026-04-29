@@ -4,8 +4,6 @@ import (
 	"os"
 	"plan_service/internal/bootstrap"
 	"plan_service/internal/env"
-	// env "wt/pkg/env"
-	// "github.com/sakamoto-max/wt_2-pkg/env"
 )
 
 func main() {

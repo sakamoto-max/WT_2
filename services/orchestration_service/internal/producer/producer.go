@@ -7,7 +7,7 @@ import (
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
 	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 )
 

@@ -3,9 +3,8 @@ package handler
 import (
 	"auth_service/internal/services"
 	"context"
-	pb "github.com/sakamoto-max/wt_2-proto/shared/auth"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	pb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -103,7 +102,6 @@ func (a *Handler) ChangeEmail(ctx context.Context, in *pb.ChangeEmailReq) (*pb.C
 
 	err := a.service.ChangeEmail(ctx, in.UserId, in.OldEmail, in.NewEmail)
 	if err != nil {
-		err = myerrors.ErrMaker(err)
 		return nil, err
 	}
 

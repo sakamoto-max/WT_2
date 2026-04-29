@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"exercise_service/internal/services"
-	exerpb "github.com/sakamoto-max/wt_2-proto/shared/exercise" 
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"exercise_service/internal/services" 
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

@@ -8,10 +8,8 @@ import (
 	"tracker_service/internal/handler"
 	"tracker_service/internal/repository"
 	"tracker_service/internal/services"
-	// "wt/pkg/logger"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
-	// pb "workout-tracker/proto/shared/tracker"
-	pb "github.com/sakamoto-max/wt_2-proto/shared/tracker"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	pb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
 
 	"google.golang.org/grpc"
 )

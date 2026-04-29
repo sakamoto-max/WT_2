@@ -3,12 +3,7 @@ package main
 import (
 	"auth_service/internal/bootstrap"
 	"os"
-
 	"auth_service/internal/env"
-
-	// env "wt/pkg/env"
-	// env "github.com/sakamoto-max/wt_2-pkg/env"
-
 )
 
 func main() {

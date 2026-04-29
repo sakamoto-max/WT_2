@@ -1,6 +1,6 @@
-module github.com/sakamoto-max/wt_2-proto
+module github.com/sakamoto-max/wt_2_proto
 
-go 1.24.1
+go 1.25.4
 
 require (
 	google.golang.org/grpc v1.80.0

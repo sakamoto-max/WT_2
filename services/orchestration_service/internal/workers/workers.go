@@ -5,9 +5,8 @@ import (
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
 	"sync"
-
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
 	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 	"go.uber.org/zap"
 )
@@ -95,7 +94,7 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 func (w *worker) PushToQueue(ctx context.Context, data *[]byte, targetService string, task string) error {
 
 	switch targetService {
-	case string(enum.PlanService):
+	case enum.ServiceName_PLAN_SERVICE.String():
 		err := w.PlanQueue.Publish(ctx, data)
 		if err != nil {
 			w.logger.Log.Errorw(
@@ -107,7 +106,7 @@ func (w *worker) PushToQueue(ctx context.Context, data *[]byte, targetService st
 			)
 			return err
 		}
-	case string(enum.EmailService):
+	case enum.ServiceName_EMAIL_SERVICE.String():
 		err := w.EmailQueue.Publish(ctx, data)
 		if err != nil {
 			w.logger.Log.Errorw(

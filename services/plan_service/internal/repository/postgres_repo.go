@@ -6,20 +6,13 @@ import (
 	"fmt"
 	"plan_service/internal/models"
 	"time"
-	// "wt/pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	// myerrors "wt/pkg/my_errors"
-	myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
-
-	// "plan_service/internal/models"
-
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
 )
 
 var (
 	ErrPlanAlreadyExists = errors.New("plan already exits")
-	// ErrNoExerciseExits = errors.New("no exercise ext")
 )
 
 // NEED
@@ -158,7 +151,7 @@ func (d *DBs) ReturnsPlanId(ctx context.Context, userId string, planName string)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return planId, myerrors.ResourceNotFoundErrMaker(string(enum.PlanResource))
+			return planId, myerrors.ResourceNotFoundErrMaker("plan")
 		}
 		return planId, myerrors.InternalServerErrMaker(fmt.Errorf("error checking if the plan already exists : %w\n", err))
 	}
@@ -269,7 +262,7 @@ func (d *DBs) CreateEmptyPlan(ctx context.Context, userId string) error {
 		INSERT INTO plans(user_id, name)
 		VALUES(@userId, @name)
 	`
-	_, err := d.pDB.Exec(ctx, query, pgx.NamedArgs{"userId": userId, "name": enum.EmptyPlanName})
+	_, err := d.pDB.Exec(ctx, query, pgx.NamedArgs{"userId": userId, "name": "empty"})
 	if err != nil {
 		return fmt.Errorf("Error creating empty plan : %v", err)
 	}

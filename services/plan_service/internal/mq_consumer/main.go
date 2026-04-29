@@ -4,15 +4,15 @@ import (
 	"os"
 	"os/signal"
 	"plan_service/internal/client"
+	"plan_service/internal/env"
 	"plan_service/internal/mq_consumer/consumer"
 	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/mq_consumer/worker"
 	"plan_service/internal/repository"
 	"sync"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	"github.com/sakamoto-max/wt_2-pkg/env"
-	"github.com/sakamoto-max/wt_2-pkg/logger"
-	mq "github.com/sakamoto-max/rabbit_mq/queue" 
+	mq "github.com/sakamoto-max/rabbit_mq/queue"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	"go.uber.org/zap"
 )
 
@@ -25,8 +25,8 @@ func main() {
 	defer logger.Log.Sync()
 
 	conn := mq.NewConn()
-	Planqueue := mq.NewMessageQueue(conn, string(enum.PlanQueue))
-	resQueue := mq.NewMessageQueue(conn, string(enum.ResultQueue))
+	Planqueue := mq.NewMessageQueue(conn, enum.QueueName_PLAN_QUEUE.String())
+	resQueue := mq.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
 
 	repo, err := repository.NewRepo()
 	if err != nil {

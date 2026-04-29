@@ -3,16 +3,17 @@ package repository
 import (
 	"context"
 	"fmt"
-	// myErrs "wt/pkg/my_errors"
-	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
+
+	// myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
 	"github.com/jackc/pgx/v5"
+	myErrs "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
 func (r *repo) GetEmail(ctx context.Context, userId string) (string, error) {
-	
+
 	var email string
 
-	query :=  `
+	query := `
 		SELECT 
 			email 
 		FROM 
@@ -21,8 +22,8 @@ func (r *repo) GetEmail(ctx context.Context, userId string) (string, error) {
 			id = @id
 	`
 
-	err := r.pDB.QueryRow(ctx, query,pgx.NamedArgs{"id" : userId}).Scan(&email)
-	if err != nil{
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"id": userId}).Scan(&email)
+	if err != nil {
 		return email, myErrs.InternalServerErrMaker(fmt.Errorf("error getting email of user with id : %v : %w", userId, err))
 	}
 
@@ -36,9 +37,9 @@ func (r *repo) ChangeEmail(ctx context.Context, userId string, newEmail string) 
 		SET email = @email
 		WHERE id = @id	
 	`
-	_, err := r.pDB.Exec(ctx, query, pgx.NamedArgs{"email" : newEmail, "id" : userId})
-	if err != nil{
-		return myErrs.InternalServerErrMaker(fmt.Errorf("error changing the email in the db : %w",err))
+	_, err := r.pDB.Exec(ctx, query, pgx.NamedArgs{"email": newEmail, "id": userId})
+	if err != nil {
+		return myErrs.InternalServerErrMaker(fmt.Errorf("error changing the email in the db : %w", err))
 	}
 
 	return nil

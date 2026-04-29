@@ -10,21 +10,26 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	// myErrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	myErrs "github.com/sakamoto-max/wt_2_pkg/myerrs"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
-
+var (
+	userResource = "user"
+	emailResource = "email"
+)
 
 func (r *repo) CreateUser(ctx context.Context, name string, email string, hashedPass string, role string) (string, time.Time, error) {
-	
+
+
 	trnx, err := r.pDB.Begin(ctx)
 	if err != nil {
 		return "", time.Now(), myErrs.InternalServerErrMaker(fmt.Errorf("error creating transaction : %w\n", err))
 	}
-	
+
 	defer trnx.Rollback(ctx)
-	
+
 	query := `
 	INSERT INTO 
 	users(name, email, role_id, hashed_pass)
@@ -36,23 +41,22 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 	var userId string
 	var createdAt time.Time
 
-	err = trnx.QueryRow(ctx, query, 
+	err = trnx.QueryRow(ctx, query,
 		pgx.NamedArgs{
-		"name" : name, 
-		"email" : email, 
-		"role" : role, 
-		"hashedPass" : hashedPass,
-	}).Scan(&userId, &createdAt)
-
+			"name":       name,
+			"email":      email,
+			"role":       role,
+			"hashedPass": hashedPass,
+		}).Scan(&userId, &createdAt)
 
 	if err != nil {
 		var pgErr *pgConn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			switch pgErr.ConstraintName {
 			case "users_name_key":
-				return "", createdAt, myErrs.AlreadyExitsErrMaker(string(enum.UserResource))
+				return "", createdAt, myErrs.AlreadyExitsErrMaker(userResource)
 			case "users_email_key":
-				return "", createdAt, myErrs.AlreadyExitsErrMaker(string(enum.UserResource))
+				return "", createdAt, myErrs.AlreadyExitsErrMaker(userResource)
 			}
 		}
 		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
@@ -68,11 +72,11 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 	}
 
 	planPayload := string(planDataInBytes)
-	
+
 	dataForEmail := domain.EmailPayload{
 		Email: email,
 	}
-	
+
 	emailDataInBytes, err := json.Marshal(dataForEmail)
 	if err != nil {
 		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
@@ -88,14 +92,18 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 			(@emailService, @createdBy, @sendEmail, @emailPayload::JSONB)
 	`
 
-	_, err = trnx.Exec(ctx, query,pgx.NamedArgs{
-		"planService" : enum.PlanService, 
-		"emptyPlan" : enum.CreateEmptyPlanForUser, 
-		"planPayload":planPayload,
-		"emailService":enum.EmailService,
-		"sendEmail" : enum.SendEmailforSigningUp,
-		"emailPayload" : emailPayload,
-		"createdBy" : "auth_service",
+	// planService stirng = "plan_service"
+	// emailService string = "email_service"
+	// sendEmailForSignUp string = ""
+
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
+		"planService":  enum.ServiceName_PLAN_SERVICE.String(),
+		"emptyPlan":    enum.TaskName_CREATE_EMPTY_PLAN_FOR_USER.String(),
+		"planPayload":  planPayload,
+		"emailService": enum.ServiceName_EMAIL_SERVICE.String(),
+		"sendEmail":    enum.TaskName_SEND_EMAIL_FOR_SIGNING_UP.String(),
+		"emailPayload": emailPayload,
+		"createdBy":    "auth_service",
 	})
 
 	if err != nil {
@@ -109,9 +117,6 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 
 	return userId, createdAt, nil
 }
-
-
-
 
 // DONE
 func (r *repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string, string, string, error) {
@@ -131,7 +136,7 @@ func (r *repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string,
 	var roleID string
 	var name string
 
-	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"email" : email}).Scan(&userID, &name, &roleID)
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"email": email}).Scan(&userID, &name, &roleID)
 
 	if err != nil {
 		return userID, roleID, name, myErrs.InternalServerErrMaker(fmt.Errorf("error getting id, name, role_id : %w", err))
@@ -168,10 +173,10 @@ func (r *repo) FetchUserPass(ctx context.Context, email string) (string, error) 
 		WHERE EMAIL = @email
 	`
 
-	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"email" : email}).Scan(&hashedPass)
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"email": email}).Scan(&hashedPass)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myErrs.ResourceNotFoundErrMaker(string(enum.EmailResource))
+			return "", myErrs.ResourceNotFoundErrMaker(string(emailResource))
 		}
 		return "", myErrs.InternalServerErrMaker(fmt.Errorf("error getting hashed pass : %w", err))
 	}
@@ -193,7 +198,7 @@ func (r *repo) FetchUserPassById(ctx context.Context, userId string) (string, er
 			id = @id	
 	`
 
-	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"id" : userId}).Scan(&hashedPass)
+	err := r.pDB.QueryRow(ctx, query, pgx.NamedArgs{"id": userId}).Scan(&hashedPass)
 	if err != nil {
 		return "", myErrs.InternalServerErrMaker(fmt.Errorf("error getting hashed pass : %w", err))
 	}
@@ -203,7 +208,7 @@ func (r *repo) FetchUserPassById(ctx context.Context, userId string) (string, er
 
 // DONE
 func (r *repo) ChangePass(ctx context.Context, userId string, newPass string) error {
-	
+
 	query := `
 		UPDATE 
 			USERS
@@ -213,8 +218,8 @@ func (r *repo) ChangePass(ctx context.Context, userId string, newPass string) er
 			ID = @id
 	
 	`
-	
-	_, err := r.pDB.Exec(ctx, query, pgx.NamedArgs{"hashedPass" : newPass, "id" : userId})
+
+	_, err := r.pDB.Exec(ctx, query, pgx.NamedArgs{"hashedPass": newPass, "id": userId})
 	if err != nil {
 		return myErrs.InternalServerErrMaker(fmt.Errorf("error updating the password : %w", err))
 	}
@@ -223,5 +228,5 @@ func (r *repo) ChangePass(ctx context.Context, userId string, newPass string) er
 }
 
 func (r *repo) GetUserId() {
-	
+
 }

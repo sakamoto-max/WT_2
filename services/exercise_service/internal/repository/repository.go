@@ -6,8 +6,7 @@ import (
 	"exercise_service/internal/domain"
 	"fmt"
 	"time"
-	"github.com/sakamoto-max/wt_2-pkg/enum"
-	myerrs "github.com/sakamoto-max/wt_2-pkg/my_errors"
+	myerrs "github.com/sakamoto-max/wt_2_pkg/myerrs"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -68,7 +67,7 @@ func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseNam
 	err := row.Scan(&exercise.Id, &exercise.Name, &exercise.BodyPart, &exercise.Equipment, &exercise.CreatedAt, &exercise.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+			return nil, myerrs.ResourceNotFoundErrMaker("exercise")
 		}
 
 		return nil, myerrs.InternalServerErrMaker(fmt.Errorf("error in getting the exercise by name : %v : %w", exerciseName, err))
@@ -161,7 +160,7 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 	`, pgx.NamedArgs{"name": bodyPartName}).Scan(&bodyPartId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myerrs.ResourceNotFoundErrMaker(string(enum.BodyPartResource))
+			return "", myerrs.ResourceNotFoundErrMaker("body_part")
 		}
 
 		err := fmt.Errorf("error getting id of body_part : %w\n", err)
@@ -174,7 +173,7 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 	`, pgx.NamedArgs{"name": equipmentName}).Scan(&equipmentId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myerrs.ResourceNotFoundErrMaker(string(enum.EquipmentResource))
+			return "", myerrs.ResourceNotFoundErrMaker("equipment")
 		}
 
 		err := fmt.Errorf("error getting id of equipment : %w\n", err)
@@ -277,7 +276,7 @@ func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (stri
 	`, pgx.NamedArgs{"id": exerciseId}).Scan(&exerciseName)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+			return "", myerrs.ResourceNotFoundErrMaker("exericse")
 		}
 
 		err := fmt.Errorf("error getting execise name for id %v : %w", exerciseId, err)
@@ -310,7 +309,7 @@ func (r *Repo) DeleteExecise(ctx context.Context, userId string, exerciseName st
 	err = trnx.QueryRow(ctx, query, pgx.NamedArgs{"name": exerciseName, "userId": userId}).Scan(&exerciseId, &createdBy)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return myerrs.ResourceNotFoundErrMaker(string(enum.ExerciseResource))
+			return myerrs.ResourceNotFoundErrMaker("exercise")
 		}
 		return myerrs.InternalServerErrMaker(fmt.Errorf("error getting id and createdBy for exericse %v : %w", exerciseName, err))
 	}
