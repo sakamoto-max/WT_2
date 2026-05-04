@@ -18,7 +18,6 @@ orc:
 email:
 	@cd services && cd email_service && go run main.go
 
-
 # migrations :
 auth_db_up:
 	@cd services && cd auth_service && migrate -database "postgres://postgres:root@localhost:5432/WT_AUTH?sslmode=disable" -path migrations up

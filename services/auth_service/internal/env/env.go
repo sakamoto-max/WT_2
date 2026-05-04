@@ -3,7 +3,6 @@ package env
 import (
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
 )
 
@@ -12,7 +11,6 @@ func Load(fileName string) {
 	if err != nil {
 		log.Fatalf("error loading the env file : %v", err)
 	}
-
 	lookup()
 }
 

@@ -110,18 +110,20 @@ func (h *Handler) GetPLanByName(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.PlanName
+	// var userInput user.PlanName
 
-	json.NewDecoder(r.Body).Decode(&userInput)
+	// json.NewDecoder(r.Body).Decode(&userInput)
 
-	err = userInput.Validate()
-	if err != nil {
-		user.ValidationErrWriter(w, err)
-		return
-	}
+	// err = userInput.Validate()
+	// if err != nil {
+	// 	user.ValidationErrWriter(w, err)
+	// 	return
+	// }
+	planName := r.PathValue("planName")
+
 	in := planpb.GetPlanByNameReq{
 		UserId:   claims.UserId,
-		PlanName: userInput.PlanName,
+		PlanName: planName,
 	}
 
 	resp, err := h.planClient.GetPlanByName(ctx, &in)
@@ -242,18 +244,21 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.PlanName
+	// var userInput user.PlanName
 
-	json.NewDecoder(r.Body).Decode(&userInput)
+	// json.NewDecoder(r.Body).Decode(&userInput)
 
-	err = userInput.Validate()
-	if err != nil {
-		user.ValidationErrWriter(w, err)
-		return
-	}
+	// err = userInput.Validate()
+	// if err != nil {
+	// 	user.ValidationErrWriter(w, err)
+	// 	return
+	// }
+
+	planName := r.PathValue("planName")
+	
 	in := planpb.DeletePlanReq{
 		UserId:   claims.UserId,
-		PlanName: userInput.PlanName,
+		PlanName: planName,
 	}
 
 	resp, err := h.planClient.DeletePlan(ctx, &in)

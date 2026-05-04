@@ -25,12 +25,12 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/exercises", h.CreateExercise)
 	r.With(middleware.JwtMiddleware).Delete("/wt/exercises", h.DeleteExecise)
 
-	r.With(middleware.JwtMiddleware).Post("/wt/plan/create", h.CreatePlan)
-	r.With(middleware.JwtMiddleware).Patch("/wt/plan/exercises", h.AddExercisesToPlan)
-	r.With(middleware.JwtMiddleware).Delete("/wt/plan/exercises", h.DeleteExerciseFromPlan)
-	r.With(middleware.JwtMiddleware).Get("/wt/plan", h.GetAllPlans)
-	r.With(middleware.JwtMiddleware).Get("/wt/plan/oneplan", h.GetPLanByName)
-	r.With(middleware.JwtMiddleware).Delete("/wt/plan", h.DeletePlan)
+	r.With(middleware.JwtMiddleware).Post("/wt/plans/create", h.CreatePlan)
+	r.With(middleware.JwtMiddleware).Patch("/wt/plans/exercises", h.AddExercisesToPlan)
+	r.With(middleware.JwtMiddleware).Delete("/wt/plans/exercises", h.DeleteExerciseFromPlan)
+	r.With(middleware.JwtMiddleware).Get("/wt/plans", h.GetAllPlans)
+	r.With(middleware.JwtMiddleware).Get("/wt/plans/{planName}", h.GetPLanByName)
+	r.With(middleware.JwtMiddleware).Delete("/wt/plans/{planName}", h.DeletePlan)
 
 	r.With(middleware.JwtMiddleware).Post("/wt/workout/empty", h.StartEmptyWorkout)
 	r.With(middleware.JwtMiddleware).Post("/wt/workout", h.StartWorkoutWithPlan)
