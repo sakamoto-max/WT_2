@@ -28,7 +28,6 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.InternalServerErr(w, err)
 	}
-
 	logger.Log.Infow("CREATE_EXERCISE_CALLED", zap.String("REQ_ID", reqId))
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
