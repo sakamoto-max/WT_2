@@ -1,2 +1,7 @@
 *.env
-*.txt
+data.txt
+docker_compose.txt
+LOOPHOLES.txt
+scripts.txt
+swagger.txt
+

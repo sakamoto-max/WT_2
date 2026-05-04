@@ -1,0 +1,81 @@
+// redis implementation
+// analytics service
+// testing
+// swagger
+// observability and monitering
+// ci/cd
+// deployment
+
+
+{
+	"workout" : [
+		{
+			"exercise_name" : "barbell_bench_press",
+			"tracker" : [
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				}
+			]
+		},
+		{
+			"exercise_name" : "push_ups",
+			"tracker" : [
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				}
+			]
+		},
+		{
+			"exercise_name" : "lat_pulldown",
+			"tracker" : [
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				}
+			]
+		},
+		{
+			"exercise_name" : "lat_pulldown",
+			"tracker" : [
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				},
+				{
+					"weight" : 10,
+					"reps" : 11
+				}
+			]
+		}
+	]
+}

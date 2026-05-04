@@ -84,6 +84,7 @@ var (
 	updatedAt string = "updated_at"
 )
 
+
 func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
 	
 	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerciseName)
@@ -117,7 +118,6 @@ func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseNa
 
 	return &data, nil
 }
-
 func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *domain.Exercise) error {
 	mainKey := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerData.Name)
 	idKey := "id"
