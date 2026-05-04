@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	env.Load("../.env")
+
+	env.LookUp()
 
 	app := bootstrap.NewApp(os.Getenv("HTTP_SERVER_ADDR"))
 	app.Run()

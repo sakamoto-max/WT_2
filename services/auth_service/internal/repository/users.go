@@ -86,10 +86,10 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 
 	query = `
 		INSERT INTO 
-			outbox(target_service, created_by, task, payload)
+			outbox(target_service, created_by, task, status, payload)
 		VALUES 
-			(@planService, @createdBy, @emptyPlan, @planPayload::JSONB),
-			(@emailService, @createdBy, @sendEmail, @emailPayload::JSONB)
+			(@planService, @createdBy, @emptyPlan, @status, @planPayload::JSONB),
+			(@emailService, @createdBy, @sendEmail, @status, @emailPayload::JSONB)
 	`
 
 	// planService stirng = "plan_service"
@@ -104,6 +104,7 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 		"sendEmail":    enum.TaskName_SEND_EMAIL_FOR_SIGNING_UP.String(),
 		"emailPayload": emailPayload,
 		"createdBy":    "auth_service",
+		"status" : enum.TaskStatus_TASK_NOT_COMPLETED.String(),
 	})
 
 	if err != nil {

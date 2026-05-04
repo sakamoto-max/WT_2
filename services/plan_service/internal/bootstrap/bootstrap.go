@@ -6,8 +6,12 @@ import (
 	"os/signal"
 	"plan_service/internal/client"
 	"plan_service/internal/handler"
+	"plan_service/internal/mq_consumer"
 	"plan_service/internal/repository"
 	"plan_service/internal/services"
+	"sync"
+
+	// "sync"
 
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	pb "github.com/sakamoto-max/wt_2_proto/shared/plan"
@@ -21,6 +25,7 @@ type app struct {
 }
 
 func NewApp(addr string) *app {
+
 
 	logger := logger.NewLogger()
 
@@ -54,6 +59,12 @@ func (a *app) Run() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
+
+	var serverWg sync.WaitGroup
+
+	serverWg.Add(1)
+	go mq_consumer.InitConsumer(&serverWg)
+
 	go func() {
 		a.logger.Log.Infof("grpc server has started at %v", a.addr)
 		if err := grpcServer.Serve(lis); err != nil {
@@ -62,11 +73,12 @@ func (a *app) Run() {
 		}
 	}()
 
+	
 	sig := <-sigChan
-
 	a.logger.Log.Infof("shutdown signal received : %v", sig.String())
-
+	
 	grpcServer.GracefulStop()
+	serverWg.Wait()
 
 	a.logger.Log.Infof("server is closed")
 }
