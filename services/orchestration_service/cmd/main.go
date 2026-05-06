@@ -22,8 +22,8 @@ const NumberOfWorkers = 5
 
 func main() {
 
-	// env.LookUp()
-	env.Load("../.env")
+	env.LookUp()
+	// env.Load("../.env")
 
 	logger := logger.NewLogger()
 	defer logger.Log.Sync()
