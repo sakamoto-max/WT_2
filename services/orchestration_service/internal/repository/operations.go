@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"orchestration_service/internal/types"
 	"time"
+
 	"github.com/jackc/pgx/v5"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 var (
@@ -42,7 +44,7 @@ func (d *DB) FetchData(ctx context.Context, targerService string) (*[]types.Data
 
 	defer trnx.Rollback(ctx)
 
-	rows, err := trnx.Query(ctx, outboxQuery, pgx.NamedArgs{"status": types.TaskNotCompleted})
+	rows, err := trnx.Query(ctx, outboxQuery, pgx.NamedArgs{"status": enum.TaskStatus_TASK_NOT_COMPLETED.String()})
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +92,7 @@ func (d *DB) FetchData(ctx context.Context, targerService string) (*[]types.Data
 			id = @id
 	`
 	for _, id := range allIds {
-		_, err := trnx.Exec(ctx, query, pgx.NamedArgs{"status": types.TaskPending, "id": id})
+		_, err := trnx.Exec(ctx, query, pgx.NamedArgs{"status": enum.TaskStatus_TASK_PENDING.String(), "id": id})
 		if err != nil {
 			return nil, fmt.Errorf("error in updating the task status to pending : %w", err)
 		}
@@ -114,14 +116,14 @@ func (d *DB) FetchData(ctx context.Context, targerService string) (*[]types.Data
 func (d *DB) CreateTrnx(ctx context.Context, targerService string) (pgx.Tx, error) {
 
 	switch targerService {
-	case string(types.AuthService):
+	case enum.ServiceName_AUTH_SERVICE.String():
 		trnx, err := d.AuthPg.Begin(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("error in creating a auth transaction : %w", err)
 		}
 
 		return trnx, nil
-	case string(types.TrackerService):
+	case enum.ServiceName_TRACKER_SERVICE.String():
 
 		trnx, err := d.TrackerPg.Begin(ctx)
 		if err != nil {
@@ -149,7 +151,7 @@ func (d *DB) TaskCompletedUpdate(ctx context.Context, targetDbName string, dbInd
 	`
 
 	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
-		"status": types.TaskCompleted,
+		"status": enum.TaskStatus_TASK_COMPLETED.String(),
 		"id":     dbIndex,
 	})
 
@@ -179,7 +181,7 @@ func (d *DB) TaskPendingUpdate(ctx context.Context, targetDbName string, dbIndex
 		WHERE id = @id	
 	`
 	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
-		"status": types.TaskPending,
+		"status": enum.TaskStatus_TASK_PENDING.String(),
 		"id":     dbIndex,
 	})
 
@@ -208,7 +210,7 @@ func (d *DB) TaskNotCompletedUpdateTries(ctx context.Context, targetDbName strin
 
 	defer trnx.Rollback(ctx)
 
-	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"status": types.TaskNotCompleted, "id": dbIndex})
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"status": enum.TaskStatus_TASK_NOT_COMPLETED.String(), "id": dbIndex})
 	if err != nil {
 		return fmt.Errorf("error in updating the task to not completed for id %v : %v", dbIndex, err)
 	}
@@ -257,7 +259,7 @@ func (d *DB) TaskFailed(ctx context.Context, targetDbName string, dbIndex string
 		SET status = @status
 		WHERE id = @id	
 	`
-	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"status": types.TaskFailed, "id": dbIndex})
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{"status": enum.TaskStatus_TASK_FAILED.String(), "id": dbIndex})
 	if err != nil {
 		return fmt.Errorf("failed to update the task to failed : %w", err)
 	}

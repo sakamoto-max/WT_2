@@ -12,7 +12,7 @@ tracker:
 	@cd services && cd tracker_service && cd cmd && cd server && go run .
 
 gateway:
-	@cd api_gateway && cd cmd && go run .
+	@cd api_gateway && cd cmd && set ENVIORNMENT="prod" && go run .
 orc:
 	@cd services && cd orchestration_service && cd cmd && go run main.go
 email:

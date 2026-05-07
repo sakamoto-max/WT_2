@@ -3,7 +3,9 @@ package env
 import (
 	"log"
 	"os"
+
 	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 )
 
 func Load(fileName string) {
@@ -11,11 +13,9 @@ func Load(fileName string) {
 	if err != nil {
 		log.Fatalf("error loading the env file : %v", err)
 	}
-
-	lookup()
 }
 
-func lookup() {
+func LookUp() {
 	_, ok := os.LookupEnv("HTTP_SERVER_ADDR")
 	if !ok {
 		log.Fatalf("unable to find env HTTP_SERVER_ADDR")

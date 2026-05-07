@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	// "github.com/joho/godotenv"
 	"github.com/joho/godotenv"
 )
 
@@ -13,10 +14,10 @@ func Load(fileName string) {
 		log.Fatalf("error loading the env file : %v", err)
 	}
 
-	lookup()
+	LookUp()
 }
 
-func lookup() {
+func LookUp() {
 	_, ok := os.LookupEnv("AUTH_POSTGRES_CONN")
 	if !ok {
 		log.Fatalf("unable to find env AUTH_POSTGRES_CONN")

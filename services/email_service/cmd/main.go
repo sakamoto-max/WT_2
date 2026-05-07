@@ -2,6 +2,7 @@ package main
 
 import (
 	"email_service/internals/consumer"
+	"email_service/internals/env"
 	"email_service/internals/producer"
 	"email_service/internals/services"
 	"email_service/internals/types"
@@ -20,6 +21,8 @@ import (
 const NumberOfWorkers = 5
 
 func main() {
+
+	env.LookUp()
 
 	conn := queue.NewConn()
 

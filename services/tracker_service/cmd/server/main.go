@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	env.Load("../../.env")
+	// env.Load("../../.env")
+	env.LookUp()
 	
 	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
 	app.Run()

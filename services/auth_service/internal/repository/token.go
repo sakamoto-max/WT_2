@@ -38,6 +38,9 @@ func (r *repo) GetUUID(ctx context.Context, userId string) (string, error) {
 
 	uuid, err := r.rDB.Get(ctx, uuidKey).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", myerrors.BadReqErrMaker(fmt.Errorf("please login first"))
+		}
 		return uuid, myerrors.InternalServerErrMaker(fmt.Errorf("error getting the UUID : %w", err))
 	}
 
