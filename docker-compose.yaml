@@ -1,5 +1,3 @@
-# version: '1.1'
-
 networks:
   wt:
     driver: bridge  
@@ -14,6 +12,12 @@ services:
       - "7555:5432"
     volumes:
       - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     environment:
       - POSTGRES_PASSWORD=root
 
@@ -22,7 +26,8 @@ services:
     networks:
       - wt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: [
       "-path", "/migrations",
       "-database", "postgresql://postgres:root@postgres:5432/auth?sslmode=disable",
@@ -33,7 +38,8 @@ services:
     networks:
       - wt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: [
       "-path", "/migrations",
       "-database", "postgresql://postgres:root@postgres:5432/tracker?sslmode=disable", "up"
@@ -43,7 +49,8 @@ services:
     networks:
       - wt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: [
       "-path", "/migrations",
       "-database", "postgresql://postgres:root@postgres:5432/exercise?sslmode=disable", "up"
@@ -53,7 +60,8 @@ services:
     networks:
       - wt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: [
       "-path", "/migrations",
       "-database", "postgresql://postgres:root@postgres:5432/plan?sslmode=disable", "up"
@@ -67,6 +75,12 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   rabbitmq:
     image: rabbitmq:4-management 
     networks:
@@ -74,6 +88,12 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   auth:
     build: services\auth_service
     networks:
@@ -89,8 +109,12 @@ services:
       - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
       - SERVICE_NAME=auth_service
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+      auth-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
   plan:
     build: services\plan_service
     networks:
@@ -108,9 +132,14 @@ services:
       - EXERCISE_GRPC_SERVER_ADDR=:6003
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      - redis
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      plan-migrate:
+        condition: service_completed_successfully
   exercise:
     build: services\exercise_service
     networks:
@@ -127,9 +156,14 @@ services:
       - SERVICE_NAME=exercise_service
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      - redis
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      exercise-migrate:
+        condition: service_completed_successfully
   tracker:
     build: services\tracker_service
     networks:
@@ -146,8 +180,12 @@ services:
       - GRPC_SERVER_ADDR=:6004
       - SERVICE_NAME=tracker_service
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      tracker-migrate:
+        condition: service_completed_successfully
 
   email:
     build: services\email_service
@@ -156,7 +194,8 @@ services:
     environment:
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
   orc:
     build: services\orchestration_service
     networks:
@@ -169,8 +208,16 @@ services:
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
       - TRACKER_POSTGRES_CONN=postgresql://postgres:root@postgres:5432/tracker?sslmode=disable
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-migrate:
+        condition: service_completed_successfully
+      tracker-migrate:
+        condition: service_completed_successfully
 
   gateway:
     build: api_gateway
@@ -187,12 +234,20 @@ services:
       - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
       - SERVICE_NAME=gateway
     depends_on:
-      - redis
-      - postgres
-      - auth
-      - tracker
-      - plan
-      - exercise
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth:
+        condition: service_started
+      tracker:
+        condition: service_started
+      plan:
+        condition: service_started
+      exercise:
+        condition: service_started
   
 volumes:
   pg_data:
