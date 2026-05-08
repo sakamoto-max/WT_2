@@ -13,3 +13,4 @@ func main() {
 	app := bootstrap.NewApp(os.Getenv("HTTP_SERVER_ADDR"))
 	app.Run()
 }
+

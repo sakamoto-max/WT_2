@@ -21,43 +21,49 @@ func NewHandler(service services.ServiceIface, logger *logger.MyLogger) *Handler
 
 func (p *Handler) CreatePlan(ctx context.Context, in *planpb.CreatePlanReq) (*planpb.CreatePlanResp, error) {
 
+	fmt.Println("called create plan")
+	
 	err := p.service.CreatePlan(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	resp := planpb.CreatePlanResp{
 		PlanName:      in.PlanName,
 		ExerciseNames: in.ExerciseNames,
 		Message:       fmt.Sprintf("%v created successfully", in.PlanName),
 	}
-
+	
+	fmt.Println("create plan ended")
 	return &resp, nil
 }
 func (p *Handler) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*planpb.GetAllPlansResp, error) {
-
+	
+	fmt.Println("called get all plans")
 	numberOfPlans, allPlans, err := p.service.GetPlans(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	resp := planpb.GetAllPlansResp{}
-
+	
 	for _, eachPlan := range *allPlans {
 		eachPlan := planpb.PlanResp{
 			PlanName:      eachPlan.PlanName,
 			ExerciseNames: eachPlan.Exercises,
 		}
-
+		
 		resp.AllPlans = append(resp.AllPlans, &eachPlan)
 	}
-
+	
 	resp.NumberOfPlans = int64(numberOfPlans)
-
+	
+	fmt.Println("ended get all plans")
 	return &resp, nil
 }
 func (p *Handler) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.GetPlanByNameResp, error) {
-
+	
+	fmt.Println("called get plan by name")
 	planId, planName, exerciseNames, err := p.service.GetPlan(ctx, in.UserId, in.PlanName)
 	if err != nil {
 		return nil, err
@@ -68,7 +74,8 @@ func (p *Handler) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq
 		PlanName:      planName,
 		PlanId:        planId,
 	}
-
+	
+	fmt.Println("ended get plan by name")
 	return &resp, nil
 }
 func (p *Handler) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {

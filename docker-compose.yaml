@@ -4,7 +4,9 @@ networks:
 
 services:
   postgres:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.pg
     networks:
       - wt
     container_name: pg    
@@ -131,6 +133,12 @@ services:
       - SERVICE_NAME=plan_service
       - EXERCISE_GRPC_SERVER_ADDR=:6003
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
+    # healthcheck:
+    #   test: ["CMD", "arg"]
+    #   interval: 1m30s
+    #   timeout: 30s
+    #   retries: 5
+    #   start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy

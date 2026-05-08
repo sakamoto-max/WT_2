@@ -20,56 +20,56 @@ import (
 
 const numberOfWorkers = 5
 
-func main() {
+// func main() {
 
-	env.LookupForConsumer()
+// 	env.Lookup()
 
-	logger := logger.NewLogger()
-	defer logger.Log.Sync()
+// 	logger := logger.NewLogger()
+// 	defer logger.Log.Sync()
 
-	conn := mq.NewConn()
-	Planqueue := mq.NewMessageQueue(conn, enum.QueueName_PLAN_QUEUE.String())
-	resQueue := mq.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
+// 	conn := mq.NewConn()
+// 	Planqueue := mq.NewMessageQueue(conn, enum.QueueName_PLAN_QUEUE.String())
+// 	resQueue := mq.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
 
-	repo, err := repository.NewRepo()
-	if err != nil {
-		logger.Log.Fatalf("error opening the repos : %v", err)
-	}
+// 	repo, err := repository.NewRepo()
+// 	if err != nil {
+// 		logger.Log.Fatalf("error opening the repos : %v", err)
+// 	}
 
-	jobs := make(chan types.Data, numberOfWorkers*2)
+// 	jobs := make(chan types.Data, numberOfWorkers*2)
 
-	exerClient := client.New()
+// 	exerClient := client.New()
 
-	workers := worker.MakeWorkers(numberOfWorkers, repo, logger, jobs, resQueue, exerClient.Client)
+// 	workers := worker.MakeWorkers(numberOfWorkers, repo, logger, jobs, resQueue, exerClient.Client)
 
-	var workerWg sync.WaitGroup
+// 	var workerWg sync.WaitGroup
 
-	for _, worker := range workers {
-		workerWg.Add(1)
-		go worker.Work(&workerWg)
-	}
+// 	for _, worker := range workers {
+// 		workerWg.Add(1)
+// 		go worker.Work(&workerWg)
+// 	}
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt)
+// 	sigChan := make(chan os.Signal, 1)
+// 	signal.Notify(sigChan, os.Interrupt)
 
-	logger.Log.Infoln("consumer has started")
+// 	logger.Log.Infoln("consumer has started")
 
-	consumer := consumer.NewConsumer(Planqueue, logger, jobs)
-	msgs := consumer.GetData()
-	go consumer.PushDataToJobs(msgs)
+// 	consumer := consumer.NewConsumer(Planqueue, logger, jobs)
+// 	msgs := consumer.GetData()
+// 	go consumer.PushDataToJobs(msgs)
 
-	sig := <-sigChan
-	logger.Log.Infow("signal received", zap.String("signal", sig.String()))
+// 	sig := <-sigChan
+// 	logger.Log.Infow("signal received", zap.String("signal", sig.String()))
 
-	conn.Close()
-	workerWg.Wait()
-	if err := repo.Close(); err != nil {
-		logger.Log.Errorf("error closing the databases : %v", err)
-	}
+// 	conn.Close()
+// 	workerWg.Wait()
+// 	if err := repo.Close(); err != nil {
+// 		logger.Log.Errorf("error closing the databases : %v", err)
+// 	}
 
-	logger.Log.Infoln("consumer closed")
+// 	logger.Log.Infoln("consumer closed")
 
-}
+// }
 
 // func InitConsumer(wg *sync.WaitGroup) {
 // 	defer wg.Done()
