@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"plan_service/internal/models"
 	"time"
-	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
+
 	"github.com/jackc/pgx/v5"
 	pgConn "github.com/jackc/pgx/v5/pgconn"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
 var (
@@ -16,7 +17,7 @@ var (
 )
 
 // NEED
-func (d *DBs) CreatePlan(ctx context.Context, userId string, planName string, exerciseIds []string) error {
+func (d *dBs) CreatePlan(ctx context.Context, userId string, planName string, exerciseIds []string) error {
 
 	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
@@ -64,7 +65,7 @@ func (d *DBs) CreatePlan(ctx context.Context, userId string, planName string, ex
 
 	return nil
 }
-func (d *DBs) GetAllUserPlans(ctx context.Context, userId string) (*[]models.Plan3, error) {
+func (d *dBs) GetPlans(ctx context.Context, userId string) (*[]models.Plan3, error) {
 
 	var allPlans []models.Plan3
 
@@ -78,7 +79,6 @@ func (d *DBs) GetAllUserPlans(ctx context.Context, userId string) (*[]models.Pla
 			USER_ID = @userId
 		`
 	rows, err := d.pDB.Query(ctx, query, pgx.NamedArgs{"userId": userId})
-	// defer rows.Close()
 
 	if err != nil {
 		return nil, myerrors.InternalServerErrMaker(fmt.Errorf("error getting plan ids for the user %v : %w", userId, err))
@@ -102,7 +102,7 @@ func (d *DBs) GetAllUserPlans(ctx context.Context, userId string) (*[]models.Pla
 	rows.Close()
 	return &allPlans, nil
 }
-func (d *DBs) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]string, error) {
+func (d *dBs) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]string, error) {
 	var exerciseIDs []string
 
 	query := `
@@ -135,7 +135,7 @@ func (d *DBs) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]st
 
 	return &exerciseIDs, nil
 }
-func (d *DBs) ReturnsPlanId(ctx context.Context, userId string, planName string) (string, error) {
+func (d *dBs) ReturnsPlanId(ctx context.Context, userId string, planName string) (string, error) {
 	var planId string
 
 	query := `
@@ -158,7 +158,7 @@ func (d *DBs) ReturnsPlanId(ctx context.Context, userId string, planName string)
 
 	return planId, nil
 }
-func (d *DBs) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+func (d *dBs) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
 
 	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
@@ -188,7 +188,7 @@ func (d *DBs) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs
 
 	return nil
 }
-func (d *DBs) DeleteExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+func (d *dBs) DeleteExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
 
 	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
@@ -218,7 +218,7 @@ func (d *DBs) DeleteExerciseFromPlan(ctx context.Context, planId string, exercis
 
 	return nil
 }
-func (d *DBs) DeletePlan(ctx context.Context, userId string, planId string) error {
+func (d *dBs) DeletePlan(ctx context.Context, userId string, planId string) error {
 	trnx, err := d.pDB.Begin(ctx)
 	if err != nil {
 		return myerrors.InternalServerErrMaker(fmt.Errorf("error creating a transaction : %w", err))
@@ -256,7 +256,7 @@ func (d *DBs) DeletePlan(ctx context.Context, userId string, planId string) erro
 	return nil
 
 }
-func (d *DBs) CreateEmptyPlan(ctx context.Context, userId string) error {
+func (d *dBs) CreateEmptyPlan(ctx context.Context, userId string) error {
 
 	query := `
 		INSERT INTO plans(user_id, name)
@@ -269,7 +269,7 @@ func (d *DBs) CreateEmptyPlan(ctx context.Context, userId string) error {
 
 	return nil
 }
-func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
+func (r *dBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.pDB.Ping(ctx)
 	if err != nil {
@@ -280,7 +280,7 @@ func (r *DBs) GetPostgresRespTime(ctx context.Context) *time.Duration {
 
 	return &timeEnd
 }
-func (r *DBs) GetRedisRespTime(ctx context.Context) *time.Duration {
+func (r *dBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.rDB.Ping(ctx).Err()
 	if err != nil {
@@ -290,4 +290,54 @@ func (r *DBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeEnd := time.Since(timeStart)
 
 	return &timeEnd
+}
+func (r *dBs) GetPlan(ctx context.Context, userId string, planName string) (string, *[]string, error) {
+	query := `
+		SELECT 
+			PLANS.ID, 
+			EXERCISE_ID 
+		FROM 
+			PLANS
+		INNER JOIN 
+			PLAN_EXERCISES
+		ON 
+			PLANS.ID = PLAN_EXERCISES.PLAN_ID
+		WHERE 
+			user_id= @userId
+		AND 
+			name=@planName
+	`
+
+	rows, err := r.pDB.Query(ctx, query, pgx.NamedArgs{
+		"userId" : userId,
+		"planName": planName,
+	})
+
+
+	if err != nil{
+		if errors.Is(err, pgx.ErrNoRows){
+			return "", nil, myerrors.ResourceNotFoundErrMaker("plan")
+		}
+
+		return "", nil, myerrors.InternalServerErrMaker(fmt.Errorf("error getting plan details : %w", err))
+	}
+
+	var planId string
+	var exerciseId string
+	
+	var exerciseIds []string
+	// var planIdWithAllExericseIds []models.PlanIDExerciseId
+
+	for rows.Next() {
+		err := rows.Scan(&planId, &exerciseId)
+		if err != nil {
+			return "", nil, myerrors.InternalServerErrMaker(fmt.Errorf("error scanning the rows : %w", err))
+		}
+	
+		exerciseIds = append(exerciseIds, exerciseId)
+	}
+
+	rows.Close()
+
+	return planId, &exerciseIds, nil
 }

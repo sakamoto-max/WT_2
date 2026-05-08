@@ -26,6 +26,7 @@ const (
 	ExerciseService_GetOneExercise_FullMethodName                       = "/exercise.ExerciseService/GetOneExercise"
 	ExerciseService_CreateExercise_FullMethodName                       = "/exercise.ExerciseService/CreateExercise"
 	ExerciseService_DeleteExercise_FullMethodName                       = "/exercise.ExerciseService/DeleteExercise"
+	ExerciseService_ExercisesExistsReturnsIds_FullMethodName            = "/exercise.ExerciseService/ExercisesExistsReturnsIds"
 	ExerciseService_PING_FullMethodName                                 = "/exercise.ExerciseService/PING"
 	ExerciseService_GetHealth_FullMethodName                            = "/exercise.ExerciseService/GetHealth"
 )
@@ -44,6 +45,7 @@ type ExerciseServiceClient interface {
 	CreateExercise(ctx context.Context, in *CreateExerciseReq, opts ...grpc.CallOption) (*CreateExerciseResp, error)
 	// rpc UpdateExercise() returns () {};
 	DeleteExercise(ctx context.Context, in *SendExerciseName, opts ...grpc.CallOption) (*DeleteExerciseResp, error)
+	ExercisesExistsReturnsIds(ctx context.Context, in *SendExerciseNames, opts ...grpc.CallOption) (*ExerciseIds, error)
 	PING(ctx context.Context, in *PingExerReq, opts ...grpc.CallOption) (*PingExerResp, error)
 	GetHealth(ctx context.Context, in *GetHealthReq, opts ...grpc.CallOption) (*GetHealthResp, error)
 }
@@ -126,6 +128,16 @@ func (c *exerciseServiceClient) DeleteExercise(ctx context.Context, in *SendExer
 	return out, nil
 }
 
+func (c *exerciseServiceClient) ExercisesExistsReturnsIds(ctx context.Context, in *SendExerciseNames, opts ...grpc.CallOption) (*ExerciseIds, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExerciseIds)
+	err := c.cc.Invoke(ctx, ExerciseService_ExercisesExistsReturnsIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *exerciseServiceClient) PING(ctx context.Context, in *PingExerReq, opts ...grpc.CallOption) (*PingExerResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PingExerResp)
@@ -160,6 +172,7 @@ type ExerciseServiceServer interface {
 	CreateExercise(context.Context, *CreateExerciseReq) (*CreateExerciseResp, error)
 	// rpc UpdateExercise() returns () {};
 	DeleteExercise(context.Context, *SendExerciseName) (*DeleteExerciseResp, error)
+	ExercisesExistsReturnsIds(context.Context, *SendExerciseNames) (*ExerciseIds, error)
 	PING(context.Context, *PingExerReq) (*PingExerResp, error)
 	GetHealth(context.Context, *GetHealthReq) (*GetHealthResp, error)
 	mustEmbedUnimplementedExerciseServiceServer()
@@ -192,6 +205,9 @@ func (UnimplementedExerciseServiceServer) CreateExercise(context.Context, *Creat
 }
 func (UnimplementedExerciseServiceServer) DeleteExercise(context.Context, *SendExerciseName) (*DeleteExerciseResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteExercise not implemented")
+}
+func (UnimplementedExerciseServiceServer) ExercisesExistsReturnsIds(context.Context, *SendExerciseNames) (*ExerciseIds, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExercisesExistsReturnsIds not implemented")
 }
 func (UnimplementedExerciseServiceServer) PING(context.Context, *PingExerReq) (*PingExerResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method PING not implemented")
@@ -346,6 +362,24 @@ func _ExerciseService_DeleteExercise_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExerciseService_ExercisesExistsReturnsIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendExerciseNames)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExerciseServiceServer).ExercisesExistsReturnsIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExerciseService_ExercisesExistsReturnsIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExerciseServiceServer).ExercisesExistsReturnsIds(ctx, req.(*SendExerciseNames))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ExerciseService_PING_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PingExerReq)
 	if err := dec(in); err != nil {
@@ -416,6 +450,10 @@ var ExerciseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteExercise",
 			Handler:    _ExerciseService_DeleteExercise_Handler,
+		},
+		{
+			MethodName: "ExercisesExistsReturnsIds",
+			Handler:    _ExerciseService_ExercisesExistsReturnsIds_Handler,
 		},
 		{
 			MethodName: "PING",

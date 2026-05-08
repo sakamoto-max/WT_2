@@ -23,6 +23,102 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SendExerciseNames struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExerciseNames []string               `protobuf:"bytes,1,rep,name=exercise_names,json=exerciseNames,proto3" json:"exercise_names,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendExerciseNames) Reset() {
+	*x = SendExerciseNames{}
+	mi := &file_exercise_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendExerciseNames) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendExerciseNames) ProtoMessage() {}
+
+func (x *SendExerciseNames) ProtoReflect() protoreflect.Message {
+	mi := &file_exercise_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendExerciseNames.ProtoReflect.Descriptor instead.
+func (*SendExerciseNames) Descriptor() ([]byte, []int) {
+	return file_exercise_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SendExerciseNames) GetExerciseNames() []string {
+	if x != nil {
+		return x.ExerciseNames
+	}
+	return nil
+}
+
+func (x *SendExerciseNames) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type ExerciseIds struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExerciseIds   []string               `protobuf:"bytes,1,rep,name=exercise_ids,json=exerciseIds,proto3" json:"exercise_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExerciseIds) Reset() {
+	*x = ExerciseIds{}
+	mi := &file_exercise_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExerciseIds) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExerciseIds) ProtoMessage() {}
+
+func (x *ExerciseIds) ProtoReflect() protoreflect.Message {
+	mi := &file_exercise_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExerciseIds.ProtoReflect.Descriptor instead.
+func (*ExerciseIds) Descriptor() ([]byte, []int) {
+	return file_exercise_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ExerciseIds) GetExerciseIds() []string {
+	if x != nil {
+		return x.ExerciseIds
+	}
+	return nil
+}
+
 type SendEverythingResp struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Name              string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -35,7 +131,7 @@ type SendEverythingResp struct {
 
 func (x *SendEverythingResp) Reset() {
 	*x = SendEverythingResp{}
-	mi := &file_exercise_proto_msgTypes[0]
+	mi := &file_exercise_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +143,7 @@ func (x *SendEverythingResp) String() string {
 func (*SendEverythingResp) ProtoMessage() {}
 
 func (x *SendEverythingResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[0]
+	mi := &file_exercise_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +156,7 @@ func (x *SendEverythingResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendEverythingResp.ProtoReflect.Descriptor instead.
 func (*SendEverythingResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{0}
+	return file_exercise_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SendEverythingResp) GetName() string {
@@ -99,7 +195,7 @@ type GetHealthReq struct {
 
 func (x *GetHealthReq) Reset() {
 	*x = GetHealthReq{}
-	mi := &file_exercise_proto_msgTypes[1]
+	mi := &file_exercise_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -111,7 +207,7 @@ func (x *GetHealthReq) String() string {
 func (*GetHealthReq) ProtoMessage() {}
 
 func (x *GetHealthReq) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[1]
+	mi := &file_exercise_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -124,7 +220,7 @@ func (x *GetHealthReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHealthReq.ProtoReflect.Descriptor instead.
 func (*GetHealthReq) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{1}
+	return file_exercise_proto_rawDescGZIP(), []int{3}
 }
 
 type GetHealthResp struct {
@@ -139,7 +235,7 @@ type GetHealthResp struct {
 
 func (x *GetHealthResp) Reset() {
 	*x = GetHealthResp{}
-	mi := &file_exercise_proto_msgTypes[2]
+	mi := &file_exercise_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -151,7 +247,7 @@ func (x *GetHealthResp) String() string {
 func (*GetHealthResp) ProtoMessage() {}
 
 func (x *GetHealthResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[2]
+	mi := &file_exercise_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -164,7 +260,7 @@ func (x *GetHealthResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHealthResp.ProtoReflect.Descriptor instead.
 func (*GetHealthResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{2}
+	return file_exercise_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetHealthResp) GetServiceName() string {
@@ -203,7 +299,7 @@ type PingExerReq struct {
 
 func (x *PingExerReq) Reset() {
 	*x = PingExerReq{}
-	mi := &file_exercise_proto_msgTypes[3]
+	mi := &file_exercise_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -215,7 +311,7 @@ func (x *PingExerReq) String() string {
 func (*PingExerReq) ProtoMessage() {}
 
 func (x *PingExerReq) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[3]
+	mi := &file_exercise_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -228,7 +324,7 @@ func (x *PingExerReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingExerReq.ProtoReflect.Descriptor instead.
 func (*PingExerReq) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{3}
+	return file_exercise_proto_rawDescGZIP(), []int{5}
 }
 
 type PingExerResp struct {
@@ -239,7 +335,7 @@ type PingExerResp struct {
 
 func (x *PingExerResp) Reset() {
 	*x = PingExerResp{}
-	mi := &file_exercise_proto_msgTypes[4]
+	mi := &file_exercise_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -251,7 +347,7 @@ func (x *PingExerResp) String() string {
 func (*PingExerResp) ProtoMessage() {}
 
 func (x *PingExerResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[4]
+	mi := &file_exercise_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -264,7 +360,7 @@ func (x *PingExerResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PingExerResp.ProtoReflect.Descriptor instead.
 func (*PingExerResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{4}
+	return file_exercise_proto_rawDescGZIP(), []int{6}
 }
 
 type CreateExerciseReq struct {
@@ -279,7 +375,7 @@ type CreateExerciseReq struct {
 
 func (x *CreateExerciseReq) Reset() {
 	*x = CreateExerciseReq{}
-	mi := &file_exercise_proto_msgTypes[5]
+	mi := &file_exercise_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -291,7 +387,7 @@ func (x *CreateExerciseReq) String() string {
 func (*CreateExerciseReq) ProtoMessage() {}
 
 func (x *CreateExerciseReq) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[5]
+	mi := &file_exercise_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -304,7 +400,7 @@ func (x *CreateExerciseReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExerciseReq.ProtoReflect.Descriptor instead.
 func (*CreateExerciseReq) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{5}
+	return file_exercise_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreateExerciseReq) GetExerciseName() string {
@@ -344,7 +440,7 @@ type CreateExerciseResp struct {
 
 func (x *CreateExerciseResp) Reset() {
 	*x = CreateExerciseResp{}
-	mi := &file_exercise_proto_msgTypes[6]
+	mi := &file_exercise_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -356,7 +452,7 @@ func (x *CreateExerciseResp) String() string {
 func (*CreateExerciseResp) ProtoMessage() {}
 
 func (x *CreateExerciseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[6]
+	mi := &file_exercise_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -369,7 +465,7 @@ func (x *CreateExerciseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExerciseResp.ProtoReflect.Descriptor instead.
 func (*CreateExerciseResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{6}
+	return file_exercise_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CreateExerciseResp) GetId() string {
@@ -388,7 +484,7 @@ type DeleteExerciseResp struct {
 
 func (x *DeleteExerciseResp) Reset() {
 	*x = DeleteExerciseResp{}
-	mi := &file_exercise_proto_msgTypes[7]
+	mi := &file_exercise_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -400,7 +496,7 @@ func (x *DeleteExerciseResp) String() string {
 func (*DeleteExerciseResp) ProtoMessage() {}
 
 func (x *DeleteExerciseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[7]
+	mi := &file_exercise_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -413,7 +509,7 @@ func (x *DeleteExerciseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteExerciseResp.ProtoReflect.Descriptor instead.
 func (*DeleteExerciseResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{7}
+	return file_exercise_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteExerciseResp) GetMessage() string {
@@ -433,7 +529,7 @@ type SendExerciseName struct {
 
 func (x *SendExerciseName) Reset() {
 	*x = SendExerciseName{}
-	mi := &file_exercise_proto_msgTypes[8]
+	mi := &file_exercise_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -445,7 +541,7 @@ func (x *SendExerciseName) String() string {
 func (*SendExerciseName) ProtoMessage() {}
 
 func (x *SendExerciseName) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[8]
+	mi := &file_exercise_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -458,7 +554,7 @@ func (x *SendExerciseName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendExerciseName.ProtoReflect.Descriptor instead.
 func (*SendExerciseName) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{8}
+	return file_exercise_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SendExerciseName) GetExerciseName() string {
@@ -484,7 +580,7 @@ type ExerciseExistsReturnIdResp struct {
 
 func (x *ExerciseExistsReturnIdResp) Reset() {
 	*x = ExerciseExistsReturnIdResp{}
-	mi := &file_exercise_proto_msgTypes[9]
+	mi := &file_exercise_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -496,7 +592,7 @@ func (x *ExerciseExistsReturnIdResp) String() string {
 func (*ExerciseExistsReturnIdResp) ProtoMessage() {}
 
 func (x *ExerciseExistsReturnIdResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[9]
+	mi := &file_exercise_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -509,7 +605,7 @@ func (x *ExerciseExistsReturnIdResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExerciseExistsReturnIdResp.ProtoReflect.Descriptor instead.
 func (*ExerciseExistsReturnIdResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{9}
+	return file_exercise_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ExerciseExistsReturnIdResp) GetExerciseId() string {
@@ -529,7 +625,7 @@ type SendExerciseID struct {
 
 func (x *SendExerciseID) Reset() {
 	*x = SendExerciseID{}
-	mi := &file_exercise_proto_msgTypes[10]
+	mi := &file_exercise_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -541,7 +637,7 @@ func (x *SendExerciseID) String() string {
 func (*SendExerciseID) ProtoMessage() {}
 
 func (x *SendExerciseID) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[10]
+	mi := &file_exercise_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -554,7 +650,7 @@ func (x *SendExerciseID) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendExerciseID.ProtoReflect.Descriptor instead.
 func (*SendExerciseID) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{10}
+	return file_exercise_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SendExerciseID) GetExerciseId() string {
@@ -580,7 +676,7 @@ type GetExerciseNameResp struct {
 
 func (x *GetExerciseNameResp) Reset() {
 	*x = GetExerciseNameResp{}
-	mi := &file_exercise_proto_msgTypes[11]
+	mi := &file_exercise_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -592,7 +688,7 @@ func (x *GetExerciseNameResp) String() string {
 func (*GetExerciseNameResp) ProtoMessage() {}
 
 func (x *GetExerciseNameResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[11]
+	mi := &file_exercise_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -605,7 +701,7 @@ func (x *GetExerciseNameResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExerciseNameResp.ProtoReflect.Descriptor instead.
 func (*GetExerciseNameResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{11}
+	return file_exercise_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetExerciseNameResp) GetExerciseName() string {
@@ -624,7 +720,7 @@ type GetAllExercisesREq struct {
 
 func (x *GetAllExercisesREq) Reset() {
 	*x = GetAllExercisesREq{}
-	mi := &file_exercise_proto_msgTypes[12]
+	mi := &file_exercise_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -636,7 +732,7 @@ func (x *GetAllExercisesREq) String() string {
 func (*GetAllExercisesREq) ProtoMessage() {}
 
 func (x *GetAllExercisesREq) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[12]
+	mi := &file_exercise_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -649,7 +745,7 @@ func (x *GetAllExercisesREq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllExercisesREq.ProtoReflect.Descriptor instead.
 func (*GetAllExercisesREq) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{12}
+	return file_exercise_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetAllExercisesREq) GetUserId() string {
@@ -669,7 +765,7 @@ type GetAllExercisesResp struct {
 
 func (x *GetAllExercisesResp) Reset() {
 	*x = GetAllExercisesResp{}
-	mi := &file_exercise_proto_msgTypes[13]
+	mi := &file_exercise_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -681,7 +777,7 @@ func (x *GetAllExercisesResp) String() string {
 func (*GetAllExercisesResp) ProtoMessage() {}
 
 func (x *GetAllExercisesResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[13]
+	mi := &file_exercise_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -694,7 +790,7 @@ func (x *GetAllExercisesResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllExercisesResp.ProtoReflect.Descriptor instead.
 func (*GetAllExercisesResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{13}
+	return file_exercise_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetAllExercisesResp) GetNumberOfExercises() int64 {
@@ -725,7 +821,7 @@ type OneExerciseResp struct {
 
 func (x *OneExerciseResp) Reset() {
 	*x = OneExerciseResp{}
-	mi := &file_exercise_proto_msgTypes[14]
+	mi := &file_exercise_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -737,7 +833,7 @@ func (x *OneExerciseResp) String() string {
 func (*OneExerciseResp) ProtoMessage() {}
 
 func (x *OneExerciseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_proto_msgTypes[14]
+	mi := &file_exercise_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -750,7 +846,7 @@ func (x *OneExerciseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OneExerciseResp.ProtoReflect.Descriptor instead.
 func (*OneExerciseResp) Descriptor() ([]byte, []int) {
-	return file_exercise_proto_rawDescGZIP(), []int{14}
+	return file_exercise_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *OneExerciseResp) GetId() string {
@@ -799,7 +895,12 @@ var File_exercise_proto protoreflect.FileDescriptor
 
 const file_exercise_proto_rawDesc = "" +
 	"\n" +
-	"\x0eexercise.proto\x12\bexercise\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"\x9e\x01\n" +
+	"\x0eexercise.proto\x12\bexercise\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"S\n" +
+	"\x11SendExerciseNames\x12%\n" +
+	"\x0eexercise_names\x18\x01 \x03(\tR\rexerciseNames\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"0\n" +
+	"\vExerciseIds\x12!\n" +
+	"\fexercise_ids\x18\x01 \x03(\tR\vexerciseIds\"\x9e\x01\n" +
 	"\x12sendEverythingResp\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\fbody_part_id\x18\x02 \x01(\x03R\n" +
@@ -848,7 +949,7 @@ const file_exercise_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xd4\x05\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xa7\x06\n" +
 	"\x0fExerciseService\x12\\\n" +
 	"\x16ExerciseExistsReturnId\x12\x1a.exercise.SendExerciseName\x1a$.exercise.ExerciseExistsReturnIdResp\"\x00\x12b\n" +
 	"$ExerciseExistsInMainReturnEveryThing\x12\x1a.exercise.SendExerciseName\x1a\x1c.exercise.sendEverythingResp\"\x00\x12L\n" +
@@ -856,7 +957,8 @@ const file_exercise_proto_rawDesc = "" +
 	"\x0fGetAllExercises\x12\x1c.exercise.GetAllExercisesREq\x1a\x1d.exercise.GetAllExercisesResp\"\x00\x12I\n" +
 	"\x0eGetOneExercise\x12\x1a.exercise.SendExerciseName\x1a\x19.exercise.OneExerciseResp\"\x00\x12M\n" +
 	"\x0eCreateExercise\x12\x1b.exercise.CreateExerciseReq\x1a\x1c.exercise.CreateExerciseResp\"\x00\x12L\n" +
-	"\x0eDeleteExercise\x12\x1a.exercise.SendExerciseName\x1a\x1c.exercise.DeleteExerciseResp\"\x00\x127\n" +
+	"\x0eDeleteExercise\x12\x1a.exercise.SendExerciseName\x1a\x1c.exercise.DeleteExerciseResp\"\x00\x12Q\n" +
+	"\x19ExercisesExistsReturnsIds\x12\x1b.exercise.SendExerciseNames\x1a\x15.exercise.ExerciseIds\"\x00\x127\n" +
 	"\x04PING\x12\x15.exercise.PingExerReq\x1a\x16.exercise.PingExerResp\"\x00\x12>\n" +
 	"\tGetHealth\x12\x16.exercise.GetHealthReq\x1a\x17.exercise.GetHealthResp\"\x00B\x12Z\x10/shared/exerciseb\x06proto3"
 
@@ -872,52 +974,56 @@ func file_exercise_proto_rawDescGZIP() []byte {
 	return file_exercise_proto_rawDescData
 }
 
-var file_exercise_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_exercise_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_exercise_proto_goTypes = []any{
-	(*SendEverythingResp)(nil),         // 0: exercise.sendEverythingResp
-	(*GetHealthReq)(nil),               // 1: exercise.GetHealthReq
-	(*GetHealthResp)(nil),              // 2: exercise.GetHealthResp
-	(*PingExerReq)(nil),                // 3: exercise.PingExerReq
-	(*PingExerResp)(nil),               // 4: exercise.PingExerResp
-	(*CreateExerciseReq)(nil),          // 5: exercise.CreateExerciseReq
-	(*CreateExerciseResp)(nil),         // 6: exercise.CreateExerciseResp
-	(*DeleteExerciseResp)(nil),         // 7: exercise.DeleteExerciseResp
-	(*SendExerciseName)(nil),           // 8: exercise.SendExerciseName
-	(*ExerciseExistsReturnIdResp)(nil), // 9: exercise.ExerciseExistsReturnIdResp
-	(*SendExerciseID)(nil),             // 10: exercise.SendExerciseID
-	(*GetExerciseNameResp)(nil),        // 11: exercise.GetExerciseNameResp
-	(*GetAllExercisesREq)(nil),         // 12: exercise.GetAllExercisesREq
-	(*GetAllExercisesResp)(nil),        // 13: exercise.GetAllExercisesResp
-	(*OneExerciseResp)(nil),            // 14: exercise.OneExerciseResp
-	(*durationpb.Duration)(nil),        // 15: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil),      // 16: google.protobuf.Timestamp
+	(*SendExerciseNames)(nil),          // 0: exercise.SendExerciseNames
+	(*ExerciseIds)(nil),                // 1: exercise.ExerciseIds
+	(*SendEverythingResp)(nil),         // 2: exercise.sendEverythingResp
+	(*GetHealthReq)(nil),               // 3: exercise.GetHealthReq
+	(*GetHealthResp)(nil),              // 4: exercise.GetHealthResp
+	(*PingExerReq)(nil),                // 5: exercise.PingExerReq
+	(*PingExerResp)(nil),               // 6: exercise.PingExerResp
+	(*CreateExerciseReq)(nil),          // 7: exercise.CreateExerciseReq
+	(*CreateExerciseResp)(nil),         // 8: exercise.CreateExerciseResp
+	(*DeleteExerciseResp)(nil),         // 9: exercise.DeleteExerciseResp
+	(*SendExerciseName)(nil),           // 10: exercise.SendExerciseName
+	(*ExerciseExistsReturnIdResp)(nil), // 11: exercise.ExerciseExistsReturnIdResp
+	(*SendExerciseID)(nil),             // 12: exercise.SendExerciseID
+	(*GetExerciseNameResp)(nil),        // 13: exercise.GetExerciseNameResp
+	(*GetAllExercisesREq)(nil),         // 14: exercise.GetAllExercisesREq
+	(*GetAllExercisesResp)(nil),        // 15: exercise.GetAllExercisesResp
+	(*OneExerciseResp)(nil),            // 16: exercise.OneExerciseResp
+	(*durationpb.Duration)(nil),        // 17: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil),      // 18: google.protobuf.Timestamp
 }
 var file_exercise_proto_depIdxs = []int32{
-	15, // 0: exercise.GetHealthResp.postgres_resp_time:type_name -> google.protobuf.Duration
-	15, // 1: exercise.GetHealthResp.redis_resp_time:type_name -> google.protobuf.Duration
-	14, // 2: exercise.GetAllExercisesResp.all_exericses:type_name -> exercise.OneExerciseResp
-	16, // 3: exercise.OneExerciseResp.created_at:type_name -> google.protobuf.Timestamp
-	16, // 4: exercise.OneExerciseResp.updated_at:type_name -> google.protobuf.Timestamp
-	8,  // 5: exercise.ExerciseService.ExerciseExistsReturnId:input_type -> exercise.SendExerciseName
-	8,  // 6: exercise.ExerciseService.ExerciseExistsInMainReturnEveryThing:input_type -> exercise.SendExerciseName
-	10, // 7: exercise.ExerciseService.GetExerciseName:input_type -> exercise.SendExerciseID
-	12, // 8: exercise.ExerciseService.GetAllExercises:input_type -> exercise.GetAllExercisesREq
-	8,  // 9: exercise.ExerciseService.GetOneExercise:input_type -> exercise.SendExerciseName
-	5,  // 10: exercise.ExerciseService.CreateExercise:input_type -> exercise.CreateExerciseReq
-	8,  // 11: exercise.ExerciseService.DeleteExercise:input_type -> exercise.SendExerciseName
-	3,  // 12: exercise.ExerciseService.PING:input_type -> exercise.PingExerReq
-	1,  // 13: exercise.ExerciseService.GetHealth:input_type -> exercise.GetHealthReq
-	9,  // 14: exercise.ExerciseService.ExerciseExistsReturnId:output_type -> exercise.ExerciseExistsReturnIdResp
-	0,  // 15: exercise.ExerciseService.ExerciseExistsInMainReturnEveryThing:output_type -> exercise.sendEverythingResp
-	11, // 16: exercise.ExerciseService.GetExerciseName:output_type -> exercise.GetExerciseNameResp
-	13, // 17: exercise.ExerciseService.GetAllExercises:output_type -> exercise.GetAllExercisesResp
-	14, // 18: exercise.ExerciseService.GetOneExercise:output_type -> exercise.OneExerciseResp
-	6,  // 19: exercise.ExerciseService.CreateExercise:output_type -> exercise.CreateExerciseResp
-	7,  // 20: exercise.ExerciseService.DeleteExercise:output_type -> exercise.DeleteExerciseResp
-	4,  // 21: exercise.ExerciseService.PING:output_type -> exercise.PingExerResp
-	2,  // 22: exercise.ExerciseService.GetHealth:output_type -> exercise.GetHealthResp
-	14, // [14:23] is the sub-list for method output_type
-	5,  // [5:14] is the sub-list for method input_type
+	17, // 0: exercise.GetHealthResp.postgres_resp_time:type_name -> google.protobuf.Duration
+	17, // 1: exercise.GetHealthResp.redis_resp_time:type_name -> google.protobuf.Duration
+	16, // 2: exercise.GetAllExercisesResp.all_exericses:type_name -> exercise.OneExerciseResp
+	18, // 3: exercise.OneExerciseResp.created_at:type_name -> google.protobuf.Timestamp
+	18, // 4: exercise.OneExerciseResp.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 5: exercise.ExerciseService.ExerciseExistsReturnId:input_type -> exercise.SendExerciseName
+	10, // 6: exercise.ExerciseService.ExerciseExistsInMainReturnEveryThing:input_type -> exercise.SendExerciseName
+	12, // 7: exercise.ExerciseService.GetExerciseName:input_type -> exercise.SendExerciseID
+	14, // 8: exercise.ExerciseService.GetAllExercises:input_type -> exercise.GetAllExercisesREq
+	10, // 9: exercise.ExerciseService.GetOneExercise:input_type -> exercise.SendExerciseName
+	7,  // 10: exercise.ExerciseService.CreateExercise:input_type -> exercise.CreateExerciseReq
+	10, // 11: exercise.ExerciseService.DeleteExercise:input_type -> exercise.SendExerciseName
+	0,  // 12: exercise.ExerciseService.ExercisesExistsReturnsIds:input_type -> exercise.SendExerciseNames
+	5,  // 13: exercise.ExerciseService.PING:input_type -> exercise.PingExerReq
+	3,  // 14: exercise.ExerciseService.GetHealth:input_type -> exercise.GetHealthReq
+	11, // 15: exercise.ExerciseService.ExerciseExistsReturnId:output_type -> exercise.ExerciseExistsReturnIdResp
+	2,  // 16: exercise.ExerciseService.ExerciseExistsInMainReturnEveryThing:output_type -> exercise.sendEverythingResp
+	13, // 17: exercise.ExerciseService.GetExerciseName:output_type -> exercise.GetExerciseNameResp
+	15, // 18: exercise.ExerciseService.GetAllExercises:output_type -> exercise.GetAllExercisesResp
+	16, // 19: exercise.ExerciseService.GetOneExercise:output_type -> exercise.OneExerciseResp
+	8,  // 20: exercise.ExerciseService.CreateExercise:output_type -> exercise.CreateExerciseResp
+	9,  // 21: exercise.ExerciseService.DeleteExercise:output_type -> exercise.DeleteExerciseResp
+	1,  // 22: exercise.ExerciseService.ExercisesExistsReturnsIds:output_type -> exercise.ExerciseIds
+	6,  // 23: exercise.ExerciseService.PING:output_type -> exercise.PingExerResp
+	4,  // 24: exercise.ExerciseService.GetHealth:output_type -> exercise.GetHealthResp
+	15, // [15:25] is the sub-list for method output_type
+	5,  // [5:15] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -934,7 +1040,7 @@ func file_exercise_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exercise_proto_rawDesc), len(file_exercise_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

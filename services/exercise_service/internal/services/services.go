@@ -58,7 +58,6 @@ func (s *Service) DeleteExeciseSer(ctx context.Context, userId string, exerciseN
 	return nil
 }
 
-
 func (s *Service) CreateExerciseSer(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) {
 
 	UUId, err := s.DB.CreateExercise(ctx, userId ,exerciseName, bodyPartName, equipmentName)
@@ -73,10 +72,13 @@ func (s *Service) ExerciseExistsReturnId(ctx context.Context, userId string, exe
 	return s.DB.ExerciseExistsReturnId(ctx, userId, exerciseName)
 }
 
+// func (s *Service) ExercisesExistsReturnsIds(ctx context.Context, userId string, exerciseNames []string) (*[]string, error) {
+// 	//
+// }
+
 func (s *Service)  GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error) {
 	return s.DB.GetExerciseNameByID(ctx, exerciseId)
 }
-
 
 func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
 

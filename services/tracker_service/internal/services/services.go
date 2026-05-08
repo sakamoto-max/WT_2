@@ -13,7 +13,7 @@ import (
 )
 
 type Service struct {
-	db      *repository.DBs
+	db      repository.RepoIface
 	pClient planpb.PlanServiceClient
 	eClient exerpb.ExerciseServiceClient
 }
@@ -26,7 +26,7 @@ func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration
 	return pgRespTime, redisRespTime
 }
 
-func NewService(Db *repository.DBs, planClient planpb.PlanServiceClient, exerClient exerpb.ExerciseServiceClient) *Service {
+func NewService(Db repository.RepoIface, planClient planpb.PlanServiceClient, exerClient exerpb.ExerciseServiceClient) *Service {
 	return &Service{db: Db, pClient: planClient, eClient: exerClient}
 }
 

@@ -1,4 +1,12 @@
+// reduce the db calls
+- plan.service.AddExercises -> service calls exerClient many times -> make a 
+	RPC to take all the exercisenames and returns Ids 
+
+
+
 // redis implementation
+- currently plan_service -> cache -> created last 3 funcs -> integrate them into service layer
+
 // analytics service
 // testing
 // swagger

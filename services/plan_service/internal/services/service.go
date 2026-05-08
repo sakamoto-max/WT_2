@@ -7,26 +7,27 @@ import (
 	"plan_service/internal/repository"
 	"strings"
 	"time"
+
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 )
 
 type ServiceIface interface {
 	CreatePlan(ctx context.Context, userId string, planName string, exerciseNames *[]string) error
-	GetAllPlansSer(ctx context.Context, userId string) (int, *[]models.Plan2, error)
-	GetPlanByNameSer(ctx context.Context, userId string, planName string) (string, string, *[]string, error)
-	AddExercisesToPlan(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error)
+	GetPlans(ctx context.Context, userId string) (int, *[]models.Plan2, error)
+	GetPlan(ctx context.Context, userId string, planName string) (string, string, *[]string, error)
+	AddExercises(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error)
 	DeleteExerciseFromPlan(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error)
-	DeletePlanSer(ctx context.Context, userId string, planName string) error
+	DeletePlan(ctx context.Context, userId string, planName string) error
 	GetEmptyPlanId(ctx context.Context, userId string) (string, error)
 	GetHealth(ctx context.Context) (*time.Duration, *time.Duration)
 }
 
 type service struct {
-	Db      *repository.DBs
+	Db      repository.RepoIFace
 	GClient exerpb.ExerciseServiceClient
 }
 
-func NewService(Db *repository.DBs, grpcCli exerpb.ExerciseServiceClient) ServiceIface {
+func NewService(Db repository.RepoIFace, grpcCli exerpb.ExerciseServiceClient) ServiceIface {
 	return &service{Db: Db, GClient: grpcCli}
 }
 
@@ -52,11 +53,11 @@ func (s *service) CreatePlan(ctx context.Context, userId string, planName string
 	return nil
 }
 
-func (s *service) GetAllPlansSer(ctx context.Context, userId string) (int, *[]models.Plan2, error) {
+func (s *service) GetPlans(ctx context.Context, userId string) (int, *[]models.Plan2, error) {
 
 	var allPlans []models.Plan2
 
-	planNamesWithIds, err := s.Db.GetAllUserPlans(ctx, userId)
+	planNamesWithIds, err := s.Db.GetPlans(ctx, userId)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -89,20 +90,32 @@ func (s *service) GetAllPlansSer(ctx context.Context, userId string) (int, *[]mo
 
 }
 
-func (s *service) GetPlanByNameSer(ctx context.Context, userId string, planName string) (string, string, *[]string, error) {
+func (s *service) GetPlan(ctx context.Context, userId string, planName string) (string, string, *[]string, error) {
 
-	planId, err := s.Db.ReturnsPlanId(ctx, userId, planName)
+	PlanId, ExerciseIds, err := s.Db.GetUserPlan(ctx, userId, planName)
 	if err != nil {
 		return "", "", nil, err
 	}
 
-	exerciseIds, err := s.Db.GetAllExercisesByPlanID(ctx, planId)
-	if err != nil {
-		return "", "", nil, err
+	if PlanId == "" {
+		PlanId, err = s.Db.ReturnsPlanId(ctx, userId, planName)
+		if err != nil {
+			return "", "", nil, err
+		}
+
+		ExerciseIds, err = s.Db.GetAllExercisesByPlanID(ctx, PlanId)
+		if err != nil {
+			return "", "", nil, err
+		}
+
+		err = s.Db.SetUserPlan(ctx, userId, planName, PlanId, ExerciseIds)
+		if err != nil {
+			return "", "", nil, err
+		}
 	}
 
 	var allExercises []string
-	for _, exerciseId := range *exerciseIds {
+	for _, exerciseId := range *ExerciseIds {
 
 		r, err := s.GClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: userId})
 		if err != nil {
@@ -112,14 +125,26 @@ func (s *service) GetPlanByNameSer(ctx context.Context, userId string, planName 
 		allExercises = append(allExercises, r.ExerciseName)
 	}
 
-	return planId, planName, &allExercises, nil
+	return PlanId, planName, &allExercises, nil
 }
 
-func (s *service) AddExercisesToPlan(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error) {
+func (s *service) AddExercises(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error) {
 
-	planId, err := s.Db.ReturnsPlanId(ctx, userId, planName)
+	PlanId, err := s.Db.GetUserPlanId(ctx, userId, planName)
 	if err != nil {
 		return nil, err
+	}
+
+	if PlanId == "" {
+		PlanId, err = s.Db.ReturnsPlanId(ctx, userId, planName)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.Db.SetUserPlanId(ctx, userId, planName, PlanId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var exerciseIds []string
@@ -133,12 +158,12 @@ func (s *service) AddExercisesToPlan(ctx context.Context, userId string, planNam
 		exerciseIds = append(exerciseIds, r.ExerciseId)
 	}
 
-	err = s.Db.AddExercisesToPlan(ctx, planId, &exerciseIds)
+	err = s.Db.AddExercisesToPlan(ctx, PlanId, &exerciseIds)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := MakeRespForAddingNewExer(ctx, userId, planId, planName, s)
+	resp, err := makeRespForAddingNewExer(ctx, userId, PlanId, planName, s)
 	if err != nil {
 		return nil, err
 	}
@@ -148,9 +173,21 @@ func (s *service) AddExercisesToPlan(ctx context.Context, userId string, planNam
 
 func (s *service) DeleteExerciseFromPlan(ctx context.Context, userId string, planName string, exerciseNames *[]string) (*models.Plan2, error) {
 
-	planId, err := s.Db.ReturnsPlanId(ctx, userId, planName)
+	PlanId, err := s.Db.GetUserPlanId(ctx, userId, planName)
 	if err != nil {
 		return nil, err
+	}
+
+	if PlanId == "" {
+		PlanId, err = s.Db.ReturnsPlanId(ctx, userId, planName)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.Db.SetUserPlanId(ctx, userId, planName, PlanId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var exerciseIds []string
@@ -165,12 +202,12 @@ func (s *service) DeleteExerciseFromPlan(ctx context.Context, userId string, pla
 		exerciseIds = append(exerciseIds, r.ExerciseId)
 	}
 
-	err = s.Db.DeleteExerciseFromPlan(ctx, planId, &exerciseIds)
+	err = s.Db.DeleteExerciseFromPlan(ctx, PlanId, &exerciseIds)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := MakeRespForAddingNewExer(ctx, userId, planId, planName, s)
+	resp, err := makeRespForAddingNewExer(ctx, userId, PlanId, planName, s)
 	if err != nil {
 		return nil, err
 	}
@@ -178,22 +215,38 @@ func (s *service) DeleteExerciseFromPlan(ctx context.Context, userId string, pla
 	return resp, nil
 }
 
-func (s *service) DeletePlanSer(ctx context.Context, userId string, planName string) error {
+func (s *service) DeletePlan(ctx context.Context, userId string, planName string) error {
 
-	planId, err := s.Db.ReturnsPlanId(ctx, userId, planName)
+	
+	PlanId, err := s.Db.GetUserPlanId(ctx, userId, planName)
+	if err != nil {
+		return err
+	}
+	
+	if PlanId == "" {
+		PlanId, err = s.Db.ReturnsPlanId(ctx, userId, planName)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.Db.DeletePlan(ctx, userId, PlanId)
 	if err != nil {
 		return err
 	}
 
-	err = s.Db.DeletePlan(ctx, userId, planId)
+	err = s.Db.DelUserPlanId(ctx, userId, planName)
+	if err != nil {
+		return err
+	}
+
+	err = s.Db.DelUserPlan(ctx, userId, planName)
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
-
 func (s *service) GetEmptyPlanId(ctx context.Context, userId string) (string, error) {
 
 	var PlanId string
@@ -202,13 +255,13 @@ func (s *service) GetEmptyPlanId(ctx context.Context, userId string) (string, er
 	if err != nil {
 		return "", err
 	}
-	
+
 	if PlanId == "" {
 		PlanId, err := s.Db.ReturnsPlanId(ctx, userId, "empty")
 		if err != nil {
 			return "", err
 		}
-		
+
 		err = s.Db.SetUserEmptyPlanIdR(ctx, userId, PlanId)
 		if err != nil {
 			return "", err
@@ -218,7 +271,7 @@ func (s *service) GetEmptyPlanId(ctx context.Context, userId string) (string, er
 	return PlanId, nil
 }
 
-func MakeRespForAddingNewExer(ctx context.Context, userId string, planId string, planName string, s *service) (*models.Plan2, error) {
+func makeRespForAddingNewExer(ctx context.Context, userId string, planId string, planName string, s *service) (*models.Plan2, error) {
 
 	var resp models.Plan2
 	var allExercises []string

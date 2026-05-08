@@ -36,7 +36,7 @@ func (p *Handler) CreatePlan(ctx context.Context, in *planpb.CreatePlanReq) (*pl
 }
 func (p *Handler) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*planpb.GetAllPlansResp, error) {
 
-	numberOfPlans, allPlans, err := p.service.GetAllPlansSer(ctx, in.UserId)
+	numberOfPlans, allPlans, err := p.service.GetPlans(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (p *Handler) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*
 }
 func (p *Handler) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.GetPlanByNameResp, error) {
 
-	planId, planName, exerciseNames, err := p.service.GetPlanByNameSer(ctx, in.UserId, in.PlanName)
+	planId, planName, exerciseNames, err := p.service.GetPlan(ctx, in.UserId, in.PlanName)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (p *Handler) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq
 }
 func (p *Handler) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*planpb.PlanResp, error) {
 
-	r, err := p.service.AddExercisesToPlan(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
+	r, err := p.service.AddExercises(ctx, in.UserId, in.PlanName, &in.ExerciseNames)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (p *Handler) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*p
 }
 func (p *Handler) DeletePlan(ctx context.Context, in *planpb.DeletePlanReq) (*planpb.DeletePlanResp, error) {
 
-	err := p.service.DeletePlanSer(ctx, in.UserId, in.PlanName)
+	err := p.service.DeletePlan(ctx, in.UserId, in.PlanName)
 	if err != nil {
 		return nil, err
 	}

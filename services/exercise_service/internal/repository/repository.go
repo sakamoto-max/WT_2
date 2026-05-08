@@ -377,3 +377,7 @@ func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerci
 
 	return id, nil
 }
+
+// func (r *Repo) ExercisesExistsReturnsIds(ctx context.Context, userId string, exerciseName string) () {
+
+// }

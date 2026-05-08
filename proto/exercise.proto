@@ -25,9 +25,20 @@ service ExerciseService {
     // 
     rpc DeleteExercise(SendExerciseName) returns (DeleteExerciseResp) {};
 //
+    rpc ExercisesExistsReturnsIds(SendExerciseNames) returns (ExerciseIds) {};
+    //
     rpc PING(PingExerReq) returns (PingExerResp) {};
     //
     rpc GetHealth(GetHealthReq) returns (GetHealthResp) {};
+}
+
+message SendExerciseNames {
+    repeated string exercise_names = 1; 
+    string user_id = 2;
+}
+
+message  ExerciseIds {
+    repeated string exercise_ids = 1;
 }
 
 //

@@ -107,6 +107,11 @@ func (e *Handler) GetExerciseName(ctx context.Context, in *exerpb.SendExerciseID
 
 	return &resp, nil
 }
+
+// func (e *Handler) ExercisesExistsReturnsIds(ctx context.Context, in *exerpb.SendExerciseNames) (*exerpb.ExerciseIds, error) {
+
+
+// }
 func (a *Handler) PING(ctx context.Context, in *exerpb.PingExerReq) (*exerpb.PingExerResp, error) {
 	r := exerpb.PingExerResp{}
 

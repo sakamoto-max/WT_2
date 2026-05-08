@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"plan_service/internal/models"
 	"strconv"
 	"time"
 
@@ -11,12 +12,36 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type DBs struct {
+type dBs struct {
 	pDB *pgxpool.Pool
 	rDB *redis.Client
 }
 
-func NewRepo() (*DBs, error) {
+type RepoIFace interface {
+	CreatePlan(ctx context.Context, userId string, planName string, exerciseIds []string) error
+	GetPlans(ctx context.Context, userId string) (*[]models.Plan3, error)
+	GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]string, error)
+	ReturnsPlanId(ctx context.Context, userId string, planName string) (string, error)
+	AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error
+	DeleteExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error
+	DeletePlan(ctx context.Context, userId string, planId string) error
+	CreateEmptyPlan(ctx context.Context, userId string) error
+	GetPostgresRespTime(ctx context.Context) *time.Duration
+	GetRedisRespTime(ctx context.Context) *time.Duration
+	SetUserEmptyPlanIdR(ctx context.Context, userId string, planId string) error
+	GetUserEmptyPlanIdR(ctx context.Context, userId string) (string, error)
+	DelUserEmptyPlanIdR(ctx context.Context, userId string) error
+	Close() error
+	GetPlan(ctx context.Context, userId string, planName string) (string, *[]string, error)
+	SetUserPlanId(ctx context.Context, userId string, planName string, planId string) error
+	GetUserPlanId(ctx context.Context, userId string, planName string) (string, error)
+	DelUserPlanId(ctx context.Context, userId string, planName string) error
+	SetUserPlan(ctx context.Context, userId string, planName string, planId string, exerciseIds *[]string) error 
+	GetUserPlan(ctx context.Context, userId string, planName string) (string, *[]string, error) 
+	DelUserPlan(ctx context.Context, userId string, planName string) error
+}
+
+func NewRepo() (RepoIFace, error) {
 
 	pool, err := newPgConn()
 	if err != nil {
@@ -29,7 +54,7 @@ func NewRepo() (*DBs, error) {
 		return nil, err
 	}
 
-	return &DBs{pDB: pool, rDB: client}, nil
+	return &dBs{pDB: pool, rDB: client}, nil
 }
 
 func newPgConn() (*pgxpool.Pool, error) {
@@ -82,7 +107,7 @@ func newRedisConn() (*redis.Client, error) {
 
 }
 
-func (r *DBs) Close() error {
+func (r *dBs) Close() error {
 	r.pDB.Close()
 
 	err := r.rDB.Close()

@@ -25,6 +25,13 @@ type AllPlansResp struct {
 	Plans         []Plan2 `json:"plans"`
 }
 
+type PlanIDExerciseId struct {
+	PlanId string 
+	ExerciseIds string
+}
+
+
+
 type PlanResp struct {
 	Message string `json:"message"`
 }

@@ -15,14 +15,14 @@ import (
 
 type worker struct {
 	id          int
-	db          *repository.DBs
+	db          repository.RepoIFace
 	logger      *logger.MyLogger
 	jobs        <-chan types.Data
 	resultQueue *mq.MessageQueue
 	exerclient  exerpb.ExerciseServiceClient
 }
 
-func newWorker(id int, repo *repository.DBs, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, client exerpb.ExerciseServiceClient) *worker {
+func newWorker(id int, repo repository.RepoIFace, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, client exerpb.ExerciseServiceClient) *worker {
 	return &worker{
 		id:          id,
 		db:          repo,
@@ -33,7 +33,7 @@ func newWorker(id int, repo *repository.DBs, logger *logger.MyLogger, jobs <-cha
 	}
 }
 
-func MakeWorkers(numberOfWorkers int, repo *repository.DBs, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, Client exerpb.ExerciseServiceClient) []*worker {
+func MakeWorkers(numberOfWorkers int, repo repository.RepoIFace, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, Client exerpb.ExerciseServiceClient) []*worker {
 
 	var workers []*worker
 
