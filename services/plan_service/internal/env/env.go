@@ -39,10 +39,10 @@ func LookupForApi() {
 	if !ok {
 		log.Fatalf("unable to find env EXERCISE_GRPC_SERVER_ADDR")
 	}
-	_, ok = os.LookupEnv("MQ_URL")
-	if !ok {
-		log.Fatalf("unable to find env MQ_URL")
-	}
+	// _, ok = os.LookupEnv("MQ_URL")
+	// if !ok {
+	// 	log.Fatalf("unable to find env MQ_URL")
+	// }
 }
 func LookupForConsumer() {
 	_, ok := os.LookupEnv("POSTGRES_CONN")

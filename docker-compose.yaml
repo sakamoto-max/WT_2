@@ -118,7 +118,10 @@ services:
       postgres:
         condition: service_healthy
   plan:
-    build: services\plan_service
+    build: 
+      context: services\plan_service
+    
+    command: ./main 
     networks:
       - wt
     ports:
@@ -131,14 +134,30 @@ services:
       - REDIS_DB=1
       - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
       - SERVICE_NAME=plan_service
+      - EXERCISE_GRPC_SERVER_ADDR=exercise:6003
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      plan-migrate:
+        condition: service_completed_successfully
+  plan_consumer:
+    build:
+      context: services/plan_service
+    command: ./consumer
+    networks:
+      - wt
+    environment:
+      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/plan?sslmode=disable
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASS=
+      - REDIS_DB=1
+      - SERVICE_NAME=plan_service_consumer
       - EXERCISE_GRPC_SERVER_ADDR=:6003
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
-    # healthcheck:
-    #   test: ["CMD", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
@@ -187,6 +206,8 @@ services:
       - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
       - GRPC_SERVER_ADDR=:6004
       - SERVICE_NAME=tracker_service
+      - EXER_GRPC_SERVER_ADDR=exercise:6003
+      - PLAN_GRPC_SERVER_ADDR=plan:6002
     depends_on:
       postgres:
         condition: service_healthy

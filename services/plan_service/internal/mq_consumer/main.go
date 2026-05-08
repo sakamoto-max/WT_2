@@ -1,24 +1,24 @@
-package mq_consumer
+// package mq_consumer
 
-import (
-	"os"
-	"os/signal"
-	"plan_service/internal/client"
-	"plan_service/internal/env"
+// import (
+// 	"os"
+// 	"os/signal"
+// 	"plan_service/internal/client"
+// 	"plan_service/internal/env"
 
-	"plan_service/internal/mq_consumer/consumer"
-	"plan_service/internal/mq_consumer/types"
-	"plan_service/internal/mq_consumer/worker"
-	"plan_service/internal/repository"
-	"sync"
+// 	"plan_service/internal/mq_consumer/consumer"
+// 	"plan_service/internal/mq_consumer/types"
+// 	"plan_service/internal/mq_consumer/worker"
+// 	"plan_service/internal/repository"
+// 	"sync"
 
-	mq "github.com/sakamoto-max/rabbit_mq/queue"
-	"github.com/sakamoto-max/wt_2_pkg/logger"
-	"github.com/sakamoto-max/wt_2_proto/shared/enum"
-	"go.uber.org/zap"
-)
+// 	mq "github.com/sakamoto-max/rabbit_mq/queue"
+// 	"github.com/sakamoto-max/wt_2_pkg/logger"
+// 	"github.com/sakamoto-max/wt_2_proto/shared/enum"
+// 	"go.uber.org/zap"
+// )
 
-const numberOfWorkers = 5
+// const numberOfWorkers = 5
 
 // func main() {
 

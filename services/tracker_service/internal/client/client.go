@@ -2,6 +2,8 @@ package client
 
 import (
 	"log"
+	"os"
+	"fmt"
 	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	"google.golang.org/grpc"
@@ -20,14 +22,18 @@ func New() *client {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	connForPlan, err := grpc.NewClient("localhost:6002", opts...)
+	fmt.Println("the plan is ", os.Getenv("PLAN_GRPC_SERVER_ADDR"))
+
+	connForPlan, err := grpc.NewClient(os.Getenv("PLAN_GRPC_SERVER_ADDR"), opts...)
 	if err != nil {
 		log.Fatalf("failed to create the client : %v", err)
 	}
 
 	planClient := planpb.NewPlanServiceClient(connForPlan)
 
-	connForExer, err := grpc.NewClient("localhost:6003", opts...)
+	fmt.Println("the exer is", os.Getenv("EXER_GRPC_SERVER_ADDR"))
+
+	connForExer, err := grpc.NewClient(os.Getenv("EXER_GRPC_SERVER_ADDR"), opts...)
 	if err != nil {
 		log.Fatalf("failed to create the client : %v", err)
 	}

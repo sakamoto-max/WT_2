@@ -36,8 +36,11 @@ func (r *dBs) GetRedisRespTime(ctx context.Context) *time.Duration {
 
 func (d *dBs) StartWorkout(ctx context.Context, userId string, planId string) (string, error) {
 	var trackerId string
+
+	fmt.Println("user_id in repo", userId)
+
 	err := d.pDB.QueryRow(ctx, `
-		INSERT INTO tracker(user_id, plan_id, started_at)
+		INSERT INTO tracker(user_id, plan_id, created_at)
 		VALUES($1, $2, NOW())
 		RETURNING id	
 	`, userId, planId).Scan(&trackerId)

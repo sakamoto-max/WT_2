@@ -45,4 +45,12 @@ func LookUp() {
 	if !ok {
 		log.Fatalf("unable to find env SERVICE_NAME")
 	}
+	_, ok = os.LookupEnv("PLAN_GRPC_SERVER_ADDR")
+	if !ok {
+		log.Fatalf("unable to find env PLAN_GRPC_SERVER_ADDR")
+	}
+	_, ok = os.LookupEnv("EXER_GRPC_SERVER_ADDR")
+	if !ok {
+		log.Fatalf("unable to find env EXER_GRPC_SERVER_ADDR")
+	}
 }
