@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"plan_service/internal/client"
 	"plan_service/internal/handler"
-	"plan_service/internal/mq_consumer"
+	// "plan_service/internal/mq_consumer"
 	"plan_service/internal/repository"
 	"plan_service/internal/services"
-	"sync"
+	// "sync"
 
 	// "sync"
 
@@ -60,10 +60,10 @@ func (a *app) Run() {
 	signal.Notify(sigChan, os.Interrupt)
 
 
-	var serverWg sync.WaitGroup
+	// var serverWg sync.WaitGroup
 
-	serverWg.Add(1)
-	go mq_consumer.InitConsumer(&serverWg)
+	// serverWg.Add(1)
+	// go mq_consumer.InitConsumer(&serverWg)
 
 	go func() {
 		a.logger.Log.Infof("grpc server has started at %v", a.addr)
@@ -78,7 +78,7 @@ func (a *app) Run() {
 	a.logger.Log.Infof("shutdown signal received : %v", sig.String())
 	
 	grpcServer.GracefulStop()
-	serverWg.Wait()
+	// serverWg.Wait()
 
 	a.logger.Log.Infof("server is closed")
 }

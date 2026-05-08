@@ -10,7 +10,7 @@ import (
 
 func main() {
 	
-	env.Lookup()
+	env.LookupForApi()
 
 	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
 	app.Run()
