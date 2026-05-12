@@ -22,6 +22,11 @@ const NumberOfWorkers = 5
 
 func main() {
 
+	stage := os.Getenv("STAGE")
+	if stage != "" {
+		env.Load("../.env")
+	}
+
 	env.LookUp()
 
 	conn := queue.NewConn()
@@ -34,7 +39,7 @@ func main() {
 	defer logger.Log.Sync()
 
 	service := services.NewService(logger)
-	jobs := make(chan types.Data, NumberOfWorkers * 2)
+	jobs := make(chan types.Data, NumberOfWorkers*2)
 
 	producer := producer.NewProducer(logger, resQueue)
 
@@ -42,29 +47,23 @@ func main() {
 
 	var workerWg sync.WaitGroup
 
-	for _, worker := range workers{
+	for _, worker := range workers {
 		workerWg.Add(1)
 		go worker.Work(&workerWg)
 	}
-
-
-
 
 	consumer := consumer.NewConsumer(emailQueue, logger, jobs)
 	msgs := consumer.Start()
 	go consumer.PushToJobs(msgs)
 
-
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-	sig := <- sigChan
+	sig := <-sigChan
 
 	logger.Log.Infow("shutdown signal received", zap.String("signal", sig.String()))
 
 	conn.Close()
 	workerWg.Wait()
-
 
 }

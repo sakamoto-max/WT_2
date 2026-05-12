@@ -2,18 +2,18 @@ package main
 
 import (
 	"auth_service/internal/bootstrap"
-	"os"
 	"auth_service/internal/env"
+	"os"
 )
 
 func main() {
-	
-	// env.Load("../../.env")
+
+	stage := os.Getenv("STAGE")
+	if stage != "" {
+		env.Load("../../.env")
+	}
 	env.Validate()
 
 	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
 	app.Run()
 }
-
-
-

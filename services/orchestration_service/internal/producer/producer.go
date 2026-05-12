@@ -7,8 +7,9 @@ import (
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
+
+	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
-	mq "github.com/sakamoto-max/rabbit_mq/queue" 
 )
 
 type producer struct {
@@ -29,11 +30,13 @@ func NewProducer(db *repository.DB, planQueue *mq.MessageQueue, emailQueue *mq.M
 
 func (p *producer) Start(ctx context.Context, wg *sync.WaitGroup, tickerChan <-chan time.Time, jobsChan chan<- types.Data, targetServices *[]string) {
 
+	defer wg.Done()
 	p.logger.Log.Infoln("producer has started")
 
 	for {
 		select {
 		case <-tickerChan:
+
 			p.logger.Log.Infoln("ticker signal received")
 
 			DataChan := make(chan *[]types.Data, len(*targetServices))
@@ -67,7 +70,8 @@ func (p *producer) Start(ctx context.Context, wg *sync.WaitGroup, tickerChan <-c
 			close(DataChan)
 
 		case <-ctx.Done():
-			wg.Wait()
+			// p.logger.Log.Infoln("context done received")
+			// wg.Wait()
 			p.logger.Log.Infoln("producer stopped")
 			return
 		}
@@ -78,7 +82,7 @@ func FetchData(p *producer, targetService string, dataChan chan<- *[]types.Data,
 
 	defer wg.Done()
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
 	Data, err := p.db.FetchData(ctx, targetService)

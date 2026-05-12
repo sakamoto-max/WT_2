@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"github.com/sakamoto-max/wt_2_proto/shared/enum"
@@ -22,8 +23,11 @@ const NumberOfWorkers = 5
 
 func main() {
 
+	stage := os.Getenv("STAGE")
+	if stage != "" {
+		env.Load("../.env")
+	}
 	env.LookUp()
-	// env.Load("../.env")
 
 	logger := logger.NewLogger()
 	defer logger.Log.Sync()
@@ -50,6 +54,7 @@ func main() {
 	workers := workers.MakeWorkers(NumberOfWorkers, planQueue, emailQueue, Db, jobs, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 
 	var workersWg sync.WaitGroup
 
@@ -64,7 +69,7 @@ func main() {
 
 	msgs := consumer.GetData()
 
-	go consumer.Operate(ctx, msgs)
+	go consumer.Operate(msgs)
 
 	// producer
 
@@ -74,7 +79,10 @@ func main() {
 
 	ticker := time.NewTicker(time.Second * 5)
 
-	go producer.Start(ctx, &workersWg, ticker.C, jobs, &targetServices)
+	var producerWg sync.WaitGroup
+
+	producerWg.Add(1)
+	go producer.Start(ctx, &producerWg, ticker.C, jobs, &targetServices)
 
 	// shutdown
 
@@ -85,9 +93,12 @@ func main() {
 	sig := <-sigChan
 	logger.Log.Infow("shutdown signal received", zap.String("signal", sig.String()))
 
-	ticker.Stop()
+	ticker.Stop() // stops producer
 	cancel()
+	producerWg.Wait()
+	conn.Close() // stops consumer
 	close(jobs)
+	workersWg.Wait()
 }
 
 // what if a operation fails ->

@@ -22,6 +22,11 @@ const numberOfWorkers = 5
 
 func main() {
 
+	stage := os.Getenv("STAGE")
+	if stage != "" {
+		env.Load("../../.env")
+	}
+
 	env.LookupForConsumer()
 
 	logger := logger.NewLogger()

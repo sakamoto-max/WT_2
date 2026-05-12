@@ -6,32 +6,19 @@ import (
 	"slices"
 	"time"
 	"tracker_service/internal/models"
-	"tracker_service/internal/repository"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
-type Service struct {
-	db      repository.RepoIface
-	pClient planpb.PlanServiceClient
-	eClient exerpb.ExerciseServiceClient
-}
-
-func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+func (s *service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
 
 	pgRespTime := s.db.GetPostgresRespTime(ctx)
 	redisRespTime := s.db.GetRedisRespTime(ctx)
 
 	return pgRespTime, redisRespTime
 }
-
-func NewService(Db repository.RepoIface, planClient planpb.PlanServiceClient, exerClient exerpb.ExerciseServiceClient) *Service {
-	return &Service{db: Db, pClient: planClient, eClient: exerClient}
-}
-
-func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error {
-	// get empty plan_id of user
+func (s *service) StartEmptyWorkoutSer(ctx context.Context, userID string) error {
 
 	trackerId, err := s.db.GetTrackerId(ctx, userID)
 	if err != nil {
@@ -43,11 +30,9 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error
 	}
 
 	r, err := s.pClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: userID})
-	// r, err := s.pClient.GetEmptyPlanId().GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: userID, PlanName: string(enum.EmptyPlanName)})
 	if err != nil {
 		return fmt.Errorf("error getting data from plan server : %w", err)
 	}
-
 
 	trackerId, err = s.db.StartWorkout(ctx, userID, r.EmptyPlanId)
 	if err != nil {
@@ -62,7 +47,7 @@ func (s *Service) StartEmptyWorkoutSer(ctx context.Context, userID string) error
 	return nil
 }
 
-func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, planName string) (*[]string, error) {
+func (s *service) StartWorkoutWithPlanSer(ctx context.Context, userId string, planName string) (*[]string, error) {
 
 	trackerId, err := s.db.GetTrackerId(ctx, userId)
 	if err != nil {
@@ -101,7 +86,7 @@ func (s *Service) StartWorkoutWithPlanSer(ctx context.Context, userId string, pl
 	return &r.ExerciseNames, nil
 }
 
-func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *models.Tracker) (*string, error) {
+func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models.Tracker) (*string, error) {
 
 	trackerId, err := s.db.GetTrackerId(ctx, userId)
 	if err != nil {
@@ -270,9 +255,47 @@ func (s *Service) EndWorkoutSer(ctx context.Context, userId string, data *models
 	return nil, nil
 }
 
+func (s *service) CancelWorkout(ctx context.Context, userID string) error {
+
+	trackerId, err := s.db.GetTrackerId(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	if trackerId == "" {
+		return myerrors.BadReqErrMaker(fmt.Errorf("user has no workout ongoing"))
+	}
+
+	planName, err := s.db.GetUserCurrentPlanName(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	switch {
+	case planName == "":
+		err := s.db.DelTrackerId(ctx, userID)
+		if err != nil {
+			return err
+		}
+
+	case planName != "":
+		err := s.db.DelAllUserData(ctx, userID, planName)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.db.DeleteTrackerIdInPG(ctx, trackerId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // helpers
 
-func getExerIdOfEachExercise(ctx context.Context, data *models.Tracker, userId string, s *Service) (*models.Tracker, error) {
+func getExerIdOfEachExercise(ctx context.Context, data *models.Tracker, userId string, s *service) (*models.Tracker, error) {
 	for i := range len(data.Workout) {
 
 		exerciseName := data.Workout[i].ExerciseName
@@ -347,42 +370,6 @@ func checkIfNewExercisesAdded(originalPlanExers *[]string, userSent *[]string) *
 	return nil
 }
 
-func (s *Service) CancelWorkout(ctx context.Context, userID string) error {
-
-	trackerId, err := s.db.GetTrackerId(ctx, userID)
-	if err != nil {
-		return err
-	}
-
-	if trackerId == "" {
-		return myerrors.BadReqErrMaker(fmt.Errorf("user has no workout ongoing"))
-	}
-
-	planName, err := s.db.GetUserCurrentPlanName(ctx, userID)
-	if err != nil {
-		return err
-	}
-
-	switch {
-	case planName == "":
-		err := s.db.DelTrackerId(ctx, userID)
-		if err != nil {
-			return err
-		}
-
-	case planName != "":
-		err := s.db.DelAllUserData(ctx, userID, planName)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = s.db.DeleteTrackerIdInPG(ctx, trackerId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 // trackerId
 // workoutOngoing

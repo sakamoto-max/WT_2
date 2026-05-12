@@ -1,7 +1,25 @@
+Add swagger
+unit testing - boundary value analysis 
+functional testing
+
+
+
+2026-05-12T12:29:06.237+0530    INFO    repository/repo.go:34   connected to postgres
+2026-05-12T12:29:06.249+0530    INFO    repository/repo.go:43   connected to redis
+2026-05-12T12:29:06.263+0530    INFO    consumer/consumer.go:31 consumer has started
+2026-05-12T12:29:06.264+0530    INFO    producer/producer.go:33 producer has started
+2026-05-12T12:29:07.950+0530    INFO    cmd/main.go:90          shutdown signal received        {"signal": "interrupt"}
+2026-05-12T12:29:07.950+0530    INFO    workers/workers.go:53   worker stopped  {"id": 5, "reason": "shutdown"}
+2026-05-12T12:29:07.950+0530    INFO    workers/workers.go:53   worker stopped  {"id": 2, "reason": "shutdown"}
+2026-05-12T12:29:07.950+0530    INFO    workers/workers.go:53   worker stopped  {"id": 3, "reason": "shutdown"}
+2026-05-12T12:29:07.950+0530    INFO    workers/workers.go:53   worker stopped  {"id": 4, "reason": "shutdown"}
+2026-05-12T12:29:07.950+0530    INFO    consumer/consumer.go:64 consumer is closing
+2026-05-12T12:29:07.950+0530    INFO    workers/workers.go:53   worker stopped  {"id": 1, "reason": "shutdown"}
+
+
 // reduce the db calls
 - plan.service.AddExercises -> service calls exerClient many times -> make a 
 	RPC to take all the exercisenames and returns Ids 
-
 
 
 // redis implementation

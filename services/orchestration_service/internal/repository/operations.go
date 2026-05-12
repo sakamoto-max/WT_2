@@ -15,6 +15,10 @@ var (
 	ErrNoRowsFound    = errors.New("no rows found")
 	ErrNoRowsEffected = errors.New("no rows effected")
 )
+
+var (
+	// queryExecutionTime time.Duration = time.Second * 5
+)
 var (
 	outboxQuery string = `
 		SELECT 
@@ -135,7 +139,11 @@ func (d *DB) CreateTrnx(ctx context.Context, targerService string) (pgx.Tx, erro
 
 	return nil, nil
 }
-func (d *DB) TaskCompletedUpdate(ctx context.Context, targetDbName string, dbIndex string) error {
+func (d *DB) TaskCompletedUpdate(targetDbName string, dbIndex string) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), queryExecutionTime)
+	defer cancel()
+	
 	trnx, err := d.CreateTrnx(ctx, targetDbName)
 	if err != nil {
 		return err

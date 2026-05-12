@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"exercise_service/internal/domain"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,12 +12,25 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Repo struct {
+type RepoIface interface {
+	GetPostgresRespTime(ctx context.Context) *time.Duration
+	GetRedisRespTime(ctx context.Context) *time.Duration
+	GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error)
+	GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error)
+	SetExerciseByNameR(ctx context.Context, userId string, exerData *domain.Exercise) error
+	CreateExercise(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) 
+	GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error)
+	GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error) 
+	DeleteExecise(ctx context.Context, userId string, exerciseName string) error
+	ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error)
+}
+
+type repo struct {
 	pDB *pgxpool.Pool
 	rDB *redis.Client
 }
 
-func NewRepo() (*Repo, error) {
+func NewRepo() (RepoIface, error) {
 
 	pool, err := newPgConn()
 	if err != nil {
@@ -29,7 +43,7 @@ func NewRepo() (*Repo, error) {
 		return nil, err
 	}
 
-	return &Repo{pDB: pool, rDB: client}, nil
+	return &repo{pDB: pool, rDB: client}, nil
 }
 
 func newPgConn() (*pgxpool.Pool, error) {
@@ -82,7 +96,7 @@ func newRedisConn() (*redis.Client, error) {
 
 }
 
-func (r *Repo) Close() error {
+func (r *repo) Close() error {
 	r.pDB.Close()
 
 	if err := r.rDB.Close(); err != nil {

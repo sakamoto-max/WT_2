@@ -4,17 +4,15 @@ import (
 	"log"
 	"os"
 
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
-// func Load(fileName string) {
-// 	err := godotenv.Load(fileName)
-// 	if err != nil {
-// 		log.Fatalf("error loading the env file : %v", err)
-// 	}
-
-// 	lookup()
-// }
+func Load(fileName string) {
+	err := godotenv.Load(fileName)
+	if err != nil {
+		log.Fatalf("error loading the env file : %v", err)
+	}
+}
 
 func LookUp() {
 	_, ok := os.LookupEnv("POSTGRES_CONN")

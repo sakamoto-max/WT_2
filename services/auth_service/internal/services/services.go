@@ -2,27 +2,16 @@ package services
 
 import (
 	"auth_service/internal/jwt"
-	"auth_service/internal/repository"
 	"auth_service/internal/utils"
 	"context"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
-
-	// token "github.com/sakamoto-max/wt_2_pkg/jwt"
-
 	"github.com/google/uuid"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
 
-type Service struct {
-	repo repository.RepoIface
-}
-
-func NewService(r repository.RepoIface) *Service {
-	return &Service{repo: r}
-}
 
 var (
 	ErrEmailDoesntMatch  = errors.New("email user sent is wrong")
@@ -31,9 +20,9 @@ var (
 	ErrSameOldEmail      = errors.New("new email cannot be same as the old email")
 )
 
-func (s *Service) SignUp(ctx context.Context, name string, email string, password string, role string) (string, time.Time, error) {
+func (s *service) SignUp(ctx context.Context, name string, email string, password string, role string) (string, time.Time, error) {
 
-	
+
 	var CreatedAt time.Time
 
 	email = strings.ToLower(email)
@@ -50,7 +39,7 @@ func (s *Service) SignUp(ctx context.Context, name string, email string, passwor
 
 	return userId, CreatedAt, nil
 }
-func (s *Service) Login(ctx context.Context, email string, password string) (string, string, string, string, error) {
+func (s *service) Login(ctx context.Context, email string, password string) (string, string, string, string, error) {
 
 	var refreshToken string
 	var UUID string
@@ -101,7 +90,7 @@ func (s *Service) Login(ctx context.Context, email string, password string) (str
 	}
 	return userId, name, AccessToken, UUID, nil
 }
-func (s *Service) Logout(ctx context.Context, userId string) error {
+func (s *service) Logout(ctx context.Context, userId string) error {
 
 	uuid, err := s.repo.GetUUID(ctx, userId)
 	if err != nil {
@@ -115,7 +104,7 @@ func (s *Service) Logout(ctx context.Context, userId string) error {
 
 	return nil
 }
-func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string, error) {
+func (s *service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string, error) {
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, UUID)
 	if err != nil {
@@ -136,7 +125,7 @@ func (s *Service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	return accessToken, nil
 }
-func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string, newPass string) error {
+func (s *service) ChangePass(ctx context.Context, userId string, oldPass string, newPass string) error {
 
 	if oldPass == newPass {
 		return myerrors.BadReqErrMaker(ErrSameOldPass)
@@ -164,7 +153,7 @@ func (s *Service) ChangePass(ctx context.Context, userId string, oldPass string,
 
 	return nil
 }
-func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail string, newEmail string) error {
+func (s *service) ChangeEmail(ctx context.Context, userId string, oldEmail string, newEmail string) error {
 
 	if oldEmail == newEmail {
 		return myerrors.BadReqErrMaker(ErrSameOldEmail)
@@ -186,7 +175,7 @@ func (s *Service) ChangeEmail(ctx context.Context, userId string, oldEmail strin
 
 	return nil
 }
-func (s *Service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+func (s *service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
 
 	pgRespTime := s.repo.GetPostgresRespTime(ctx)
 	redisRespTime := s.repo.GetRedisRespTime(ctx)

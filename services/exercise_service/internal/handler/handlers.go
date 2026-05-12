@@ -10,12 +10,12 @@ import (
 )
 
 type Handler struct {
-	service *services.Service
+	service services.ServiceIface
 	exerpb.UnimplementedExerciseServiceServer
 	logger *logger.MyLogger
 }
 
-func NewHandler(service *services.Service, logger *logger.MyLogger) *Handler {
+func NewHandler(service services.ServiceIface, logger *logger.MyLogger) *Handler {
 	return &Handler{service: service, logger: logger}
 }
 

@@ -1,14 +1,15 @@
 package consumer
 
 import (
-	"context"
+	// "context"
 	"encoding/json"
 	"fmt"
 	"orchestration_service/internal/repository"
-	"github.com/sakamoto-max/wt_2_proto/shared/enum"
-	"github.com/sakamoto-max/wt_2_pkg/logger"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
+	"github.com/sakamoto-max/wt_2_pkg/logger"
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type consumer struct {
@@ -25,11 +26,10 @@ func NewConsumer(db *repository.DB, resQueue *mq.MessageQueue, logger *logger.My
 	}
 }
 
-
-func (c *consumer) GetData() <-chan amqp.Delivery {	
+func (c *consumer) GetData() <-chan amqp.Delivery {
 
 	c.logger.Log.Infoln("consumer has started")
-	
+
 	msgs, err := c.resultQueue.Consume(enum.QueueName_RESULT_QUEUE.String())
 	if err != nil {
 		c.logger.Log.Fatalf("unable to open the consumer : %v", err)
@@ -38,31 +38,41 @@ func (c *consumer) GetData() <-chan amqp.Delivery {
 	return msgs
 }
 
-func (c *consumer) Operate(ctx context.Context, msgs <-chan amqp.Delivery) {
-	
+func (c *consumer) Operate(msgs <-chan amqp.Delivery) {
+
 	for {
-		select {
-		case msg, ok := <-msgs:
-			if !ok {
-				c.logger.Log.Infoln("consumer has closed")
-				return
-			}
-			
-			c.logger.Log.Infoln("consumer got data")
+		msg, ok := <-msgs
 
-			var data mq.TaskStatus
+		if !ok {
+			c.logger.Log.Infoln("consumer has closed")
+			return
+		}
 
-			_ = json.Unmarshal(msg.Body, &data)
+		c.logger.Log.Infoln("consumer got data")
 
-			fmt.Printf("target_service in consumer is %v", data.TargetService)
-			
-			err := c.db.TaskCompletedUpdate(ctx, data.TargetService, data.Id)
-			if err != nil {
-				c.logger.Log.Errorf("error : unable to update the task status : %v", err)
-			}
-		case <-ctx.Done():
-			c.logger.Log.Infoln("consumer is closing")
-			return			
+		var data mq.TaskStatus
+
+		_ = json.Unmarshal(msg.Body, &data)
+
+		fmt.Printf("target_service in consumer is %v", data.TargetService)
+
+		err := c.db.TaskCompletedUpdate(data.TargetService, data.Id)
+		if err != nil {
+			c.logger.Log.Errorf("error : unable to update the task status : %v", err)
 		}
 	}
+
+	// for {
+	// 	select {
+	// 	case msg, ok := <-msgs:
+	// 		if !ok {
+	// 			c.logger.Log.Infoln("consumer has closed")
+	// 			return
+	// 		}
+
+	// 	// case <-ctx.Done():
+	// 	// 	c.logger.Log.Infoln("consumer is closing")
+	// 	// 	return
+	// 	}
+	// }
 }

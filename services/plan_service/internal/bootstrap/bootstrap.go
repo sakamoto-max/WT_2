@@ -26,7 +26,6 @@ type app struct {
 
 func NewApp(addr string) *app {
 
-
 	logger := logger.NewLogger()
 
 	repo, err := repository.NewRepo()
@@ -59,12 +58,6 @@ func (a *app) Run() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-
-	// var serverWg sync.WaitGroup
-
-	// serverWg.Add(1)
-	// go mq_consumer.InitConsumer(&serverWg)
-
 	go func() {
 		a.logger.Log.Infof("grpc server has started at %v", a.addr)
 		if err := grpcServer.Serve(lis); err != nil {
@@ -78,7 +71,6 @@ func (a *app) Run() {
 	a.logger.Log.Infof("shutdown signal received : %v", sig.String())
 	
 	grpcServer.GracefulStop()
-	// serverWg.Wait()
 
 	a.logger.Log.Infof("server is closed")
 }

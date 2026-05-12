@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
+func (r *repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.pDB.Ping(ctx)
 	if err != nil {
@@ -22,7 +22,7 @@ func (r *Repo) GetPostgresRespTime(ctx context.Context) *time.Duration {
 
 	return &timeEnd
 }
-func (r *Repo) GetRedisRespTime(ctx context.Context) *time.Duration {
+func (r *repo) GetRedisRespTime(ctx context.Context) *time.Duration {
 	timeStart := time.Now()
 	err := r.rDB.Ping(ctx).Err()
 	if err != nil {
@@ -33,7 +33,7 @@ func (r *Repo) GetRedisRespTime(ctx context.Context) *time.Duration {
 
 	return &timeEnd
 }
-func (r *Repo) GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
+func (r *repo) GetExerciseByName(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
 
 	var exercise domain.Exercise
 	query := `
@@ -85,7 +85,7 @@ var (
 )
 
 
-func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
+func (r *repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseName string) (*domain.Exercise, error) {
 	
 	key := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerciseName)
 
@@ -118,7 +118,7 @@ func (r *Repo) GetExerciseByNameR(ctx context.Context, userId string, exerciseNa
 
 	return &data, nil
 }
-func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *domain.Exercise) error {
+func (r *repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *domain.Exercise) error {
 	mainKey := fmt.Sprintf("user_id:%v:exercise_name:%v", userId, exerData.Name)
 	idKey := "id"
 	bodyPartKey := "body_part"
@@ -141,7 +141,7 @@ func (r *Repo) SetExerciseByNameR(ctx context.Context, userId string, exerData *
 	return nil
 }
 
-func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) {
+func (r *repo) CreateExercise(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error) {
 
 	var bodyPartId uuid.UUID
 	var equipmentId uuid.UUID
@@ -197,7 +197,7 @@ func (r *Repo) CreateExercise(ctx context.Context, userId string, exerciseName s
 
 	return Id.String(), nil
 }
-func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error) {
+func (r *repo) GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error) {
 	// HSET ALLEXERCISES EXERCISE_NAME
 
 	query := `
@@ -266,7 +266,7 @@ func (r *Repo) GetAllExercises(ctx context.Context, userId string) (*[]domain.Ex
 
 	return &allExercises, nil
 }
-func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error) {
+func (r *repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error) {
 
 	var exerciseName string
 
@@ -285,7 +285,7 @@ func (r *Repo) GetExerciseNameByID(ctx context.Context, exerciseId string) (stri
 
 	return exerciseName, nil
 }
-func (r *Repo) DeleteExecise(ctx context.Context, userId string, exerciseName string) error {
+func (r *repo) DeleteExecise(ctx context.Context, userId string, exerciseName string) error {
 	// if the exercise's created by is NULL -> move it to user nullified
 	// else delete the exercise
 
@@ -348,7 +348,7 @@ func (r *Repo) DeleteExecise(ctx context.Context, userId string, exerciseName st
 
 	return nil
 }
-func (r *Repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error) {
+func (r *repo) ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error) {
 
 	query := `
 		SELECT 
