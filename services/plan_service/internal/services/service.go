@@ -30,6 +30,8 @@ func (s *service) CreatePlan(ctx context.Context, userId string, planName string
 		return err
 	}
 
+	
+
 	return nil
 }
 

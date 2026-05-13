@@ -9,7 +9,7 @@ import (
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
 	trackpb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/user"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	"go.uber.org/zap"
 )
@@ -68,13 +68,13 @@ func (h *Handler) StartWorkoutWithPlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.PlanName
+	var userInput models.PlanName
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 	in := trackpb.StartWorkoutWithPlanReq{
@@ -113,7 +113,7 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.Tracker
+	var userInput models.Tracker
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 

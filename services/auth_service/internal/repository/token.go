@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	// myerrors "github.com/sakamoto-max/wt_2-pkg/my_errors"
 	"github.com/redis/go-redis/v9"
@@ -63,8 +64,8 @@ func (r *repo) SetRefreshTokenAndUUID(ctx context.Context, uuid string, Refresht
 
 	pipe := r.rDB.Pipeline()
 
-	pipe.Set(ctx, uuidKey, uuid, 0)
-	pipe.Set(ctx, refreshKey, Refreshtoken, 0)
+	pipe.Set(ctx, uuidKey, uuid, time.Hour * 24 * 30)
+	pipe.Set(ctx, refreshKey, Refreshtoken, time.Hour * 24 * 30)
 
 	_, err := pipe.Exec(ctx)
 	if err != nil {
@@ -81,6 +82,9 @@ func (r *repo) GetRefreshToken(ctx context.Context, uuid string) (string, error)
 
 	err := r.rDB.Get(ctx, key).Scan(&refreshToken)
 	if err != nil {
+		if errors.Is(err, redis.Nil){
+			return "", myerrors.BadReqErrMaker(fmt.Errorf("refresh token does not exist"))
+		}
 		return "", myerrors.InternalServerErrMaker(fmt.Errorf("error getting the refresh token : %w\n", err))
 	}
 

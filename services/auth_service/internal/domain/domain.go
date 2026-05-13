@@ -11,6 +11,8 @@ type Signup struct {
 	Password string `json:"password"`
 }
 
+// type SignUpPayload
+
 type Login struct {
 	Message  string `json:"message"`
 	Email    string `json:"email"`

@@ -25,6 +25,7 @@ func NewConsumer(planQueue *mq.MessageQueue, logger *logger.MyLogger, jobs chan<
 }
 
 func (c *consumer) GetData() <-chan amqp.Delivery {
+
 	msgs, err := c.planQueue.Consume(enum.QueueName_PLAN_QUEUE.String())
 	if err != nil {
 		c.logger.Log.Fatalf("unable to get data from the consumer : %v", err)

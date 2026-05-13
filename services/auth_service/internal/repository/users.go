@@ -118,6 +118,104 @@ func (r *repo) CreateUser(ctx context.Context, name string, email string, hashed
 
 	return userId, createdAt, nil
 }
+func (r *repo) CreateUser2(ctx context.Context, name string, email string, hashedPass string, role string) (string, time.Time, error) {
+
+
+	trnx, err := r.pDB.Begin(ctx)
+	if err != nil {
+		return "", time.Now(), myErrs.InternalServerErrMaker(fmt.Errorf("error creating transaction : %w\n", err))
+	}
+
+	defer trnx.Rollback(ctx)
+
+	query := `
+	INSERT INTO 
+	users(name, email, role_id, hashed_pass)
+	VALUES
+	(@name, @email, (select id from roles where role = @role), @hashedPass)
+	RETURNING 
+	id, created_at
+	`
+	var userId string
+	var createdAt time.Time
+
+	err = trnx.QueryRow(ctx, query,
+		pgx.NamedArgs{
+			"name":       name,
+			"email":      email,
+			"role":       role,
+			"hashedPass": hashedPass,
+		}).Scan(&userId, &createdAt)
+
+	if err != nil {
+		var pgErr *pgConn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			switch pgErr.ConstraintName {
+			case "users_name_key":
+				return "", createdAt, myErrs.AlreadyExitsErrMaker(userResource)
+			case "users_email_key":
+				return "", createdAt, myErrs.AlreadyExitsErrMaker(userResource)
+			}
+		}
+		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
+	}
+
+	dataForPlan := domain.EmptyPayload{
+		UserId: userId,
+	}
+
+	planDataInBytes, err := json.Marshal(dataForPlan)
+	if err != nil {
+		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
+	}
+
+	planPayload := string(planDataInBytes)
+
+	dataForEmail := domain.EmailPayload{
+		Email: email,
+	}
+
+	emailDataInBytes, err := json.Marshal(dataForEmail)
+	if err != nil {
+		return "", createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("failed to marshal the data : %w", err))
+	}
+
+	emailPayload := string(emailDataInBytes)
+
+	query = `
+		INSERT INTO 
+			outbox(target_service, created_by, task, status, payload)
+		VALUES 
+			(@planService, @createdBy, @emptyPlan, @status, @planPayload::JSONB),
+			(@emailService, @createdBy, @sendEmail, @status, @emailPayload::JSONB)
+	`
+
+	// planService stirng = "plan_service"
+	// emailService string = "email_service"
+	// sendEmailForSignUp string = ""
+
+	_, err = trnx.Exec(ctx, query, pgx.NamedArgs{
+		"planService":  enum.ServiceName_PLAN_SERVICE.String(),
+		"emptyPlan":    enum.TaskName_CREATE_EMPTY_PLAN_FOR_USER.String(),
+		"planPayload":  planPayload,
+		"emailService": enum.ServiceName_EMAIL_SERVICE.String(),
+		"sendEmail":    enum.TaskName_SEND_EMAIL_FOR_SIGNING_UP.String(),
+		"emailPayload": emailPayload,
+		"createdBy":    "auth_service",
+		"status" : enum.TaskStatus_TASK_NOT_COMPLETED.String(),
+	})
+
+	if err != nil {
+		return userId, createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error inserting data into outbox : %w", err))
+	}
+
+	err = trnx.Commit(ctx)
+	if err != nil {
+		return userId, createdAt, myErrs.InternalServerErrMaker(fmt.Errorf("error commiting the transaction : %w", err))
+	}
+
+	return userId, createdAt, nil
+}
 
 // DONE
 func (r *repo) FetchUserIdRoleIdName(ctx context.Context, email string) (string, string, string, error) {
@@ -228,6 +326,4 @@ func (r *repo) ChangePass(ctx context.Context, userId string, newPass string) er
 	return nil
 }
 
-func (r *repo) GetUserId() {
 
-}

@@ -3,6 +3,7 @@ package handler
 import (
 	"auth_service/internal/services"
 	"context"
+
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	pb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -57,6 +58,7 @@ func (a *Handler) UserLogin(ctx context.Context, in *pb.UserLoginReq) (*pb.UserL
 }
 
 func (a *Handler) UserLogOut(ctx context.Context, in *pb.SendUserId) (*pb.UserLogOutResp, error) {
+
 	err := a.service.Logout(ctx, in.UserId)
 	if err != nil {
 		return nil, err

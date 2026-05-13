@@ -15,10 +15,10 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	r.Post("/wt/user/signup", h.SignUp)
 	r.Post("/wt/user/login", h.Login)
-	r.With(middleware.JwtMiddleware).Post("/wt/user/logout", h.Logout)
 	r.Post("/wt/user/refresh", h.GetNewAccessToken)
 	r.With(middleware.JwtMiddleware).Patch("/wt/user/password", h.ChangePassWord)
 	r.With(middleware.JwtMiddleware).Patch("/wt/user/email", h.ChangeEmail)
+	r.With(middleware.JwtMiddleware).Post("/wt/user/logout", h.Logout)
 
 	r.With(middleware.JwtMiddleware).Get("/wt/exercises", h.GetAllExercises)
 	r.With(middleware.JwtMiddleware).Get("/wt/exercises/{exerciseName}", h.GetExerciseByName)

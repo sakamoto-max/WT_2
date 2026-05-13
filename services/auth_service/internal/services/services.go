@@ -5,13 +5,14 @@ import (
 	"auth_service/internal/utils"
 	"context"
 	"errors"
-	"fmt"
+
+	// "fmt"
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 )
-
 
 var (
 	ErrEmailDoesntMatch  = errors.New("email user sent is wrong")
@@ -21,7 +22,6 @@ var (
 )
 
 func (s *service) SignUp(ctx context.Context, name string, email string, password string, role string) (string, time.Time, error) {
-
 
 	var CreatedAt time.Time
 
@@ -108,10 +108,8 @@ func (s *service) GetNewAccessTokenSer(ctx context.Context, UUID string) (string
 
 	refreshToken, err := s.repo.GetRefreshToken(ctx, UUID)
 	if err != nil {
-		return "", fmt.Errorf("error getting  from repo : %w", err)
+		return "", err
 	}
-
-	// token := token.JwtToken{}
 
 	claims, err := jwt.ValidateToken(refreshToken)
 	if err != nil {
@@ -135,6 +133,7 @@ func (s *service) ChangePass(ctx context.Context, userId string, oldPass string,
 	if err != nil {
 		return err
 	}
+
 
 	err = utils.MatchPasswords(oldPass, passFromDb)
 	if err != nil {

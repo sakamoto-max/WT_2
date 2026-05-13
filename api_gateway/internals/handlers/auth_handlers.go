@@ -8,7 +8,7 @@ import (
 	authpb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/user"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
 	"go.uber.org/zap"
@@ -35,13 +35,13 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	logger.Log.Infow("USER_SIGNUP_CALLED", zap.String("REQ_ID", reqId))
 
-	var userInput user.Signup
+	var userInput models.Signup
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -90,13 +90,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.Login
+	var userInput models.Login
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.authClient.UserLogOut(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -166,13 +166,13 @@ func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	var userInput user.UUIDReader
+	var userInput models.UUIDReader
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -182,7 +182,7 @@ func (h *Handler) GetNewAccessToken(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.authClient.GetNewAccessToken(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -210,13 +210,13 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	var userInput user.ChangePass
+	var userInput models.ChangePass
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -228,7 +228,7 @@ func (h *Handler) ChangePassWord(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.authClient.ChangePass(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -256,13 +256,13 @@ func (h *Handler) ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	var userInput user.ChangeEmail
+	var userInput models.ChangeEmail
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 

@@ -8,7 +8,7 @@ import (
 	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/user"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
 	"go.uber.org/zap"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 )
@@ -32,13 +32,13 @@ func (h *Handler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.Plan
+	var userInput models.Plan
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -83,7 +83,8 @@ func (h *Handler) GetAllPlans(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.planClient.GetAllPlans(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		// utils.BadReq(w, err
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -110,15 +111,6 @@ func (h *Handler) GetPLanByName(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	// var userInput user.PlanName
-
-	// json.NewDecoder(r.Body).Decode(&userInput)
-
-	// err = userInput.Validate()
-	// if err != nil {
-	// 	user.ValidationErrWriter(w, err)
-	// 	return
-	// }
 	planName := r.PathValue("planName")
 
 	in := planpb.GetPlanByNameReq{
@@ -128,7 +120,8 @@ func (h *Handler) GetPLanByName(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.planClient.GetPlanByName(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		// utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -155,13 +148,13 @@ func (h *Handler) AddExercisesToPlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.Plan
+	var userInput models.Plan
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -173,7 +166,8 @@ func (h *Handler) AddExercisesToPlan(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.planClient.AddExercisesToPlan(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		// utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -199,13 +193,13 @@ func (h *Handler) DeleteExerciseFromPlan(w http.ResponseWriter, r *http.Request)
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var userInput user.Plan
+	var userInput models.Plan
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -217,7 +211,8 @@ func (h *Handler) DeleteExerciseFromPlan(w http.ResponseWriter, r *http.Request)
 
 	resp, err := h.planClient.DeleteExercisesFromPlan(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		// utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 
@@ -244,16 +239,6 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	// var userInput user.PlanName
-
-	// json.NewDecoder(r.Body).Decode(&userInput)
-
-	// err = userInput.Validate()
-	// if err != nil {
-	// 	user.ValidationErrWriter(w, err)
-	// 	return
-	// }
-
 	planName := r.PathValue("planName")
 	
 	in := planpb.DeletePlanReq{
@@ -263,7 +248,8 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.planClient.DeletePlan(ctx, &in)
 	if err != nil {
-		utils.BadReq(w, err)
+		// utils.BadReq(w, err)
+		myerrors.ErrMatcher(w, err)
 		return
 	}
 

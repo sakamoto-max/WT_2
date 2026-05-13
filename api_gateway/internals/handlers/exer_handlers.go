@@ -9,7 +9,7 @@ import (
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/user"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	"go.uber.org/zap"
 )
@@ -33,13 +33,13 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	var userInput user.Exercise
+	var userInput models.Exercise
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -56,9 +56,9 @@ func (h *Handler) CreateExercise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := user.CreateExerResp{
+	resp := models.CreateExerResp{
 		Messsage: fmt.Sprintf("exercise %v has been successfully created ", in.ExerciseName),
-		Exercise: user.Exercise{
+		Exercise: models.Exercise{
 			Id:        res.Id,
 			Name:      in.ExerciseName,
 			BodyPart:  in.BodyPart,
@@ -108,7 +108,7 @@ func (h *Handler) GetExerciseByName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := user.Exercise{
+	resp := models.Exercise{
 		Id:        res.Id,
 		Name:      res.Name,
 		BodyPart:  res.BodyPart,
@@ -126,14 +126,17 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.InternalServerErr(w, err)
 	}
+
 	logger, err := middleware.GetLogger(r.Context())
 	if err != nil {
 		utils.InternalServerErr(w, err)
 	}
+
 	reqId, err := middleware.GetReqId(r.Context())
 	if err != nil {
 		utils.InternalServerErr(w, err)
 	}
+	
 
 	logger.Log.Infow("GET_ALL_EXERCISES_CALLED", zap.String("REQ_ID", reqId))
 
@@ -148,10 +151,10 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp user.AllExercisesResp
+	var resp models.AllExercisesResp
 
 	for _, eachExer := range res.AllExericses {
-		exer := user.Exercise{
+		exer := models.Exercise{
 			Id:        eachExer.Id,
 			Name:      eachExer.Name,
 			BodyPart:  eachExer.BodyPart,
@@ -190,13 +193,13 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	var userInput user.ExerciseName
+	var userInput models.ExerciseName
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
 	err = userInput.Validate()
 	if err != nil {
-		user.ValidationErrWriter(w, err)
+		models.ValidationErrWriter(w, err)
 		return
 	}
 
@@ -214,5 +217,3 @@ func (h *Handler) DeleteExecise(w http.ResponseWriter, r *http.Request) {
 	utils.DeletedNotFoundWriter(w, resp)
 	logger.Log.Infow("DELETE_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 }
-
-func (h *Handler) UpdateExercise(w http.ResponseWriter, r *http.Request) {}
