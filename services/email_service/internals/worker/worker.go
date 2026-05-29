@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"email_service/internals/server"
 	"email_service/internals/services"
 	"email_service/internals/types"
 	"sync"
@@ -18,23 +19,22 @@ type worker struct {
 	senderChan chan<- types.Data
 }
 
-func MakeWorkers(NumberOfWorkers int, logger *logger.MyLogger, service *services.Service, jobs <-chan types.Data, senderChan chan<- types.Data) []*worker {
+func StartWorkers(server server.Server) {
 
-	var workers []*worker
-
-	for i := range NumberOfWorkers {
-		w := &worker{
+	for i := range server.NumberOfWorkers {
+		worker := &worker{
 			id:         i + 1,
-			logger:     logger,
-			service:    service,
-			jobs:       jobs,
-			senderChan: senderChan,
+			logger:     server.Logger,
+			service:    server.Service,
+			jobs:       server.JobsChan,
+			senderChan: server.SenderChan,
 		}
 
-		workers = append(workers, w)
-
+		server.WorkersWg.Add(1)
+		go worker.Work(server.WorkersWg)
 	}
-	return workers
+
+	server.Logger.Log.Infow("workers have started", zap.Int("number of workers", server.NumberOfWorkers))
 }
 
 func (w *worker) Work(wg *sync.WaitGroup) {

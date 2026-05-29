@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"plan_service/internal/client"
+	"plan_service/internal/config"
 	"plan_service/internal/domain"
 	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/repository"
@@ -24,26 +25,27 @@ type worker struct {
 	exerclient client.ExerClientIface
 }
 
-func MakeWorkers(numberOfWorkers int, repo *repository.Db, logger *logger.MyLogger, jobs <-chan types.Data, senderChan chan<- mqTypes.Data, Client client.ExerClientIface) []*worker {
+func StartWorkers(config config.Config) {
 
-	var workers []*worker
+	for i := range config.NumberOfWorkers {
 
-	for i := range numberOfWorkers {
-
-		w := &worker{
+		worker := &worker{
 			id:         i + 1,
-			db:         repo,
-			logger:     logger,
-			jobsChan:   jobs,
-			senderChan: senderChan,
-			exerclient: Client,
+			db:         config.Db,
+			logger:     config.Logger,
+			jobsChan:   config.JobsChan,
+			senderChan: config.SendersChan,
+			exerclient: config.ExerClient,
 		}
 
-		workers = append(workers, w)
+		config.WorkerWg.Add(1)
+		go worker.Work(config.WorkerWg)
 	}
 
-	return workers
+	config.Logger.Log.Infow("workers have started", zap.Int("number of workers", config.NumberOfWorkers))
+
 }
+
 
 func (w *worker) Work(wg *sync.WaitGroup) {
 	defer wg.Done()

@@ -3,6 +3,7 @@ package fetcher
 import (
 	"context"
 	"orchestration_service/internal/repository"
+	server "orchestration_service/internal/server"
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
@@ -20,6 +21,26 @@ type fetcher struct {
 	TickerChan     <-chan time.Time
 }
 
+func StartFetcher(server server.Server) {
+
+	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
+
+	// fetcher := fetcher.NewFetcher(server.Db, server.Logger, &targetServices, server.JobsChan, server.Ticker.C)
+	fetcher := fetcher{
+		db:             server.Db,
+		logger:         server.Logger,
+		targetServices: &targetServices,
+		jobsChan:       server.JobsChan,
+		TickerChan:     server.Ticker.C,
+	}
+
+	server.FetcherWg.Add(1)
+
+	go fetcher.Start(server.Ctx, server.FetcherWg)
+
+	server.Logger.Log.Infoln("fetcher has started")
+}
+
 func NewFetcher(db *repository.Db, logger *logger.MyLogger, targetServices *[]string, jobsChan chan<- types.Data, tickerChan <-chan time.Time) *fetcher {
 	return &fetcher{
 		db:             db,
@@ -34,7 +55,7 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
-	p.logger.Log.Infoln("producer has started")
+	// p.logger.Log.Infoln("producer has started")
 
 	for {
 		select {

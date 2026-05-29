@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"encoding/json"
+	server "orchestration_service/internal/server"
 	"orchestration_service/internal/types"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
@@ -16,17 +17,19 @@ type consumer struct {
 	jobs        chan<- types.Data
 }
 
-func NewConsumer(resQueue *mq.MessageQueue, logger *logger.MyLogger, jobs chan<- types.Data) *consumer {
-	return &consumer{
-		resultQueue: resQueue,
-		logger:      logger,
-		jobs:        jobs,
+func StartConsumer(server server.Server) {
+	c := consumer{
+		resultQueue: server.ResultQueue,
+		logger:      server.Logger,
+		jobs:        server.JobsChan,
 	}
+
+	go c.StartListening()
+
+	server.Logger.Log.Infoln("consumer has started")
 }
 
 func (c *consumer) StartListening() {
-
-	c.logger.Log.Infoln("consumer has started")
 
 	msgsQueue, err := c.resultQueue.Consume()
 	if err != nil {

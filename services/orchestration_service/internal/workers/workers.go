@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"orchestration_service/internal/repository"
+	"orchestration_service/internal/server"
 	"orchestration_service/internal/types"
 	"sync"
 
@@ -23,25 +24,47 @@ type worker struct {
 	logger     *logger.MyLogger
 }
 
-func MakeWorkers(NumberOfWorkers int, planQueue *mq.MessageQueue, emailQueue *mq.MessageQueue, db *repository.Db, jobs <-chan types.Data, logger *logger.MyLogger) []*worker {
+func StartWorkers(server server.Server) {
 
-	var workers []*worker
+	// workers := workers.MakeWorkers(server.NumberOfWorkers, server.PlanQueue, server.EmailQueue, server.Db, server.JobsChan, server.Logger)
 
-	for i := 1; i <= NumberOfWorkers; i++ {
-		w := &worker{
-			id:         i,
-			PlanQueue:  planQueue,
-			EmailQueue: emailQueue,
-			Db:         db,
-			Jobs:       jobs,
-			logger:     logger,
+	for i := range server.NumberOfWorkers {
+		worker := &worker{
+			id:         i + 1,
+			PlanQueue:  server.PlanQueue,
+			EmailQueue: server.EmailQueue,
+			Db:         server.Db,
+			Jobs:       server.JobsChan,
+			logger:     server.Logger,
 		}
-		workers = append(workers, w)
+
+		server.WorkersWg.Add(1)
+
+		go worker.Work(server.WorkersWg)
 	}
-	return workers
+
+	server.Logger.Log.Infow("workers have started", zap.Int("number of workers", server.NumberOfWorkers))
 }
 
-func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
+// func MakeWorkers(NumberOfWorkers int, planQueue *mq.MessageQueue, emailQueue *mq.MessageQueue, db *repository.Db, jobs <-chan types.Data, logger *logger.MyLogger) []*worker {
+
+// 	var workers []*worker
+
+// 	for i := 1; i <= NumberOfWorkers; i++ {
+// 		w := &worker{
+// 			id:         i,
+// 			PlanQueue:  planQueue,
+// 			EmailQueue: emailQueue,
+// 			Db:         db,
+// 			Jobs:       jobs,
+// 			logger:     logger,
+// 		}
+// 		workers = append(workers, w)
+// 	}
+// 	return workers
+// }
+
+func (w *worker) Work(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
@@ -62,14 +85,14 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 
 				fmt.Println("status", data.Status)
 
-				err := w.Db.Auth.UpdateTaskStatus(ctx, data.DbId, data.Status)
+				err := w.Db.Auth.UpdateTaskStatus(context.Background(), data.DbId, data.Status)
 				if err != nil {
 					w.logger.Log.Errorw("failed to update task status", zap.Int("worker_id", w.id), zap.String("task_name", data.Task), zap.String("created_by", data.CreatedBy), zap.String("targetServie", data.TargetService), zap.String("db index value", data.DbId), zap.Error(err))
 				}
 
 			case enum.ServiceName_TRACKER_SERVICE.String():
 
-				err := w.Db.Tracker.UpdateTaskStatus(ctx, data.DbId, data.Status)
+				err := w.Db.Tracker.UpdateTaskStatus(context.Background(), data.DbId, data.Status)
 				if err != nil {
 					w.logger.Log.Errorw("failed to update task status", zap.Int("worker_id", w.id), zap.String("task_name", data.Task), zap.String("created_by", data.CreatedBy), zap.String("targetServie", data.TargetService), zap.String("db index value", data.DbId), zap.Error(err))
 				}
@@ -86,7 +109,7 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 
 				switch data.CreatedBy {
 				case enum.ServiceName_AUTH_SERVICE.String():
-					err := w.Db.Auth.UpdateTaskStatus(ctx, data.DbId, enum.TaskStatus_TASK_FAILED.String())
+					err := w.Db.Auth.UpdateTaskStatus(context.Background(), data.DbId, enum.TaskStatus_TASK_FAILED.String())
 					if err != nil {
 
 						w.logger.Log.Errorw("failed to update the task to failed",
@@ -97,7 +120,7 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 					}
 
 				case enum.ServiceName_TRACKER_SERVICE.String():
-					err := w.Db.Tracker.UpdateTaskStatus(ctx, data.DbId, enum.TaskStatus_TASK_FAILED.String())
+					err := w.Db.Tracker.UpdateTaskStatus(context.Background(), data.DbId, enum.TaskStatus_TASK_FAILED.String())
 					if err != nil {
 
 						w.logger.Log.Errorw("failed to update the task to failed",
@@ -109,19 +132,18 @@ func (w *worker) Work(ctx context.Context, wg *sync.WaitGroup) {
 				continue
 			}
 
-			err := w.PushToQueue(ctx, data)
+			err := w.PushToQueue(context.Background(), data)
 			if err != nil {
-
 
 				switch data.CreatedBy {
 				case enum.ServiceName_AUTH_SERVICE.String():
-					err := w.Db.Auth.UpdateTaskStatusWithNumberOfTries(ctx, data.DbId, enum.TaskStatus_TASK_PENDING.String())
+					err := w.Db.Auth.UpdateTaskStatusWithNumberOfTries(context.Background(), data.DbId, enum.TaskStatus_TASK_PENDING.String())
 					if err != nil {
 						w.logger.Log.Errorw("failed to update the task to failed", zap.String("in service", data.CreatedBy), zap.Error(err))
 					}
 
 				case enum.ServiceName_TRACKER_SERVICE.String():
-					err := w.Db.Tracker.UpdateTaskStatusWithNumberOfTries(ctx, data.DbId, enum.TaskStatus_TASK_PENDING.String())
+					err := w.Db.Tracker.UpdateTaskStatusWithNumberOfTries(context.Background(), data.DbId, enum.TaskStatus_TASK_PENDING.String())
 					if err != nil {
 						w.logger.Log.Errorw("failed to update the task to failed", zap.String("in service", data.CreatedBy), zap.Error(err))
 					}

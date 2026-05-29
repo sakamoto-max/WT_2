@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"email_service/internals/server"
 	"email_service/internals/types"
 	"encoding/json"
 
@@ -15,12 +16,18 @@ type consumer struct {
 	jobs       chan<- types.Data
 }
 
-func NewConsumer(emailQueue *queue.MessageQueue, logger *logger.MyLogger, jobs chan<- types.Data) *consumer {
-	return &consumer{
-		emailQueue: emailQueue,
-		logger:     logger,
-		jobs:       jobs,
+func StartConsumer(server server.Server) {
+
+	consumer := &consumer{
+		emailQueue: server.EmailQueue,
+		logger:     server.Logger,
+		jobs:       server.JobsChan,
 	}
+
+	go consumer.StartListening()
+
+	server.Logger.Log.Infoln("consumer has started")
+
 }
 
 func (c *consumer) StartListening() {

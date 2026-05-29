@@ -3,6 +3,7 @@ package sender
 import (
 	"context"
 	"email_service/internals/repostitory"
+	"email_service/internals/server"
 	"email_service/internals/types"
 	"encoding/json"
 	"fmt"
@@ -23,23 +24,22 @@ type Sender struct {
 	db         *repostitory.Db
 }
 
-func MakeSenders(numberOfSenders int, logger *logger.MyLogger, resQueue *queue.MessageQueue, senderChan <-chan types.Data, db *repostitory.Db) []*Sender {
+func StartSenders(server server.Server) {
 
-	var senders []*Sender
-
-	for i := range numberOfSenders {
-		s := &Sender{
+	for i := range server.NumberOfSenders {
+		sender := &Sender{
 			id:         i + 1,
-			logger:     logger,
-			resQueue:   resQueue,
-			senderChan: senderChan,
-			db:         db,
+			logger:     server.Logger,
+			resQueue:   server.ResQueue,
+			senderChan: server.SenderChan,
+			db:         server.Db,
 		}
 
-		senders = append(senders, s)
-	}
+		server.SendersWg.Add(1)
+		go sender.Start(server.SendersWg)
 
-	return senders
+	}
+	server.Logger.Log.Infow("senders have started", zap.Int("number of senders", server.NumberOfSenders))
 }
 
 func (s *Sender) Start(wg *sync.WaitGroup) {
@@ -94,7 +94,6 @@ func (s *Sender) ExponentialBackOff(data types.Data) {
 	}
 
 }
-
 
 func convertIntoBytes(data any) (*[]byte, error) {
 	dataInBytes, err := json.Marshal(data)

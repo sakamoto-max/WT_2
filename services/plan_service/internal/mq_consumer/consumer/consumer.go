@@ -3,6 +3,7 @@ package consumer
 import (
 	"encoding/json"
 	// "fmt"
+	"plan_service/internal/config"
 	"plan_service/internal/mq_consumer/types"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
@@ -18,12 +19,18 @@ type consumer struct {
 	jobs      chan<- types.Data
 }
 
-func NewConsumer(planQueue *mq.MessageQueue, logger *logger.MyLogger, jobs chan<- types.Data) *consumer {
-	return &consumer{
-		planQueue: planQueue,
-		logger:    logger,
-		jobs:      jobs,
+func StartConsumer(config config.Config) {
+
+	consumer := &consumer{
+		planQueue: config.PlanQueue,
+		logger:    config.Logger,
+		jobs:      config.JobsChan,
 	}
+
+	go consumer.Start()
+
+	config.Logger.Log.Infoln("consumer has started")
+
 }
 
 func (c *consumer) Start() {
@@ -44,12 +51,12 @@ func (c *consumer) Start() {
 		data := ConvertIntoJosn(&msg.Body)
 
 		c.logger.Log.Infow("consumer has received a task", zap.String("task name", data.TaskName), zap.String("sent by", data.SentBy))
-		
+
 		c.jobs <- types.Data{
-			DbId: data.DbId,
-			SentBy: data.SentBy,
-			TaskName: data.TaskName,
-			Payload: data.Payload,
+			DbId:          data.DbId,
+			SentBy:        data.SentBy,
+			TaskName:      data.TaskName,
+			Payload:       data.Payload,
 			TargetService: data.TargetService,
 		}
 		c.logger.Log.Infoln("consumer has sent data to the jobs chan")

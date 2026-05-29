@@ -2,7 +2,7 @@
 plan:
 	@cd services && cd plan_service && cd cmd && cd server && go run main.go
 plan_consumer :
-	@cd services && cd plan_service && cd internal && cd mq_consumer && go run main.go	
+	@cd services && cd plan_service && cd cmd && cd consumer && go run main.go	
 exercise:
 	@cd services && cd exercise_service && cd cmd && cd server && go run main.go
 auth:
@@ -10,11 +10,11 @@ auth:
 tracker:
 	@cd services && cd tracker_service && cd cmd && cd server && go run main.go
 gateway:
-	@cd api_gateway && cd cmd && cd server && go run .
+	@cd api_gateway && cd cmd && cd server && go run main.go
 orc:
 	@cd services && cd orchestration_service && cd cmd && go run main.go
 email:
-	@cd services && cd email_service && go run main.go
+	@cd services && cd email_service && cd cmd && go run main.go
 
 
 # migrations :

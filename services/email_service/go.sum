@@ -17,8 +17,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rabbitmq/amqp091-go v1.11.0 h1:HxIctVm9Gid/Vtn706necmZ7Wj6pgGI2eqplRbEY8O8=
 github.com/rabbitmq/amqp091-go v1.11.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
-github.com/sakamoto-max/rabbit_mq v1.2.3 h1:+VJuekiiJ/b0tE6mBtaBVcPwKnKUmP6mLD/WYM0Gq0w=
-github.com/sakamoto-max/rabbit_mq v1.2.3/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
 github.com/sakamoto-max/rabbit_mq v1.2.4 h1:BTsFdoyVV+UydL0XRI5dV1eLihxArrC8rbNbxsoh8Bc=
 github.com/sakamoto-max/rabbit_mq v1.2.4/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba h1:ayEzn70puI4hjdMbWD3ON5eZy4LsmmmxllW1wV5x9C4=

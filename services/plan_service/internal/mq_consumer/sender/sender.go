@@ -2,6 +2,7 @@ package sender
 
 import (
 	"context"
+	"plan_service/internal/config"
 	"sync"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
@@ -17,27 +18,25 @@ type Sender struct {
 	logger     *logger.MyLogger
 }
 
-func MakeSenders(numberOfSenders int, senderChan <-chan mqTypes.Data, resQueue *mq.MessageQueue, logger *logger.MyLogger) []*Sender {
+func StartSenders(config config.Config) {
 
-	var AllSenders []*Sender
-
-	for i := range numberOfSenders {
-		s := &Sender{
+	for i := range config.NumberOfSenders {
+		sender := &Sender{
 			id:         i + 1,
-			senderChan: senderChan,
-			resQueue:   resQueue,
-			logger:     logger,
+			senderChan: config.SendersChan,
+			resQueue:   config.ResQueue,
+			logger:     config.Logger,
 		}
-
-		AllSenders = append(AllSenders, s)
+		config.SenderWg.Add(1)
+		go sender.Start(config.SenderWg)
 	}
 
-	return AllSenders
+	config.Logger.Log.Infow("senders have started", zap.Int("number of senders", config.NumberOfSenders))
 }
 
 func (s *Sender) Start(wg *sync.WaitGroup) {
 	defer wg.Done()
-	
+
 	for {
 		msg, ok := <-s.senderChan
 		if !ok {
