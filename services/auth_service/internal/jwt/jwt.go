@@ -39,6 +39,25 @@ func GenerateAccessToken(userId string, roleId string) (string, error) {
 
 	return accessToken, nil
 }
+func GenerateAccessTokenFastExp(userId string, roleId string) (string, error) {
+	j := jwtStruct{}
+
+	j.claims.UserId = userId
+	j.claims.RoleId = roleId
+	j.claims.RegisteredClaims = jwt.RegisteredClaims{
+		Issuer:    "workout-tracker",
+		ExpiresAt: jwt.NewNumericDate(time.Now()),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j.claims)
+
+	accessToken, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	if err != nil {
+		return "", myerrors.InternalServerErrMaker(fmt.Errorf("error signing the refresh token %w\n", err))
+	}
+
+	return accessToken, nil
+}
 
 func GenerateRefreshToken(userId string, roleId string) (string, error) {
 

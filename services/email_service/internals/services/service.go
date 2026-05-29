@@ -1,7 +1,6 @@
 package services
 
 import (
-	
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"go.uber.org/zap"
 )
@@ -19,7 +18,7 @@ func NewService(logger *logger.MyLogger) *Service {
 func (s *Service) SendWelcomeEmail(email string) error {
 	s.logger.Log.Infow(
 		"email sent",
-		 zap.String("email", email),
+		zap.String("email", email),
 	)
 
 	return nil

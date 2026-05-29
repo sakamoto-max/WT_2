@@ -1,52 +1,78 @@
 package bootstrap
 
 import (
-	"exercise_service/internal/handler"
+	"exercise_service/internal/database"
 	"exercise_service/internal/repository"
+	"exercise_service/internal/repository/cache"
 	"exercise_service/internal/services"
 	"net"
 	"os"
 	"os/signal"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	pb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 type app struct {
-	addr    string
-	handler *handler.Handler
-	logger  *logger.MyLogger
+	addr        string
+	service     *services.Service
+	logger      *logger.MyLogger
+	pool        *pgxpool.Pool
+	redisClient *redis.Client
 }
 
 func NewApp(addr string) *app {
-
+	//
 	logger := logger.NewLogger()
 
-	repo, err := repository.NewRepo()
+	pool, err := database.NewPgConn()
 	if err != nil {
-		logger.Log.Fatalf("error opening the repos : %v", err)
+		logger.Log.Fatalw("failed to open postgres conn", zap.Error(err))
 	}
 
-	service := services.NewService(repo)
-	handler := handler.NewHandler(service, logger)
+	redisClient, err := database.NewRedisConn()
+	if err != nil {
+		logger.Log.Fatalw("failed to open redis conn", zap.Error(err))
+	}
+
+	pg := repository.NewDb(pool)
+	cache := cache.NewCache(redisClient)
+
+	service := services.NewService(pg, cache)
+	// handler := handler.NewHandler(service, logger)
 
 	return &app{
-		addr:    addr,
-		handler: handler,
-		logger:  logger,
+		addr:        addr,
+		service:     service,
+		logger:      logger,
+		redisClient: redisClient,
+		pool:        pool,
 	}
 
 }
 
 func (a *app) Run() {
+
+	defer func() {
+		err := a.redisClient.Close()
+		if err != nil {
+			a.logger.Log.Infow("failed to close redis client", zap.Error(err))
+		}
+		a.pool.Close()
+	}()
+
 	lis, err := net.Listen("tcp", a.addr)
 	if err != nil {
 		a.logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterExerciseServiceServer(grpcServer, a.handler)
-	
+	pb.RegisterExerciseServiceServer(grpcServer, a.service)
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 

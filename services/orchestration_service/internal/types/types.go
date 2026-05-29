@@ -4,18 +4,21 @@ import (
 	"fmt"
 	"orchestration_service/internal/utils"
 	"time"
-	// "github.com/sakamoto-max/wt_2-pkg/utils"
+	// "github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type Data struct {
-	DbId          string    `db:"id"`
-	TargetService string    `db:"target_service"`
-	CreatedBy     string    `db:"created_by"`
-	Task          string    `db:"task"`
-	Status        string    `db:"status"`
-	Payload       any       `db:"payload"`
-	CreatedAt     time.Time `db:"created_at"`
-	NumberOfTries int       `db:"number_of_tries"`
+	DbId          string         `db:"id"`
+	TargetService string         `db:"target_service"`
+	CreatedBy     string         `db:"created_by"`
+	Task          string         `db:"task"`
+	Status        string         `db:"status"`
+	Payload       map[string]any `db:"payload"`
+	CreatedAt     time.Time      `db:"created_at"`
+	NumberOfTries int            `db:"number_of_tries"`
+	ServiceName   string
+	NoData        bool
+	Err           error
 }
 
 func (d *Data) ConvertToBytes() (*[]byte, error) {
@@ -27,22 +30,3 @@ func (d *Data) ConvertToBytes() (*[]byte, error) {
 
 	return dataInBytes, nil
 }
-
-type taskStatus string
-
-var (
-	TaskCompleted    taskStatus = "completed"
-	TaskPending      taskStatus = "pending"
-	TaskNotCompleted taskStatus = "not_completed"
-	TaskFailed       taskStatus = "failed"
-)
-
-type serviceName string
-
-var (
-	PlanService     serviceName = "plan_service"
-	AuthService     serviceName = "auth_service"
-	TrackerService  serviceName = "tracker_service"
-	ExerciseService serviceName = "exercise_service"
-	EmailService    serviceName = "email_service"
-)

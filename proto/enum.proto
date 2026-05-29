@@ -26,6 +26,7 @@ enum TaskName {
   CREATE_EMPTY_PLAN_FOR_USER = 1;
   SEND_EMAIL_FOR_SIGNING_UP = 2;
   UPDATE_PLAN = 3;  
+  UPDATE_VALUE_IN_DB = 4;
 }
 
 enum QueueName {
@@ -34,4 +35,15 @@ enum QueueName {
     RESULT_QUEUE = 2;
     EMAIL_QUEUE = 3;
 }
+
+
+enum QueueFields {
+    ENUM_QUEUE_FIELDS_UNDEFINED = 0;
+    USER_ID = 1;
+    EMAIL = 2;
+    USER_NAME = 3;
+    PLAN_NAME = 4;
+    EXERCISE_NAMES = 5;
+}
+
 

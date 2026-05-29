@@ -1,49 +1,41 @@
 package worker
 
 import (
-	"email_service/internals/producer"
 	"email_service/internals/services"
 	"email_service/internals/types"
 	"sync"
 
-	// "github.com/sakamoto-max/wt_2_pkg/enum"
-	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
-
-	// "github.com/sakamoto-max/wt_2_pkg/types"
-
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	"go.uber.org/zap"
 )
 
 type worker struct {
-	id      int
-	logger  *logger.MyLogger
-	service *services.Service
-	jobs <-chan types.Data
-	producer *producer.Producer
+	id         int
+	logger     *logger.MyLogger
+	service    *services.Service
+	jobs       <-chan types.Data
+	senderChan chan<- types.Data
 }
 
-func MakeWorkers(NumberOfWorkers int, logger *logger.MyLogger, service *services.Service, jobs <-chan types.Data, producer *producer.Producer) []*worker {
+func MakeWorkers(NumberOfWorkers int, logger *logger.MyLogger, service *services.Service, jobs <-chan types.Data, senderChan chan<- types.Data) []*worker {
 
 	var workers []*worker
-	for i := 1; i <= NumberOfWorkers; i++ {
-		w := newWorker(i, logger, service, jobs, producer)
+
+	for i := range NumberOfWorkers {
+		w := &worker{
+			id:         i + 1,
+			logger:     logger,
+			service:    service,
+			jobs:       jobs,
+			senderChan: senderChan,
+		}
+
 		workers = append(workers, w)
-	}
 
+	}
 	return workers
-
 }
-func newWorker(id int, logger *logger.MyLogger, service *services.Service, jobs <-chan types.Data, producer *producer.Producer) *worker {
-	return &worker{
-		id:      id,
-		logger:  logger,
-		service: service,
-		jobs: jobs,
-		producer: producer,
-	}
-}
-
 
 func (w *worker) Work(wg *sync.WaitGroup) {
 
@@ -51,43 +43,71 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 
 	for {
 
-		msg, ok := <- w.jobs
-	
+		msg, ok := <-w.jobs
+
 		if !ok {
-			w.logger.Log.Infow("worker is stopping", zap.Int("worker_id", w.id))
 			return
 		}
 
+		w.logger.Log.Infow("worker received task", zap.Int("worker_id", w.id), zap.String("task", msg.TaskName))
 
-		w.logger.Log.Infow("worker received task", zap.Int("worker_id", w.id), zap.String("task", msg.Task))
-
-		switch msg.Task{
+		switch msg.TaskName {
 		case enum.TaskName_SEND_EMAIL_FOR_SIGNING_UP.String():
 
 			email, err := msg.GetEmail()
 			if err != nil {
-				w.logger.Log.Errorw(
-					"error getting email",
-					zap.Int("worker_id", w.id),
-					zap.Error(err),
-				)
+				w.senderChan <- types.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					Status:        enum.TaskStatus_TASK_FAILED.String(),
+					SentBy:        msg.TargetService,
+					TargetService: msg.SentBy,
+					Err:           err,
+				}
+				continue
 			}
 
 			err = w.service.SendWelcomeEmail(email)
-			if err != nil{
-				w.producer.TaskFailed(msg.DbId, enum.ServiceName_AUTH_SERVICE.String(), msg.Task)
-				w.logger.Log.Errorw("error occured while sending email", zap.Int("worker_id", w.id), zap.String("email", email), zap.Error(err))
+			if err != nil {
+				w.senderChan <- types.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					Status:        enum.TaskStatus_TASK_FAILED.String(),
+					SentBy:        msg.TargetService,
+					TargetService: msg.SentBy,
+					Err:           err,
+				}
+				continue
+			}
+
+			w.senderChan <- types.Data{
+				DbId:          msg.DbId,
+				TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+				Status:        enum.TaskStatus_TASK_COMPLETED.String(),
+				SentBy:        msg.TargetService,
+				TargetService: msg.SentBy,
+				Err:           err,
 			}
 		}
 
-		w.producer.TaskCompleted(msg.DbId, enum.ServiceName_AUTH_SERVICE.String(), msg.Task)
-		w.logger.Log.Infow(
-			"task completed", 
-			zap.Int("worker_id", w.id), 
-			zap.String("task", msg.Task),
-		)
 	}
-
-
-
 }
+
+// consumer responsibilities :
+// 1. listens to the email queue
+// 2. if it gets any data -> send it to jobs queue
+
+// consumer depends on -> email queue, jobs chan
+
+// worker responsibilities :
+// 1. listen to the jobs chan
+// 2. if data is received -> perform the TaskName
+// 3. send the result to the producer queue
+
+// worker depends on -> jobs chan, producer chan, email service
+
+// producer
+// 1. lisents to the producer queue
+// 2. if data is received it will push it to the res queue
+
+// producer depends on -> producer chan, resQueue

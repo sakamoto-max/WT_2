@@ -1,28 +1,21 @@
 package services
 
 import (
-	"context"
-	"exercise_service/internal/domain"
 	"exercise_service/internal/repository"
-	"time"
+	"exercise_service/internal/repository/cache"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 )
 
-type service struct {
-	DB repository.RepoIface
-}
-
-func NewService(r repository.RepoIface) *service {
-	return &service{
-		DB: r,
+func NewService(pg *repository.Db, cache *cache.Cache) *Service {
+	return &Service{
+		pg:    pg,
+		cache: cache,
 	}
 }
-
-type ServiceIface interface {
-	GetExerciseByName(ctx context.Context, userID string, exerciseName string) (*domain.Exercise, error)
-	GetAllExercisesSer(ctx context.Context, userId string) (*[]domain.Exercise, error)
-	DeleteExeciseSer(ctx context.Context, userId string, exerciseName string) error
-	CreateExerciseSer(ctx context.Context, userId string, exerciseName string, bodyPartName string, equipmentName string) (string, error)
-	ExerciseExistsReturnId(ctx context.Context, userId string, exerciseName string) (string, error)
-	GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error)
-	GetHealth(ctx context.Context) (*time.Duration, *time.Duration)
+type Service struct {
+	exerpb.UnimplementedExerciseServiceServer
+	pg    *repository.Db
+	cache *cache.Cache
 }
+
+

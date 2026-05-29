@@ -1,22 +1,21 @@
 # creating servers :
 plan:
-	@cd services && cd plan_service && cd cmd && cd server && go run .
+	@cd services && cd plan_service && cd cmd && cd server && go run main.go
 plan_consumer :
 	@cd services && cd plan_service && cd internal && cd mq_consumer && go run main.go	
 exercise:
-	@cd services && cd exercise_service && cd cmd && cd server && go run .
+	@cd services && cd exercise_service && cd cmd && cd server && go run main.go
 auth:
-	@cd services && cd auth_service && cd cmd && cd server && go run .
-
+	@cd services && cd auth_service && cd cmd && cd server && go run main.go
 tracker:
-	@cd services && cd tracker_service && cd cmd && cd server && go run .
-
+	@cd services && cd tracker_service && cd cmd && cd server && go run main.go
 gateway:
-	@cd api_gateway && cd cmd && set ENVIORNMENT="prod" && go run .
+	@cd api_gateway && cd cmd && cd server && go run .
 orc:
 	@cd services && cd orchestration_service && cd cmd && go run main.go
 email:
 	@cd services && cd email_service && go run main.go
+
 
 # migrations :
 auth_db_up:

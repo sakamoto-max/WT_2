@@ -2,93 +2,96 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
-	"time"
-	"tracker_service/internal/models"
+	"tracker_service/internal/domain"
+
+	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
-	myerrors "github.com/sakamoto-max/wt_2_pkg/myerrs"
+	trackerpb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-func (s *service) GetHealth(ctx context.Context) (*time.Duration, *time.Duration) {
+var (
+	ErrWorkoutOngoing = errors.New("workout is ongoing")
+)
 
-	pgRespTime := s.db.GetPostgresRespTime(ctx)
-	redisRespTime := s.db.GetRedisRespTime(ctx)
-
-	return pgRespTime, redisRespTime
-}
-func (s *service) StartEmptyWorkoutSer(ctx context.Context, userID string) error {
-
-	trackerId, err := s.db.GetTrackerId(ctx, userID)
-	if err != nil {
-		return err
-	}
-
-	if trackerId != "" {
-		return myerrors.ErrWorkoutOngoing
-	}
-
-	r, err := s.pClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: userID})
-	if err != nil {
-		return fmt.Errorf("error getting data from plan server : %w", err)
-	}
-
-	trackerId, err = s.db.StartWorkout(ctx, userID, r.EmptyPlanId)
-	if err != nil {
-		return err
-	}
-
-	err = s.db.SetTrackerId(ctx, userID, trackerId)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *service) StartWorkoutWithPlanSer(ctx context.Context, userId string, planName string) (*[]string, error) {
-
-	trackerId, err := s.db.GetTrackerId(ctx, userId)
+func (s *Service) StartEmptyWorkout(ctx context.Context, in *trackerpb.StartEmptyWorkoutReq) (*trackerpb.GeneralResp, error) {
+	trackerId, err := s.cache.TrackerId.GetTrackerId(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
 
 	if trackerId != "" {
-		return nil, myerrors.ErrWorkoutOngoing
+		return nil, myerrors.BadReqErrMaker(ErrWorkoutOngoing)
 	}
 
-	r, err := s.pClient.GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: userId, PlanName: planName})
+	r, err := s.planClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: in.UserId})
 	if err != nil {
 		return nil, fmt.Errorf("error getting data from plan server : %w", err)
 	}
 
-	err = s.db.SetUserCurrentPlanName(ctx, userId, planName)
-	if err != nil {
+	if trackerId, err = s.pg.Start.StartWorkout(ctx, domain.StartWorkout{UserId: in.UserId, PlanId: r.EmptyPlanId}); err != nil {
 		return nil, err
 	}
 
-	err = s.db.SetPlanWithExercises(ctx, userId, planName, &r.ExerciseNames)
-	if err != nil {
+	if err = s.cache.TrackerId.SetTrackerId(ctx, in.UserId, trackerId); err != nil {
 		return nil, err
 	}
 
-	trackerId, err = s.db.StartWorkout(ctx, userId, r.PlanId)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.SetTrackerId(ctx, userId, trackerId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r.ExerciseNames, nil
+	return &trackerpb.GeneralResp{
+		Message: "an empty workout has started",
+	}, nil
 }
 
-func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models.Tracker) (*string, error) {
+func (s *Service) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartWorkoutWithPlanReq) (*trackerpb.StartWorkoutWithPlanResp, error) {
 
-	trackerId, err := s.db.GetTrackerId(ctx, userId)
+	trackerId, err := s.cache.TrackerId.GetTrackerId(ctx, in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	if trackerId != "" {
+		return nil, myerrors.BadReqErrMaker(ErrWorkoutOngoing)
+	}
+
+	r, err := s.planClient.GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: in.UserId, PlanName: in.PlanName})
+	if err != nil {
+		return nil, fmt.Errorf("error getting data from plan server : %w", err)
+	}
+
+	err = s.cache.CurrentPlan.SetUserCurrentPlanName(ctx, in.UserId, in.PlanName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.cache.Plan.SetPlanWithExercises(ctx, in.UserId, in.PlanName, &r.ExerciseNames)
+	if err != nil {
+		return nil, err
+	}
+
+	trackerId, err = s.pg.Start.StartWorkout(ctx, domain.StartWorkout{UserId: in.UserId, PlanId: r.PlanId})
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.cache.TrackerId.SetTrackerId(ctx, in.UserId, trackerId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &trackerpb.StartWorkoutWithPlanResp{
+		Message:         fmt.Sprintf("workout with plan %v has started", in.PlanName),
+		PlanName:        in.PlanName,
+		ExercisesInPlan: r.ExerciseNames,
+	}, nil
+}
+
+func (s *Service) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (*trackerpb.EndWorkoutResp, error) {
+
+	trackerId, err := s.cache.TrackerId.GetTrackerId(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +100,7 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 		return nil, myerrors.BadReqErrMaker(fmt.Errorf("user doesn't have any workout ongoing"))
 	}
 
-	planName, err := s.db.GetUserCurrentPlanName(ctx, userId)
+	planName, err := s.cache.CurrentPlan.GetUserCurrentPlanName(ctx, in.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +109,26 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 
 	var newExercisesPerformed *[]string
 
-	data, err = getExerIdOfEachExercise(ctx, data, userId, s)
-	if err != nil {
-		return nil, err
+	data := domain.ConvertToLocal(in)
+
+	for i := range len(data.Workout) {
+
+		exerciseName := data.Workout[i].ExerciseName
+
+		in := exerpb.SendExerciseName{
+			UserId:       in.UserId,
+			ExerciseName: exerciseName,
+		}
+
+		resp, err := s.exerClient.ExerciseExistsReturnId(ctx, &in)
+		if err != nil {
+
+			return nil, err
+		}
+
+		a := resp.ExerciseId
+
+		data.Workout[i].ExerciseId = a
 	}
 
 	var TriggerDbCommit bool
@@ -117,12 +137,12 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 	case planName == "":
 		TriggerDbCommit = true
 	case planName != "":
-		allExersInPlan, err := s.db.GetPlanWithExercises(ctx, userId, planName)
+		allExersInPlan, err := s.cache.Plan.GetPlanWithExercises(ctx, in.UserId, planName)
 		if err != nil {
 			return nil, err
 		}
 
-		conflictLevel, err := s.db.GetConflictLevel(ctx, userId)
+		conflictLevel, err := s.cache.Conflict.GetConflictLevel(ctx, in.UserId)
 		if err != nil {
 			return nil, err
 		}
@@ -132,36 +152,48 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 
 			exercisesInTracker := data.GetAllExercises()
 
-			err := s.db.SetUserTrackerData(ctx, userId, data)
+			err := s.cache.TrackerData.SetUserTrackerData(ctx, in.UserId, data)
 			if err != nil {
 				return nil, err
 			}
 
 			resp := checkExercisesNotPerformed(allExersInPlan, exercisesInTracker)
 			if resp != nil {
-				err := s.db.SetConflictLevel(ctx, userId, 1)
+				err := s.cache.Conflict.SetConflictLevel(ctx, in.UserId, 1)
 				if err != nil {
 					return nil, err
 				}
 
-				return nil, resp
+				return &trackerpb.EndWorkoutResp{
+					RequestStatus:   resp.RequestStatus,
+					Message:         resp.Message,
+					Reason:          resp.Reason.Error(),
+					ExerciseNames:   resp.ExerciseNames,
+					ConflictOccured: true,
+				}, nil
 			}
 
 			resp = checkIfNewExercisesAdded(allExersInPlan, exercisesInTracker)
 			if resp != nil {
-				err := s.db.SetConflictLevel(ctx, userId, 2)
+				err := s.cache.Conflict.SetConflictLevel(ctx, in.UserId, 2)
 				if err != nil {
 					return nil, err
 				}
 
-				err = s.db.SetUserNewExercises(ctx, userId, &resp.ExerciseNames)
+				err = s.cache.NewExercises.SetUserNewExercises(ctx, in.UserId, &resp.ExerciseNames)
 				if err != nil {
 					return nil, err
 				}
 
 				newExercisesPerformed = &resp.ExerciseNames
-
-				return nil, resp
+				//
+				return &trackerpb.EndWorkoutResp{
+					RequestStatus:   resp.RequestStatus,
+					Message:         resp.Message,
+					Reason:          resp.Reason.Error(),
+					ExerciseNames:   resp.ExerciseNames,
+					ConflictOccured: true,
+				}, nil
 			}
 
 			TriggerDbCommit = true
@@ -171,11 +203,12 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 			yes := data.UserResponse
 
 			if !yes {
-				resp := "please continue the workout"
-				return &resp, nil
+				return &trackerpb.EndWorkoutResp{
+					Message: "please continue the workout",
+				}, nil
 			}
 
-			data, err = s.db.GetUserTrackerData(ctx, userId)
+			data, err = s.cache.TrackerData.GetUserTrackerData(ctx, in.UserId)
 			if err != nil {
 				return nil, err
 			}
@@ -184,14 +217,12 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 
 			resp := checkIfNewExercisesAdded(allExersInPlan, exercisesInTracker)
 			if resp != nil {
-				err := s.db.SetConflictLevel(ctx, userId, 2)
+				err := s.cache.Conflict.SetConflictLevel(ctx, in.UserId, 2)
 				if err != nil {
 					return nil, err
 				}
 
-				// set to redis
-
-				err = s.db.SetUserNewExercises(ctx, userId, &resp.ExerciseNames)
+				err = s.cache.NewExercises.SetUserNewExercises(ctx, in.UserId, &resp.ExerciseNames)
 				if err != nil {
 					return nil, err
 				}
@@ -206,14 +237,13 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 		case 2:
 			yes := data.UserResponse
 
-			data, err = s.db.GetUserTrackerData(ctx, userId)
+			data, err = s.cache.TrackerData.GetUserTrackerData(ctx, in.UserId)
 			if err != nil {
 				return nil, err
 			}
 
 			if yes {
-				// get newExercises list from redis
-				exerciseNames, err := s.db.GetUserNewExercises(ctx, userId)
+				exerciseNames, err := s.cache.NewExercises.GetUserNewExercises(ctx, in.UserId)
 				if err != nil {
 					return nil, err
 				}
@@ -229,119 +259,100 @@ func (s *service) EndWorkoutSer(ctx context.Context, userId string, data *models
 
 	if TriggerDbCommit {
 
-		trackerId, err := s.db.GetTrackerId(ctx, userId)
-		if err != nil {
-			return nil, err
-		}
-
 		switch withOutbox {
 		case true:
-			err := s.db.EndWorkoutWithOutbox(ctx, userId, trackerId, data, planName, newExercisesPerformed)
+			err := s.pg.End.EndWorkoutWithOutbox(ctx, in.UserId, trackerId, data, planName, newExercisesPerformed)
 			if err != nil {
 				return nil, err
 			}
 		case false:
-			err := s.db.EndWorkout(ctx, trackerId, data)
+			err := s.pg.End.EndWorkout(ctx, trackerId, data)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	if err := s.db.DelAllUserData(ctx, userId, planName); err != nil {
+	if err := s.cache.UserData.DelAllUserData(ctx, in.UserId, planName); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &trackerpb.EndWorkoutResp{
+		Message: "workout ended successfully",
+	}, nil
 }
 
-func (s *service) CancelWorkout(ctx context.Context, userID string) error {
+func (s *Service) PING(ctx context.Context, in *trackerpb.PingTrackReq) (*trackerpb.PingTrackResp, error) {
+	r := trackerpb.PingTrackResp{}
 
-	trackerId, err := s.db.GetTrackerId(ctx, userID)
+	return &r, nil
+}
+
+func (s *Service) GetHealth(ctx context.Context, in *trackerpb.GetHealthReq) (*trackerpb.GetHealthResp, error) {
+	pgRespTime := s.pg.Metrics.GetRespTime(ctx)
+	redisRespTime := s.cache.Metrics.GetRespTime(ctx)
+
+	if pgRespTime == nil && redisRespTime == nil {
+		return &trackerpb.GetHealthResp{
+			PostgresRespTime: nil,
+			RedisRespTime:    nil,
+		}, nil
+	}
+	if redisRespTime == nil {
+		return &trackerpb.GetHealthResp{
+			PostgresRespTime: durationpb.New(*pgRespTime),
+			RedisRespTime:    nil,
+		}, nil
+	}
+	if pgRespTime == nil {
+		return &trackerpb.GetHealthResp{
+			PostgresRespTime: nil,
+			RedisRespTime:    durationpb.New(*redisRespTime),
+		}, nil
+	}
+
+	return &trackerpb.GetHealthResp{
+		PostgresRespTime: durationpb.New(*pgRespTime),
+		RedisRespTime:    durationpb.New(*redisRespTime),
+	}, nil
+}
+
+func (s *Service) CancelWorkout(ctx context.Context, in *trackerpb.CancelWorkoutReq) (*trackerpb.CancelWorkoutResp, error) {
+	trackerId, err := s.cache.TrackerId.GetTrackerId(ctx, in.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if trackerId == "" {
-		return myerrors.BadReqErrMaker(fmt.Errorf("user has no workout ongoing"))
+		return nil, myerrors.BadReqErrMaker(fmt.Errorf("user has no workout ongoing"))
 	}
 
-	planName, err := s.db.GetUserCurrentPlanName(ctx, userID)
+	planName, err := s.cache.CurrentPlan.GetUserCurrentPlanName(ctx, in.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	switch {
 	case planName == "":
-		err := s.db.DelTrackerId(ctx, userID)
-		if err != nil {
-			return err
-		}
-
-	case planName != "":
-		err := s.db.DelAllUserData(ctx, userID, planName)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = s.db.DeleteTrackerIdInPG(ctx, trackerId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-
-// helpers
-
-func getExerIdOfEachExercise(ctx context.Context, data *models.Tracker, userId string, s *service) (*models.Tracker, error) {
-	for i := range len(data.Workout) {
-
-		exerciseName := data.Workout[i].ExerciseName
-
-		in := exerpb.SendExerciseName{
-			UserId:       userId,
-			ExerciseName: exerciseName,
-		}
-
-		resp, err := s.eClient.ExerciseExistsReturnId(ctx, &in)
+		err := s.cache.TrackerId.DelTrackerId(ctx, in.UserId)
 		if err != nil {
 			return nil, err
 		}
 
-		a := resp.ExerciseId
-
-		data.Workout[i].ExerciseId = a
-	}
-
-	return data, nil
-}
-
-func checkExercisesNotPerformed(originalPlanExers *[]string, userSent *[]string) *myerrors.Conflict {
-	var notPerformed []string
-
-	for _, eachExer := range *originalPlanExers {
-		exists := slices.Contains(*userSent, eachExer)
-
-		if !exists {
-			notPerformed = append(notPerformed, eachExer)
+	case planName != "":
+		err := s.cache.UserData.DelAllUserData(ctx, in.UserId, planName)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	if len(notPerformed) > 0 {
-
-		resp := myerrors.Conflict{
-			RequestStatus: "INCOMPLETE",
-			Reason:        myerrors.ErrNotPerformed,
-			Message:       "still complete?",
-			ExerciseNames: notPerformed,
-		}
-
-		return &resp
+	err = s.pg.Cancel.DeleteTrackerIdInPG(ctx, trackerId)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil
+	return &trackerpb.CancelWorkoutResp{
+		Message: "workout has been successfully canceled",
+	}, nil
 }
 
 func checkIfNewExercisesAdded(originalPlanExers *[]string, userSent *[]string) *myerrors.Conflict {
@@ -370,7 +381,28 @@ func checkIfNewExercisesAdded(originalPlanExers *[]string, userSent *[]string) *
 	return nil
 }
 
+func checkExercisesNotPerformed(originalPlanExers *[]string, userSent *[]string) *myerrors.Conflict {
+	var notPerformed []string
 
-// trackerId
-// workoutOngoing
-// workoutWithPlan
+	for _, eachExer := range *originalPlanExers {
+		exists := slices.Contains(*userSent, eachExer)
+
+		if !exists {
+			notPerformed = append(notPerformed, eachExer)
+		}
+	}
+
+	if len(notPerformed) > 0 {
+
+		resp := myerrors.Conflict{
+			RequestStatus: "INCOMPLETE",
+			Reason:        myerrors.ErrNotPerformed,
+			Message:       "still complete?",
+			ExerciseNames: notPerformed,
+		}
+
+		return &resp
+	}
+
+	return nil
+}

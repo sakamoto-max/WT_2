@@ -17,6 +17,11 @@ func Load(filePath string) {
 func LookUp() {
 	_, ok := os.LookupEnv("MQ_URL")
 	if !ok {
-		log.Fatalf("unable to find MQ_URL")
+		log.Fatalf("unable to find MQ_URL env")
+	}
+
+	_, ok = os.LookupEnv("POSTGRES_CONN")
+	if !ok {
+		log.Fatalf("unable to find POSTGRES_CONN env")
 	}
 }

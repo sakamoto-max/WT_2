@@ -8,7 +8,7 @@ import (
 
 func main() {
 	stage := os.Getenv("STAGE")
-	if stage != "" {
+	if stage == "" {
 		env.Load("../../.env")
 	}
 

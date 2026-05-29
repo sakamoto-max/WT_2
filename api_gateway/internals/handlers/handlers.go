@@ -69,7 +69,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		redisGoTime := auth.RedisRespTime.AsDuration().Seconds()
 		authStatus.PGRespTime = &pgGoTime
 		authStatus.RedisRespTime = &redisGoTime
-		fmt.Println("auth status : ", authStatus)
 		health.AllServices = append(health.AllServices, authStatus)
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +83,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 			exerStatus.Status = UnHealthy
 			exerStatus.PGRespTime = nil
 			exerStatus.RedisRespTime = nil
-			fmt.Println("exer status : ", exerStatus)
 			health.AllServices = append(health.AllServices, exerStatus)
 		}
 	} else {
@@ -97,7 +95,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		redisGoTime := exer.RedisRespTime.AsDuration().Seconds()
 		exerStatus.PGRespTime = &pgGoTime
 		exerStatus.RedisRespTime = &redisGoTime
-		fmt.Println("exer status : ", exerStatus)
 		health.AllServices = append(health.AllServices, exerStatus)
 	}
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +109,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 			planStatus.Status = UnHealthy
 			planStatus.PGRespTime = nil
 			planStatus.RedisRespTime = nil
-			fmt.Println("plan status : ", planStatus)
 			health.AllServices = append(health.AllServices, planStatus)
 		}
 	} else {
@@ -125,7 +121,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		redisGoTime := plan.RedisRespTime.AsDuration().Seconds()
 		planStatus.PGRespTime = &pgGoTime
 		planStatus.RedisRespTime = &redisGoTime
-		fmt.Println("plan status : ", planStatus)
 		health.AllServices = append(health.AllServices, planStatus)
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +135,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 			trackerStatus.Status = UnHealthy
 			trackerStatus.PGRespTime = nil
 			trackerStatus.RedisRespTime = nil
-			fmt.Println("tracker status : ", trackerStatus)
 			health.AllServices = append(health.AllServices, trackerStatus)
 		}
 	} else {
@@ -154,7 +148,6 @@ func (h *Handler) GetHealth(w http.ResponseWriter, r *http.Request) {
 		redisGoTime := tracker.RedisRespTime.AsDuration().Seconds()
 		trackerStatus.PGRespTime = &pgGoTime
 		trackerStatus.RedisRespTime = &redisGoTime
-		fmt.Println("tracker status : ", trackerStatus)
 		health.AllServices = append(health.AllServices, trackerStatus)
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,78 +1,58 @@
 package consumer
 
 import (
-	// "context"
 	"encoding/json"
-	"fmt"
-	"orchestration_service/internal/repository"
+	"orchestration_service/internal/types"
 
-	amqp "github.com/rabbitmq/amqp091-go"
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
+	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
-	"github.com/sakamoto-max/wt_2_proto/shared/enum"
+	"go.uber.org/zap"
 )
 
 type consumer struct {
-	db          *repository.DB
 	resultQueue *mq.MessageQueue
 	logger      *logger.MyLogger
+	jobs        chan<- types.Data
 }
 
-func NewConsumer(db *repository.DB, resQueue *mq.MessageQueue, logger *logger.MyLogger) *consumer {
+func NewConsumer(resQueue *mq.MessageQueue, logger *logger.MyLogger, jobs chan<- types.Data) *consumer {
 	return &consumer{
-		db:          db,
 		resultQueue: resQueue,
 		logger:      logger,
+		jobs:        jobs,
 	}
 }
 
-func (c *consumer) GetData() <-chan amqp.Delivery {
+func (c *consumer) StartListening() {
 
 	c.logger.Log.Infoln("consumer has started")
 
-	msgs, err := c.resultQueue.Consume(enum.QueueName_RESULT_QUEUE.String())
+	msgsQueue, err := c.resultQueue.Consume()
 	if err != nil {
 		c.logger.Log.Fatalf("unable to open the consumer : %v", err)
 	}
 
-	return msgs
-}
-
-func (c *consumer) Operate(msgs <-chan amqp.Delivery) {
-
 	for {
-		msg, ok := <-msgs
-
+		msg, ok := <-msgsQueue
 		if !ok {
-			c.logger.Log.Infoln("consumer has closed")
 			return
 		}
 
-		c.logger.Log.Infoln("consumer got data")
-
-		var data mq.TaskStatus
+		var data mqTypes.Data
 
 		_ = json.Unmarshal(msg.Body, &data)
 
-		fmt.Printf("target_service in consumer is %v", data.TargetService)
+		c.logger.Log.Infow("consumer got data", zap.String("task name", data.TaskName), zap.String("sent by", data.SentBy), zap.String("task status", data.TaskStatus))
 
-		err := c.db.TaskCompletedUpdate(data.TargetService, data.Id)
-		if err != nil {
-			c.logger.Log.Errorf("error : unable to update the task status : %v", err)
+		c.jobs <- types.Data{
+			DbId:          data.DbId,
+			TargetService: data.TargetService,
+			CreatedBy:     data.SentBy,
+			Task:          data.TaskName,
+			Status:        data.TaskStatus,
+			Err:           data.Err,
 		}
+
 	}
-
-	// for {
-	// 	select {
-	// 	case msg, ok := <-msgs:
-	// 		if !ok {
-	// 			c.logger.Log.Infoln("consumer has closed")
-	// 			return
-	// 		}
-
-	// 	// case <-ctx.Done():
-	// 	// 	c.logger.Log.Infoln("consumer is closing")
-	// 	// 	return
-	// 	}
-	// }
 }

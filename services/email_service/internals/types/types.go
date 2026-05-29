@@ -2,21 +2,23 @@ package types
 
 import (
 	"fmt"
-	"time"
+
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type Data struct {
-	DbId          string         `db:"id"`
-	TargetService string         `db:"target_service"`
-	Task          string         `db:"task"`
-	Status        string         `db:"status"`
-	Payload       map[string]any `db:"payload"`
-	CreatedAt     time.Time      `db:"created_at"`
-	NumberOfTries int            `db:"number_of_tries"`
+	DbId          string         `json:"dbId"`
+	TargetService string         `json:"targetService"`
+	TaskName      string         `json:"taskName"`
+	Status        string         `json:"status"`
+	Payload       map[string]any `json:"payload"`
+	SentBy        string         `json:"sentBy"`
+	Err           error          `json:"err"`
 }
 
+
 func (d *Data) GetEmail() (string, error) {
-	email, ok := d.Payload["email"].(string)
+	email, ok := d.Payload[enum.QueueFields_EMAIL.String()].(string)
 	if !ok {
 		return "", fmt.Errorf("error getting email")
 	}

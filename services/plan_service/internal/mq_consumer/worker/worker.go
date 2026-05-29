@@ -2,11 +2,13 @@ package worker
 
 import (
 	"context"
-	"fmt"
+	"plan_service/internal/client"
+	"plan_service/internal/domain"
 	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/repository"
 	"sync"
-	mq "github.com/sakamoto-max/rabbit_mq/queue"
+
+	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
@@ -14,31 +16,28 @@ import (
 )
 
 type worker struct {
-	id          int
-	db          repository.RepoIFace
-	logger      *logger.MyLogger
-	jobs        <-chan types.Data
-	resultQueue *mq.MessageQueue
-	exerclient  exerpb.ExerciseServiceClient
+	id         int
+	db         *repository.Db
+	logger     *logger.MyLogger
+	jobsChan   <-chan types.Data
+	senderChan chan<- mqTypes.Data
+	exerclient client.ExerClientIface
 }
 
-func newWorker(id int, repo repository.RepoIFace, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, client exerpb.ExerciseServiceClient) *worker {
-	return &worker{
-		id:          id,
-		db:          repo,
-		logger:      logger,
-		jobs:        jobs,
-		resultQueue: resQueue,
-		exerclient:  client,
-	}
-}
-
-func MakeWorkers(numberOfWorkers int, repo repository.RepoIFace, logger *logger.MyLogger, jobs <-chan types.Data, resQueue *mq.MessageQueue, Client exerpb.ExerciseServiceClient) []*worker {
+func MakeWorkers(numberOfWorkers int, repo *repository.Db, logger *logger.MyLogger, jobs <-chan types.Data, senderChan chan<- mqTypes.Data, Client client.ExerClientIface) []*worker {
 
 	var workers []*worker
 
-	for i := 1; i <= numberOfWorkers; i++ {
-		w := newWorker(i, repo, logger, jobs, resQueue, Client)
+	for i := range numberOfWorkers {
+
+		w := &worker{
+			id:         i + 1,
+			db:         repo,
+			logger:     logger,
+			jobsChan:   jobs,
+			senderChan: senderChan,
+			exerclient: Client,
+		}
 
 		workers = append(workers, w)
 	}
@@ -50,48 +49,43 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
-		msg, ok := <-w.jobs
+		msg, ok := <-w.jobsChan
 
 		if !ok {
-			w.logger.Log.Infow("worker stopped", zap.Int("worker_id", w.id))
 			return
 		}
 
-		w.logger.Log.Infow(
-			"worker received a job",
-			zap.Int("worker_id", w.id),
-			zap.String("task", msg.Task),
-		)
+		w.logger.Log.Infow("worker received a job", zap.Int("worker_id", w.id), zap.String("task", msg.TaskName))
 
-		switch msg.Task {
+		switch msg.TaskName {
 		case enum.TaskName_CREATE_EMPTY_PLAN_FOR_USER.String():
 
-			userId, _ := msg.GetUserId()
-
-			err := w.db.CreateEmptyPlan(context.TODO(), userId)
+			userId, err := msg.GetUserId()
 			if err != nil {
-				w.logger.Log.Infow("failed to create empty plan for the user", zap.Int("worker", w.id), zap.Error(err))
-
-				w.SendDataToResQ(
-					msg.DbId,
-					enum.ServiceName_PLAN_SERVICE.String(),
-					enum.ServiceName_AUTH_SERVICE.String(),
-					msg.Task,
-					enum.TaskStatus_TASK_NOT_COMPLETED.String(),
-				)
-
+				w.logger.Log.Errorln(err)
 				continue
 			}
 
-			err = w.SendDataToResQ(
-				msg.DbId,
-				enum.ServiceName_PLAN_SERVICE.String(),
-				enum.ServiceName_AUTH_SERVICE.String(),
-				msg.Task,
-				enum.TaskStatus_TASK_COMPLETED.String(),
-			)
+			err = w.db.PlanCommandRepo.CreateEmptyPlan(context.TODO(), userId)
 			if err != nil {
 
+				w.senderChan <- mqTypes.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					SentBy:        msg.TargetService,
+					TaskStatus:    enum.TaskStatus_TASK_FAILED.String(),
+					TargetService: msg.SentBy,
+					Err:           err,
+				}
+				continue
+			}
+
+			w.senderChan <- mqTypes.Data{
+				DbId:          msg.DbId,
+				TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+				SentBy:        msg.TargetService,
+				TaskStatus:    enum.TaskStatus_TASK_COMPLETED.String(),
+				TargetService: msg.SentBy,
 			}
 
 		case enum.TaskName_UPDATE_PLAN.String():
@@ -99,29 +93,30 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 			userId, err := msg.GetUserId()
 			if err != nil {
 				w.logger.Log.Errorln(err)
+				continue
 			}
+
 			planName, err := msg.GetPlanName()
 			if err != nil {
 				w.logger.Log.Errorln(err)
+				continue
 			}
+
 			newExercises, err := msg.GetNewExercises()
 			if err != nil {
 				w.logger.Log.Errorln(err)
+				continue
 			}
 
-			planId, err := w.db.ReturnsPlanId(context.TODO(), userId, planName)
+			planId, err := w.db.PlanQueryRepo.GetPlanId(context.TODO(), domain.GetPlan{UserId: userId, PlanName: planName})
 			if err != nil {
-				w.logger.Log.Infow("failed to get plan_id for the user", zap.Int("worker", w.id), zap.Error(err))
-
-				err := w.SendDataToResQ(
-					msg.DbId,
-					enum.ServiceName_PLAN_SERVICE.String(),
-					enum.ServiceName_TRACKER_SERVICE.String(),
-					msg.Task,
-					enum.TaskStatus_TASK_NOT_COMPLETED.String(),
-				)
-				if err != nil {
-					w.logger.Log.Errorw("error sending data to the result queue", zap.Error(err))
+				w.senderChan <- mqTypes.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					SentBy:        msg.TargetService,
+					TaskStatus:    enum.TaskStatus_TASK_FAILED.String(),
+					TargetService: msg.SentBy,
+					Err:           err,
 				}
 				continue
 			}
@@ -135,60 +130,42 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 				}
 				resp, err := w.exerclient.ExerciseExistsReturnId(context.TODO(), &in)
 				if err != nil {
-					w.logger.Log.Errorw("error occured while getting the exercise id", zap.Int("worker_id", w.id), zap.Error(err))
+
+					w.senderChan <- mqTypes.Data{
+						DbId:          msg.DbId,
+						TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+						SentBy:        msg.TargetService,
+						TaskStatus:    enum.TaskStatus_TASK_FAILED.String(),
+						TargetService: msg.SentBy,
+						Err:           err,
+					}
 				}
 
 				exerciseIds = append(exerciseIds, resp.ExerciseId)
 			}
 
-			// w.exerclient.ExerciseExistsReturnId(context.TODO(), )
-
-			err = w.db.AddExercisesToPlan(context.TODO(), planId, &exerciseIds)
+			err = w.db.PlanExericseRepo.AddExercisesToPlan(context.TODO(), planId, &exerciseIds)
 			if err != nil {
-				w.logger.Log.Infow("failed to update plan for the user", zap.Int("worker", w.id), zap.Error(err))
-				w.SendDataToResQ(
-					msg.DbId,
-					enum.ServiceName_PLAN_SERVICE.String(),
-					enum.ServiceName_TRACKER_SERVICE.String(),
-					msg.Task,
-					enum.TaskStatus_TASK_NOT_COMPLETED.String(),
-				)
 
+				w.senderChan <- mqTypes.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					SentBy:        msg.TargetService,
+					TaskStatus:    enum.TaskStatus_TASK_FAILED.String(),
+					TargetService: msg.SentBy,
+					Err:           err,
+				}
 				continue
+
 			}
 
-			err = w.SendDataToResQ(
-				msg.DbId,
-				enum.ServiceName_PLAN_SERVICE.String(),
-				enum.ServiceName_TRACKER_SERVICE.String(),
-				msg.Task,
-				enum.TaskStatus_TASK_COMPLETED.String(),
-			)
-			if err != nil {
-				w.logger.Log.Errorw("error occured while sending data to the res Queue", zap.Error(err))
+			w.senderChan <- mqTypes.Data{
+				DbId:          msg.DbId,
+				TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+				SentBy:        msg.TargetService,
+				TaskStatus:    enum.TaskStatus_TASK_COMPLETED.String(),
+				TargetService: msg.SentBy,
 			}
 		}
 	}
-}
-
-func (w *worker) SendDataToResQ(id string, sentBy string, targetService string, taskName string, taskStatus string) error {
-
-	fmt.Println("msg.id", id)
-
-	d := mq.NewTaskStatus(
-		id,
-		sentBy,
-		targetService,
-		taskName,
-		taskStatus,
-	)
-
-	dataInBytes := d.ConvertToBytes()
-
-	err := w.resultQueue.Publish(context.TODO(), dataInBytes)
-	if err != nil {
-		return fmt.Errorf("failed to publish to resQueue : %w", err)
-	}
-
-	return nil
 }

@@ -2,102 +2,147 @@ package mock
 
 import (
 	"context"
-	"plan_service/internal/models"
-	"plan_service/internal/repository"
+	"fmt"
+	"plan_service/internal/domain"
 	"time"
 )
 
-var (
-	emptyPlanId string = "b343fa55-9e2a-4bfe-9be0-5fb5f3dbdc4d"
-	planId string = "3af5d6d0-8be6-4a39-84f7-e20323a3e4a1"
-	timeDuration time.Duration = time.Second
-	exerciseId string = "9d497c95-8913-4c70-8ea0-6891bbd17af5"
-)
-
-
-type mockDb struct{}
-
-func NewMockDb() repository.RepoIFace {
-	return &mockDb{}
+type PlanQueryMock struct {
+	PgDown    bool
+	PlanExits bool
 }
 
-func (m *mockDb) CreatePlan(ctx context.Context, userId string, planName string, exerciseIds []string) error {
-	return nil
-}
-func (m *mockDb) GetPlans(ctx context.Context, userId string) (*[]models.Plan3, error) {
-
-	resp := []models.Plan3{
-		{"mock_plan_1", planId},
-		{"mock_plan_2", planId},
-		{"mock_plan_3", planId},
-		{"mock_plan_4", planId},
-		{"mock_plan_5", planId},
-		{"mock_plan_6", planId},
+func (p *PlanQueryMock) GetAllPlanNamesWithIds(ctx context.Context, userId string) (*[]domain.Plan, error) {
+	if p.PgDown {
+		return nil, fmt.Errorf("pg is down")
 	}
 
-	return &resp, nil
+	plan := domain.Plan{
+		PlanName: "plan_name",
+		PlanId:   "plan_id",
+	}
+
+	return &[]domain.Plan{plan, plan, plan}, nil
+}
+
+func (p *PlanQueryMock) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]string, error) {
+	if p.PgDown {
+		return nil, fmt.Errorf("pg is down")
+	}
+
+	if !p.PlanExits {
+		return nil, fmt.Errorf("plan doesn't exist")
+	}
+
+	exerId := "123"
+
+	return &[]string{exerId, exerId, exerId}, nil
+}
+
+func (p *PlanQueryMock) GetPlan(ctx context.Context, payload domain.GetPlan) (string, *[]string, error) {
+	if p.PgDown {
+		return "", nil, fmt.Errorf("pg is down")
+	}
+
+	if !p.PlanExits {
+		return "", nil, fmt.Errorf("plan doesn't exist")
+	}
+
+	exerId := "123"
+	planId := "123"
+
+	return planId, &[]string{exerId, exerId, exerId}, nil
+}
+
+func (p *PlanQueryMock) GetPlanId(ctx context.Context, payload domain.GetPlan) (string, error) {
+	if p.PgDown {
+		return "", fmt.Errorf("pg is down")
+	}
+
+	if !p.PlanExits {
+		return "", fmt.Errorf("plan doesn't exist")
+	}
+
+	return "123", nil
+}
+func (p *PlanQueryMock) GetEmptyPlanId(ctx context.Context, userId string) (string, error) {
+	if p.PgDown {
+		return "", fmt.Errorf("pg is down")
+	}
+
+	if !p.PlanExits {
+		return "", fmt.Errorf("plan doesn't exist")
+	}
+
+	return "123", nil
 }
 
 
-func (m *mockDb) GetAllExercisesByPlanID(ctx context.Context, planId string) (*[]string, error)     {
-	return &[]string{exerciseId, exerciseId, exerciseId, exerciseId}, nil
+type PlanCommandMock struct {
+	PgDown     bool
+	PlanExists bool
 }
-func (m *mockDb) ReturnsPlanId(ctx context.Context, userId string, planName string) (string, error) {
-	return planId, nil
-}
-func (m *mockDb) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+
+func (p *PlanCommandMock) DeletePlan(ctx context.Context, userId string, planId string) error {
+	if p.PgDown {
+		return fmt.Errorf("pg is down")
+	}
+
+	if !p.PlanExists {
+		return fmt.Errorf("plan doesn't exist")
+	}
+
 	return nil
 }
-func (m *mockDb) DeleteExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+func (p *PlanCommandMock) CreateEmptyPlan(ctx context.Context, userId string) error {
+	if p.PgDown {
+		return fmt.Errorf("pg is down")
+	}
+
 	return nil
 }
-func (m *mockDb) DeletePlan(ctx context.Context, userId string, planId string) error          {
+func (p *PlanCommandMock) CreatePlan(ctx context.Context, payload domain.CreatePlan) error {
+	if p.PgDown {
+		return fmt.Errorf("pg is down")
+	}
+
+	if p.PlanExists {
+		return fmt.Errorf("plan already exits")
+	}
+
 	return nil
 }
 
-func (m *mockDb) CreateEmptyPlan(ctx context.Context, userId string) error                    {
+type PlanExericseMock struct {
+	PgDown bool
+}
+
+func (p *PlanExericseMock) RemoveExerciseFromPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+	if p.PgDown {
+		return fmt.Errorf("pg is down")
+	}
+
+	return nil
+
+}
+func (p *PlanExericseMock) AddExercisesToPlan(ctx context.Context, planId string, exerciseIDs *[]string) error {
+	if p.PgDown {
+		return fmt.Errorf("pg is down")
+	}
+
 	return nil
 }
-func (m *mockDb) GetPostgresRespTime(ctx context.Context) *time.Duration                      {
+
+type MetricsMock struct {
+	PgDown bool
+}
+
+func (m *MetricsMock) GetRespTime(ctx context.Context) *time.Duration {
+	if m.PgDown {
+		return nil
+	}
+
+	timeDuration := time.Millisecond * 272
+
 	return &timeDuration
-
-}
-func (m *mockDb) GetRedisRespTime(ctx context.Context) *time.Duration                         {
-	return &timeDuration
-}
-func (m *mockDb) SetUserEmptyPlanIdR(ctx context.Context, userId string, planId string) error {
-	return nil
-}
-func (m *mockDb) GetUserEmptyPlanIdR(ctx context.Context, userId string) (string, error)      {
-	return emptyPlanId, nil
-}
-func (m *mockDb) DelUserEmptyPlanIdR(ctx context.Context, userId string) error                {
-	return nil
-}
-func (m *mockDb) Close() error                                                                {
-	return nil
-}
-func (m *mockDb) GetPlan(ctx context.Context, userId string, planName string) (string, *[]string, error) {
-	return planId, &[]string{exerciseId, exerciseId, exerciseId}, nil
-
-}
-func (m *mockDb) SetUserPlanId(ctx context.Context, userId string, planName string, planId string) error {
-	return nil
-}
-func (m *mockDb) GetUserPlanId(ctx context.Context, userId string, planName string) (string, error) {
-	return planId, nil
-}
-
-func (m *mockDb) DelUserPlanId(ctx context.Context, userId string, planName string) error           {
-	return nil
-}
-func (m *mockDb) SetUserPlan(ctx context.Context, userId string, planName string, planId string, exerciseIds *[]string) error {
-	return nil
-}
-func (m *mockDb) GetUserPlan(ctx context.Context, userId string, planName string) (string, *[]string, error) {
-	return planId, &[]string{exerciseId, exerciseId, exerciseId}, nil
-
-}
-func (m *mockDb) DelUserPlan(ctx context.Context, userId string, planName string) error {
-	return nil
 }

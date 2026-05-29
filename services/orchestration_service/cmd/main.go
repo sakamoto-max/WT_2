@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"orchestration_service/internal/consumer"
+	"orchestration_service/internal/database"
 	"orchestration_service/internal/env"
-	"orchestration_service/internal/producer"
+	"orchestration_service/internal/fetcher"
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
 	"orchestration_service/internal/workers"
@@ -24,7 +25,7 @@ const NumberOfWorkers = 5
 func main() {
 
 	stage := os.Getenv("STAGE")
-	if stage != "" {
+	if stage == "" {
 		env.Load("../.env")
 	}
 	env.LookUp()
@@ -32,13 +33,25 @@ func main() {
 	logger := logger.NewLogger()
 	defer logger.Log.Sync()
 
-	Db, err := repository.NewDBs(logger)
+	// create all the dependencies
+	// and inject
+
+	authPool, err := database.NewPool(os.Getenv("AUTH_POSTGRES_CONN"))
 	if err != nil {
-		logger.Log.Fatal(err)
+		logger.Log.Fatalw("failed to connect to auth pg", zap.Error(err))
 	}
 
-	// rabbit mq
+	trackerPool, err := database.NewPool(os.Getenv("TRACKER_POSTGRES_CONN"))
+	if err != nil {
+		logger.Log.Fatalw("failed to connect to tracker pg", zap.Error(err))
+	}
 
+	authDb := repository.RegisterDb(authPool, enum.ServiceName_AUTH_SERVICE.String())
+	trackerDb := repository.RegisterDb(trackerPool, enum.ServiceName_TRACKER_SERVICE.String())
+
+	Db := repository.NewDb(authDb, trackerDb)
+
+	// queues : planQueue, emailQueue, resultQueue
 	conn := mq.NewConn()
 
 	planQueue := mq.NewMessageQueue(conn, enum.QueueName_PLAN_QUEUE.String())
@@ -47,14 +60,32 @@ func main() {
 
 	resultQueue := mq.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
 
-	// job & workers
-
+	// jobs chan
 	jobs := make(chan types.Data, NumberOfWorkers*2)
 
-	workers := workers.MakeWorkers(NumberOfWorkers, planQueue, emailQueue, Db, jobs, logger)
-
+	// ctx
 	ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel()
+
+	// start consumer
+	consumer := consumer.NewConsumer(resultQueue, logger, jobs)
+	go consumer.StartListening()
+
+	// start producer
+	ticker := time.NewTicker(time.Second * 30)
+
+	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
+
+	var producerWg sync.WaitGroup
+
+	fetcher := fetcher.NewFetcher(&Db, logger, &targetServices, jobs, ticker.C)
+
+	producerWg.Add(1)
+
+	go fetcher.Start(ctx, &producerWg)
+
+	// start workers
+
+	workers := workers.MakeWorkers(NumberOfWorkers, planQueue, emailQueue, &Db, jobs, logger)
 
 	var workersWg sync.WaitGroup
 
@@ -62,29 +93,7 @@ func main() {
 		workersWg.Add(1)
 		go worker.Work(ctx, &workersWg)
 	}
-
-	// consumer
-
-	consumer := consumer.NewConsumer(Db, resultQueue, logger)
-
-	msgs := consumer.GetData()
-
-	go consumer.Operate(msgs)
-
-	// producer
-
-	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
-
-	producer := producer.NewProducer(Db, planQueue, emailQueue, logger)
-
-	ticker := time.NewTicker(time.Second * 5)
-
-	var producerWg sync.WaitGroup
-
-	producerWg.Add(1)
-	go producer.Start(ctx, &producerWg, ticker.C, jobs, &targetServices)
-
-	// shutdown
+	logger.Log.Infow("workers have started", zap.Int("number of workers", NumberOfWorkers))
 
 	sigChan := make(chan os.Signal, 1)
 
@@ -96,9 +105,14 @@ func main() {
 	ticker.Stop() // stops producer
 	cancel()
 	producerWg.Wait()
+	logger.Log.Infoln("producer have stopped")
+
 	conn.Close() // stops consumer
+	logger.Log.Infoln("consumer has closed")
+
 	close(jobs)
 	workersWg.Wait()
+	logger.Log.Infoln("workers have stopped")
 }
 
 // what if a operation fails ->

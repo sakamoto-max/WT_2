@@ -2,8 +2,10 @@ package bootstrap
 
 import (
 	"auth_service/internal/database"
-	"auth_service/internal/handler"
 	"auth_service/internal/repository"
+	"auth_service/internal/repository/cache"
+
+	// "auth_service/internal/repository/cache"
 	"auth_service/internal/services"
 	"net"
 	"os"
@@ -19,7 +21,7 @@ import (
 
 type app struct {
 	Addr        string
-	Handler     *handler.Handler
+	service     *services.Service
 	Logger      *logger.MyLogger
 	pool        *pgxpool.Pool
 	redisClient *redis.Client
@@ -39,14 +41,16 @@ func NewApp(addr string) *app {
 		logger.Log.Fatalw("failed to make redis client", zap.Error(err))
 	}
 
-	repo := repository.NewRepo(pool, redisClient)
+	d := repository.NewDb2(pool)
+	// cache := cache.NewCache(redisClient)
+	cache := cache.NewCache(redisClient)
 
-	service := services.NewService(repo)
-	handler := handler.NewHandler(service, logger)
+	service := services.NewService(d, cache)
+	// handler := handler.NewHandler(service, logger)
 
 	return &app{
 		Addr:        addr,
-		Handler:     handler,
+		service:     service,
 		Logger:      logger,
 		redisClient: redisClient,
 		pool:        pool,
@@ -71,7 +75,7 @@ func (a *app) Run() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterAuthServiceServer(grpcServer, a.Handler)
+	pb.RegisterAuthServiceServer(grpcServer, a.service)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)

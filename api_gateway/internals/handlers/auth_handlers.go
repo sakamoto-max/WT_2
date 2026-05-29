@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-	authpb "github.com/sakamoto-max/wt_2_proto/shared/auth"
+
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
+	authpb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"go.uber.org/zap"
 )
-
 
 var (
 	UserRole = "user"

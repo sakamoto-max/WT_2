@@ -2,12 +2,14 @@ package consumer
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"plan_service/internal/mq_consumer/types"
-	"github.com/sakamoto-max/wt_2_proto/shared/enum"
-	amqp "github.com/rabbitmq/amqp091-go"
+
+	mq "github.com/sakamoto-max/rabbit_mq/queue"
+	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
-	mq "github.com/sakamoto-max/rabbit_mq/queue" 
+	"go.uber.org/zap"
+	// "github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type consumer struct {
@@ -24,36 +26,40 @@ func NewConsumer(planQueue *mq.MessageQueue, logger *logger.MyLogger, jobs chan<
 	}
 }
 
-func (c *consumer) GetData() <-chan amqp.Delivery {
+func (c *consumer) Start() {
 
-	msgs, err := c.planQueue.Consume(enum.QueueName_PLAN_QUEUE.String())
+	msgs, err := c.planQueue.Consume()
 	if err != nil {
 		c.logger.Log.Fatalf("unable to get data from the consumer : %v", err)
 	}
 
-	return msgs
-}
-
-func (c *consumer) PushDataToJobs(msgs <-chan amqp.Delivery) {
 	for {
 		msg, ok := <-msgs
 
 		if !ok {
-			c.logger.Log.Info("closing the consumer")
-			close(c.jobs)
+			// c.logger.Log.Info("consumer is stopped")
 			return
 		}
 
 		data := ConvertIntoJosn(&msg.Body)
-		fmt.Println("data.Id",data.DbId)
 
-		c.jobs <- data
+		c.logger.Log.Infow("consumer has received a task", zap.String("task name", data.TaskName), zap.String("sent by", data.SentBy))
+		
+		c.jobs <- types.Data{
+			DbId: data.DbId,
+			SentBy: data.SentBy,
+			TaskName: data.TaskName,
+			Payload: data.Payload,
+			TargetService: data.TargetService,
+		}
+		c.logger.Log.Infoln("consumer has sent data to the jobs chan")
 	}
+
 }
 
-func ConvertIntoJosn(data *[]byte) types.Data {
+func ConvertIntoJosn(data *[]byte) mqTypes.Data {
 
-	var D types.Data
+	var D mqTypes.Data
 
 	_ = json.Unmarshal(*data, &D)
 

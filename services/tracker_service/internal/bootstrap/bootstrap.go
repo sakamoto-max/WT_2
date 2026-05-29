@@ -5,51 +5,93 @@ import (
 	"os"
 	"os/signal"
 	"tracker_service/internal/client"
-	"tracker_service/internal/handler"
+	"tracker_service/internal/database"
 	"tracker_service/internal/repository"
+	"tracker_service/internal/repository/cache"
 	"tracker_service/internal/services"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	pb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
+	"go.uber.org/zap"
 
 	"google.golang.org/grpc"
 )
 
 type app struct {
-	addr    string
-	handler *handler.Handler
-	logger  *logger.MyLogger
+	addr        string
+	service     *services.Service
+	logger      *logger.MyLogger
+	pool        *pgxpool.Pool
+	redisClient *redis.Client
+	planConn    *grpc.ClientConn
+	exerConn    *grpc.ClientConn
 }
 
 func NewApp(addr string) *app {
 
 	logger := logger.NewLogger()
 
-	repo, err := repository.NewRepo()
+	pool, err := database.NewPgConn()
 	if err != nil {
-		logger.Log.Fatalf("error opening the repos : %v", err)
+		logger.Log.Fatalw("failed to open postgres pool", zap.Error(err))
+	}
+	
+	redisClient, err := database.NewRedisConn()
+	if err != nil {
+		logger.Log.Fatalw("failed to open redis client", zap.Error(err))
 	}
 
-	clients := client.New()
+	pg := repository.NewDb(pool)
+	cache := cache.NewCache(redisClient)
 
-	service := services.NewService(repo, clients.PlanClient, clients.ExerClient)
-	handler := handler.NewHandler(service, logger)
+	planConn := client.NewEmptyClient().OpenConnection(os.Getenv("PLAN_GRPC_SERVER_ADDR"))
+	planClient := planConn.CreatePlanClient()
+	
+	exerConn := client.NewEmptyClient().OpenConnection(os.Getenv("EXER_GRPC_SERVER_ADDR"))
+	exerClient := exerConn.CreateExerciseClient()
+
+
+	service := services.NewService(pg, cache, planClient, exerClient)
 
 	return &app{
 		addr:    addr,
-		handler: handler,
+		service: service,
 		logger:  logger,
+		pool: pool,
+		redisClient: redisClient,
+		planConn: planConn.Conn,
+		exerConn: exerConn.Conn,
 	}
 
 }
 
 func (a *app) Run() {
+
+	defer func(){
+		err := a.redisClient.Close()
+		if err != nil {
+			a.logger.Log.Warnw("failed to close redis client", zap.Error(err))
+		}
+		a.pool.Close()
+		err = a.exerConn.Close()
+		if err != nil {
+			a.logger.Log.Warnw("failed to close exercise grpc conn", zap.Error(err))
+		}
+		err = a.planConn.Close()
+		if err != nil {
+			a.logger.Log.Warnw("failed to close plan grpc conn", zap.Error(err))
+		}
+	}()
+
 	lis, err := net.Listen("tcp", a.addr)
 	if err != nil {
 		a.logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterTrackerServiceServer(grpcServer, a.handler)
+	pb.RegisterTrackerServiceServer(grpcServer, a.service)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)

@@ -7,48 +7,13 @@ import (
 	"github.com/sakamoto-max/rabbit_mq/types"
 )
 
-func GetUserId(d *types.Data) (string, error) {
-	str, ok := d.Payload["user_id"].(string)
-	if !ok {
-		return "", fmt.Errorf("error getting user id")
-	}
+func ConvertToJson(src []byte) (map[string]any, error) {
 
-	return str, nil
-}
+	var data map[string]any
 
-func GetPlanName(d *types.Data) (string, error) {
-	str, ok := d.Payload["plan_name"].(string)
-	if !ok {
-		return "", fmt.Errorf("error getting planName")
-	}
-
-	return str, nil
-}
-
-func GetNewExercises(d *types.Data) ([]string, error) {
-	raw, ok := d.Payload["exercise_names"].([]any)
-	if !ok {
-		return nil, fmt.Errorf("error getting exercise_names")
-	}
-
-	var data []string
-
-	for _, v := range raw {
-		str, ok := v.(string)
-		if !ok {
-			return nil, fmt.Errorf("one of the element is not string")
-		}
-
-		data = append(data, str)
-	}
-
-	return data, nil
-}
-
-func GetEmail(d *types.Data) (string, error) {
-	data, ok := d.Payload["email"].(string)
-	if !ok {
-		return "", fmt.Errorf("error getting the email")
+	err := json.Unmarshal(src, &data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert to map[string]string")
 	}
 
 	return data, nil

@@ -3,11 +3,13 @@ module tracker_service
 go 1.25.4
 
 require (
+	github.com/go-openapi/testify v0.0.0-20251001202347-e909893202bd
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.19.0
 	github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba
-	github.com/sakamoto-max/wt_2_proto v0.0.0-20260429101209-7b83eb96794e
+	github.com/sakamoto-max/wt_2_proto v1.1.9
+	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 )
@@ -17,9 +19,9 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/sakamoto-max/rabbit_mq v1.2.3 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	go.uber.org/zap v1.28.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect

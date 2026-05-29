@@ -1,57 +1,74 @@
 package client
 
 import (
+	"context"
+	// "fmt"
 	"log"
-	"os"
-	"fmt"
-	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
+	// "os"
+
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type client struct{
-	connForPlan *grpc.ClientConn
-	connForExer *grpc.ClientConn
-	PlanClient planpb.PlanServiceClient
-	ExerClient exerpb.ExerciseServiceClient
+type client struct {
+	ConnForPlan *grpc.ClientConn
+	ConnForExer *grpc.ClientConn
+	PlanClient  planpb.PlanServiceClient
+	ExerClient  exerpb.ExerciseServiceClient
 }
 
-func New() *client {
+type Client struct {
+	Conn *grpc.ClientConn
+}
 
+func NewEmptyClient() *Client {
+	return &Client{}
+}
+
+func (c *Client) OpenConnection(targetServiceAddr string) *Client {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	fmt.Println("the plan is ", os.Getenv("PLAN_GRPC_SERVER_ADDR"))
-
-	connForPlan, err := grpc.NewClient(os.Getenv("PLAN_GRPC_SERVER_ADDR"), opts...)
+	conn, err := grpc.NewClient(targetServiceAddr, opts...)
 	if err != nil {
 		log.Fatalf("failed to create the client : %v", err)
 	}
 
-	planClient := planpb.NewPlanServiceClient(connForPlan)
+	return &Client{Conn: conn}
+}
 
-	fmt.Println("the exer is", os.Getenv("EXER_GRPC_SERVER_ADDR"))
+func (c *Client) CreatePlanClient() PlanClientIFace {
+	planClient := planpb.NewPlanServiceClient(c.Conn)
+	return planClient
+}
+func (c *Client) CreateExerciseClient() ExerClientIface {
+	exerClient := exerpb.NewExerciseServiceClient(c.Conn)
+	return exerClient
+}
 
-	connForExer, err := grpc.NewClient(os.Getenv("EXER_GRPC_SERVER_ADDR"), opts...)
-	if err != nil {
-		log.Fatalf("failed to create the client : %v", err)
-	}
-	
-	exerClient := exerpb.NewExerciseServiceClient(connForExer)
+// func (c *client) Close() {
+// 	c.ConnForExer.Close()
+// 	c.ConnForPlan.Close()
+// }
 
-	return &client{
-		connForPlan: connForPlan,
-		connForExer: connForExer,
-		PlanClient: planClient,
-		ExerClient: exerClient,
-	}
+type PlanClientIFace interface {
+	GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID, opts ...grpc.CallOption) (*planpb.EmptyPlanIdResp, error)
+	GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq, opts ...grpc.CallOption) (*planpb.GetPlanByNameResp, error)
+}
+
+// GetEmptyPlanId
+// GetPlanByName
+
+type ExerClientIface interface {
+	ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName, opts ...grpc.CallOption) (*exerpb.ExerciseExistsReturnIdResp, error)
 }
 
 
-func (c *client) Close() {
-	c.connForExer.Close()
-	c.connForPlan.Close()
-}
+// exerciseExistsReturnsId
 
 
+// type planClient struct {
+// 	client planpb.PlanServiceClient
+// }

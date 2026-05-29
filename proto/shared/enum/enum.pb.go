@@ -141,6 +141,7 @@ const (
 	TaskName_CREATE_EMPTY_PLAN_FOR_USER TaskName = 1
 	TaskName_SEND_EMAIL_FOR_SIGNING_UP  TaskName = 2
 	TaskName_UPDATE_PLAN                TaskName = 3
+	TaskName_UPDATE_VALUE_IN_DB         TaskName = 4
 )
 
 // Enum value maps for TaskName.
@@ -150,12 +151,14 @@ var (
 		1: "CREATE_EMPTY_PLAN_FOR_USER",
 		2: "SEND_EMAIL_FOR_SIGNING_UP",
 		3: "UPDATE_PLAN",
+		4: "UPDATE_VALUE_IN_DB",
 	}
 	TaskName_value = map[string]int32{
 		"ENUM_TASK_NAME_UNDEFINED":   0,
 		"CREATE_EMPTY_PLAN_FOR_USER": 1,
 		"SEND_EMAIL_FOR_SIGNING_UP":  2,
 		"UPDATE_PLAN":                3,
+		"UPDATE_VALUE_IN_DB":         4,
 	}
 )
 
@@ -238,6 +241,64 @@ func (QueueName) EnumDescriptor() ([]byte, []int) {
 	return file_enum_proto_rawDescGZIP(), []int{3}
 }
 
+type QueueFields int32
+
+const (
+	QueueFields_ENUM_QUEUE_FIELDS_UNDEFINED QueueFields = 0
+	QueueFields_USER_ID                     QueueFields = 1
+	QueueFields_EMAIL                       QueueFields = 2
+	QueueFields_USER_NAME                   QueueFields = 3
+	QueueFields_PLAN_NAME                   QueueFields = 4
+	QueueFields_EXERCISE_NAMES              QueueFields = 5
+)
+
+// Enum value maps for QueueFields.
+var (
+	QueueFields_name = map[int32]string{
+		0: "ENUM_QUEUE_FIELDS_UNDEFINED",
+		1: "USER_ID",
+		2: "EMAIL",
+		3: "USER_NAME",
+		4: "PLAN_NAME",
+		5: "EXERCISE_NAMES",
+	}
+	QueueFields_value = map[string]int32{
+		"ENUM_QUEUE_FIELDS_UNDEFINED": 0,
+		"USER_ID":                     1,
+		"EMAIL":                       2,
+		"USER_NAME":                   3,
+		"PLAN_NAME":                   4,
+		"EXERCISE_NAMES":              5,
+	}
+)
+
+func (x QueueFields) Enum() *QueueFields {
+	p := new(QueueFields)
+	*p = x
+	return p
+}
+
+func (x QueueFields) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (QueueFields) Descriptor() protoreflect.EnumDescriptor {
+	return file_enum_proto_enumTypes[4].Descriptor()
+}
+
+func (QueueFields) Type() protoreflect.EnumType {
+	return &file_enum_proto_enumTypes[4]
+}
+
+func (x QueueFields) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use QueueFields.Descriptor instead.
+func (QueueFields) EnumDescriptor() ([]byte, []int) {
+	return file_enum_proto_rawDescGZIP(), []int{4}
+}
+
 var File_enum_proto protoreflect.FileDescriptor
 
 const file_enum_proto_rawDesc = "" +
@@ -257,18 +318,26 @@ const file_enum_proto_rawDesc = "" +
 	"\x0eTASK_COMPLETED\x10\x01\x12\x10\n" +
 	"\fTASK_PENDING\x10\x02\x12\x16\n" +
 	"\x12TASK_NOT_COMPLETED\x10\x03\x12\x0f\n" +
-	"\vTASK_FAILED\x10\x04*x\n" +
+	"\vTASK_FAILED\x10\x04*\x90\x01\n" +
 	"\bTaskName\x12\x1c\n" +
 	"\x18ENUM_TASK_NAME_UNDEFINED\x10\x00\x12\x1e\n" +
 	"\x1aCREATE_EMPTY_PLAN_FOR_USER\x10\x01\x12\x1d\n" +
 	"\x19SEND_EMAIL_FOR_SIGNING_UP\x10\x02\x12\x0f\n" +
-	"\vUPDATE_PLAN\x10\x03*]\n" +
+	"\vUPDATE_PLAN\x10\x03\x12\x16\n" +
+	"\x12UPDATE_VALUE_IN_DB\x10\x04*]\n" +
 	"\tQueueName\x12\x1d\n" +
 	"\x19ENUM_QUEUE_NAME_UNDEFINED\x10\x00\x12\x0e\n" +
 	"\n" +
 	"PLAN_QUEUE\x10\x01\x12\x10\n" +
 	"\fRESULT_QUEUE\x10\x02\x12\x0f\n" +
-	"\vEMAIL_QUEUE\x10\x03B\x0eZ\f/shared/enumb\x06proto3"
+	"\vEMAIL_QUEUE\x10\x03*x\n" +
+	"\vQueueFields\x12\x1f\n" +
+	"\x1bENUM_QUEUE_FIELDS_UNDEFINED\x10\x00\x12\v\n" +
+	"\aUSER_ID\x10\x01\x12\t\n" +
+	"\x05EMAIL\x10\x02\x12\r\n" +
+	"\tUSER_NAME\x10\x03\x12\r\n" +
+	"\tPLAN_NAME\x10\x04\x12\x12\n" +
+	"\x0eEXERCISE_NAMES\x10\x05B\x0eZ\f/shared/enumb\x06proto3"
 
 var (
 	file_enum_proto_rawDescOnce sync.Once
@@ -282,12 +351,13 @@ func file_enum_proto_rawDescGZIP() []byte {
 	return file_enum_proto_rawDescData
 }
 
-var file_enum_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_enum_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_enum_proto_goTypes = []any{
 	(ServiceName)(0), // 0: enum.ServiceName
 	(TaskStatus)(0),  // 1: enum.TaskStatus
 	(TaskName)(0),    // 2: enum.TaskName
 	(QueueName)(0),   // 3: enum.QueueName
+	(QueueFields)(0), // 4: enum.QueueFields
 }
 var file_enum_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -307,7 +377,7 @@ func file_enum_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_enum_proto_rawDesc), len(file_enum_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      5,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,

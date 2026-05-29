@@ -2,29 +2,29 @@ package types
 
 import (
 	"fmt"
-	"time"
+
+	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type Data struct {
-	DbId          string         `db:"id"`
-	TargetService string         `db:"target_service"`
-	Task          string         `db:"task"`
-	Status        string         `db:"status"`
+	DbId          string `db:"id"`
+	SentBy        string
+	TaskName      string         `db:"task"`
 	Payload       map[string]any `db:"payload"`
-	CreatedAt     time.Time      `db:"created_at"`
-	NumberOfTries int            `db:"number_of_tries"`
+	TargetService string
 }
 
 func (d *Data) GetUserId() (string, error) {
-	str, ok := d.Payload["user_id"].(string)
+	str, ok := d.Payload[enum.QueueFields_USER_ID.String()].(string)
 	if !ok {
 		return "", fmt.Errorf("error getting user id")
 	}
 
 	return str, nil
 }
+
 func (d *Data) GetPlanName() (string, error) {
-	str, ok := d.Payload["plan_name"].(string)
+	str, ok := d.Payload[enum.QueueFields_PLAN_NAME.String()].(string)
 	if !ok {
 		return "", fmt.Errorf("error getting planName")
 	}
@@ -33,7 +33,7 @@ func (d *Data) GetPlanName() (string, error) {
 
 }
 func (d *Data) GetNewExercises() ([]string, error) {
-	raw, ok := d.Payload["exercise_names"].([]any)
+	raw, ok := d.Payload[enum.QueueFields_EXERCISE_NAMES.String()].([]any)
 	if !ok {
 		return nil, fmt.Errorf("error getting exercise_names")
 	}
@@ -47,14 +47,6 @@ func (d *Data) GetNewExercises() ([]string, error) {
 		}
 
 		data = append(data, str)
-	}
-
-	return data, nil
-}
-func (d *Data) GetEmail() (string, error) {
-	data, ok := d.Payload["email"].(string)
-	if !ok {
-		return "", fmt.Errorf("error getting the email")
 	}
 
 	return data, nil
