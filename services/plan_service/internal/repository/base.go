@@ -5,6 +5,7 @@ import (
 	"plan_service/internal/domain"
 	"time"
 	"github.com/jackc/pgx/v5/pgxpool"
+	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 )
 
 
@@ -28,6 +29,10 @@ type Db struct {
 	MetricsRepo interface {
 		GetRespTime(ctx context.Context) *time.Duration
 	}
+	QueueDb interface {
+		Insert(data mqTypes.Data) error
+		Fetch() (*[]mqTypes.Data, error)
+	}
 }
 
 func NewDb(pg *pgxpool.Pool) *Db {
@@ -36,6 +41,7 @@ func NewDb(pg *pgxpool.Pool) *Db {
 		PlanCommandRepo: &planCommandRepo{pg},
 		PlanExericseRepo: &planExerciseRepo{pg},
 		MetricsRepo: &metricsRepo{pg},
+		QueueDb: &queueDb{pg},
 	}
 }
 

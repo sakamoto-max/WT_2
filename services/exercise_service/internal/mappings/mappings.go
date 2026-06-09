@@ -49,7 +49,21 @@ type ExerciseExistsReturnId struct {
 
 func ToExerciseExistsReturnId(in *exerpb.SendExerciseName) ExerciseExistsReturnId {
 	return ExerciseExistsReturnId{
-		UserId: in.UserId,
+		UserId:       in.UserId,
 		ExerciseName: in.ExerciseName,
+	}
+}
+
+type GetAllExercises struct {
+	UserId    string
+	BodyPart  string
+	Equipment string
+}
+
+func ToGetAllExercises(in *exerpb.GetAllExercisesREq) GetAllExercises {
+	return GetAllExercises{
+		UserId: in.UserId,
+		BodyPart: in.BodyPart,
+		Equipment: in.Equipment,
 	}
 }

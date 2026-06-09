@@ -24,6 +24,8 @@ github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429112504-ebf9f2fe5561 h1:dxsE+RI2e
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429112504-ebf9f2fe5561/go.mod h1:iG7xX4nTbmew1MGAzL7ek8Cxlz6rxojuUDTKqQjYDCM=
 github.com/sakamoto-max/wt_2_proto v0.0.0-20260429101209-7b83eb96794e h1:eqWFowLTkFV1NVMQliBE7DsRC4Ub0yM/m4oq1RvkmS4=
 github.com/sakamoto-max/wt_2_proto v0.0.0-20260429101209-7b83eb96794e/go.mod h1:IQ0InitHb0lgIH9AxEsZy1+COkSYikIHjQSXUrgy8uo=
+github.com/sakamoto-max/wt_2_proto v1.2.0 h1:qEpUA2E5lSU308or5pUQJdxgko/QgzBZpmv69y1JIQE=
+github.com/sakamoto-max/wt_2_proto v1.2.0/go.mod h1:QKa6znG3AtHoWvSQSpjqeirSDer/nn1WBcOdOj/IXyo=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=

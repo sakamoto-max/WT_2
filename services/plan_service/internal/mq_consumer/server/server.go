@@ -1,9 +1,13 @@
-package config
+package server
 
 import (
+	"context"
 	"os"
 	"plan_service/internal/client"
 	"plan_service/internal/database"
+	"plan_service/internal/repository/cache"
+
+	// "plan_service/internal/mq_consumer/mock"
 	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/repository"
 	"sync"
@@ -17,11 +21,13 @@ import (
 	"go.uber.org/zap"
 )
 
-type Config struct {
+type Server struct {
+	Ctx             context.Context
+	CtxCancel       context.CancelFunc
 	Logger          *logger.MyLogger
 	MqConn          *amqp091.Connection
-	PlanQueue       *mq.MessageQueue
-	ResQueue        *mq.MessageQueue
+	PlanQueue       mq.QueueIface
+	ResQueue        mq.QueueIface
 	PgPool          *pgxpool.Pool
 	Db              *repository.Db
 	JobsChan        chan types.Data
@@ -32,20 +38,29 @@ type Config struct {
 	ExerClient      client.ExerClientIface
 	NumberOfWorkers int
 	NumberOfSenders int
+	Cache *cache.Cache
 }
 
-func NewConfig() Config {
+func NewServer() Server {
 
 	logger := logger.NewLogger()
 
 	mqConn := mq.NewConn()
 	planqueue := mq.NewMessageQueue(mqConn, enum.QueueName_PLAN_QUEUE.String())
 	resQueue := mq.NewMessageQueue(mqConn, enum.QueueName_RESULT_QUEUE.String())
+	// resQueue := mock.MockQueue{Open: false}
 
 	pool, err := database.NewPgConn()
 	if err != nil {
 		logger.Log.Fatalw("failed to open postgres connection for plan consumer", zap.Error(err))
 	}
+	
+	redisClient, err := database.NewRedisConn()
+	if err != nil {
+		logger.Log.Fatalw("failed to create redis connection for plan consumer", zap.Error(err))
+	}
+
+	cache := cache.NewCache(redisClient)
 
 	db := repository.NewDb(pool)
 	logger.Log.Infoln("connected to db")
@@ -65,7 +80,11 @@ func NewConfig() Config {
 	exerConn := client.NewEmptyClient().OpenConnection(os.Getenv("EXERCISE_GRPC_SERVER_ADDR"))
 	exerciseClient := exerConn.CreateExerciseClient()
 
-	return Config{
+	ctx, cancel := context.WithCancel(context.Background())
+
+	return Server{
+		Ctx:             ctx,
+		CtxCancel:       cancel,
 		Logger:          logger,
 		MqConn:          mqConn,
 		PlanQueue:       planqueue,
@@ -80,14 +99,15 @@ func NewConfig() Config {
 		ExerClient:      exerciseClient,
 		NumberOfWorkers: numberOfWorkers,
 		NumberOfSenders: numberOfSenders,
+		Cache: cache,
 	}
 }
 
-func (c Config) ShutDown(signal string) {
+func (c Server) ShutDown(signal string) {
 	c.Logger.Log.Infow("signal received", zap.String("signal", signal))
+	
+	c.CtxCancel()
 
-	// mqConn.Close()
-	c.PlanQueue.Ch.Close()
 	c.Logger.Log.Infoln("consumer has closed")
 
 	close(c.JobsChan)

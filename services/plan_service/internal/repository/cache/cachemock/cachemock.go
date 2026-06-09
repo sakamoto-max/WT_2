@@ -86,4 +86,6 @@ func (u *UserPlan) GetUserPlan(ctx context.Context, payload domain.GetPlan) (str
 
 	return "123", &[]string{"123", "123", "123"}, nil
 }
-func (u *UserPlan) DelUserPlan(ctx context.Context, payload domain.GetPlan) {}
+func (u *UserPlan) DelUserPlan(ctx context.Context, payload domain.GetPlan) error  {
+	return nil
+}

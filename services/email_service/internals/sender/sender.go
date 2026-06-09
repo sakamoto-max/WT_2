@@ -54,13 +54,12 @@ func (s *Sender) Start(wg *sync.WaitGroup) {
 
 		err := s.resQueue.Publish(context.Background(), dataInBytes)
 		if err != nil {
-			s.logger.Log.Infow("publishing to the result Queue failed. entering exponential backoff", zap.Int("sender id", s.id))
 			s.ExponentialBackOff(msg)
 			continue
 		}
-
-		s.logger.Log.Infow("sender have successfully pushed the data into result Queue", zap.Int("sender Id", s.id))
-
+		s.logger.Log.Infow("sender have successfully pushed the data into result Queue",
+			zap.Int("sender Id", s.id),
+		)
 	}
 
 }
@@ -83,14 +82,22 @@ func (s *Sender) ExponentialBackOff(data types.Data) {
 			continue
 		}
 
+		s.logger.Log.Infow("sender have successfully pushed the data into result Queue",
+			zap.Int("sender Id", s.id),
+		)
 		return
 	}
 
-	s.logger.Log.Infoln("exponential backoff failed. pushing data into the db", zap.Int("sender id", s.id))
+	s.logger.Log.Infoln("exponential backoff failed. pushing data into the db",
+		zap.Int("sender id", s.id),
+	)
 
 	err = s.db.PushToFailed(data, numberOfTries, enum.TaskStatus_TASK_FAILED.String(), err)
 	if err != nil {
-		s.logger.Log.Errorw("db operation failed", zap.Error(err))
+		s.logger.Log.Errorw("db operation failed",
+			zap.Int("sender id", s.id),
+			zap.Error(err),
+		)
 	}
 
 }

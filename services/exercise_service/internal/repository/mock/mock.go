@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 	"exercise_service/internal/domain"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"fmt"
 	"time"
 )
@@ -73,7 +73,7 @@ func (e *ExerciseGetMock) GetExerciseByName(ctx context.Context, payload mapping
 		Id: "123", Name: "name", RestTime: 120, BodyPart: "body", Equipment: "equipment", CreatedAt: time.Now(), UpdatedAt: time.Now(),
 	}, nil
 }
-func (e *ExerciseGetMock) GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error) {
+func (e *ExerciseGetMock) GetAllExercises(ctx context.Context, payload mappings.GetAllExercises) (*[]domain.Exercise, error) {
 	if e.HasErr{
 		return nil, fmt.Errorf("some error occured")
 	}

@@ -60,8 +60,15 @@ func (c *userPlanCache) GetUserPlan(ctx context.Context, payload domain.GetPlan)
 	return planId, &ExerIds, nil
 }
 
-func (c *userPlanCache) DelUserPlan(ctx context.Context, payload domain.GetPlan) {
+func (c *userPlanCache) DelUserPlan(ctx context.Context, payload domain.GetPlan) error {
 	Key := fmt.Sprintf("user_id:%v:plan_name:%v", payload.UserId, payload.PlanName)
 
-	c.client.Del(ctx, Key)
+	cmd := c.client.Del(ctx, Key)
+
+	if cmd.Err() != nil {
+		return fmt.Errorf("error deleting the user plan from cache : %w", cmd.Err())
+	}
+
+	return nil
+
 }

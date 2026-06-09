@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba
-	github.com/sakamoto-max/wt_2_proto v0.1.2
+	github.com/sakamoto-max/wt_2_proto v1.2.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.80.0

@@ -1,19 +1,7 @@
-plan service - worker and sender
+// testing
 
-
-
-unit tests for orchestration service
-// consumer -> reads the resultQueue -> updates
-// worker -> picks up a job from the jobs chan and does some operation -> updates 
-// producer -> goes and reads data in the database outboxes and sends the data into the jobs chan
-
-
-
------------------------------------------------------
-1. rabbit_mq -> change the consume function from  Consume(queueName string) (<-chan amqp.Delivery, error)  
-to  Consume() (<-chan amqp.Delivery, error) 
-2. add enums for extracting data from msg
-
+// unit testing
+// integration testing
 
 
 

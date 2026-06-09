@@ -18,8 +18,8 @@ func (d *startWorkoutRepo) StartWorkout(ctx context.Context, payload domain.Star
 	var trackerId string
 
 	query := `
-		INSERT INTO tracker(user_id, plan_id, created_at)
-		VALUES(@userId, @planId, NOW())
+		INSERT INTO tracker(user_id, plan_id)
+		VALUES(@userId, @planId)
 		RETURNING id	
 	`
 

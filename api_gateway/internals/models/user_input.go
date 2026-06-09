@@ -37,7 +37,7 @@ type UUIDReader struct {
 }
 
 type ExerciseName struct {
-	Name string `json:"exercise_name"`
+	Name string `json:"name"`
 }
 
 type Exercise struct {

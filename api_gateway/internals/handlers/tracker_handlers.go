@@ -3,14 +3,18 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+
+	// "fmt
 	"net/http"
 	"time"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
+
+	// "github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/responses"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
 	trackpb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
-	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
 	"go.uber.org/zap"
 )
 
@@ -117,6 +121,12 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&userInput)
 
+	err = userInput.Validate()
+	if err != nil {
+		models.ValidationErrWriter(w, err)
+		return
+	}
+
 	if userInput.UserResponse != "" {
 
 		in := trackpb.EndWorkoutReq{}
@@ -203,11 +213,7 @@ func (h *Handler) EndWorkout(w http.ResponseWriter, r *http.Request) {
 	utils.OkRespWriter(w, resp)
 
 	logger.Log.Infow("END_WORKOUT_TRACKED", zap.String("REQ_ID", reqId))
-	// validationErrs, errOccured := userInput.Validate()
-	// if errOccured {
-	// 	utils.ValidationErrWriter(w, *validationErrs)
-	// 	return
-	// }
+
 }
 
 func (h *Handler) CancelWorkout(w http.ResponseWriter, r *http.Request) {
@@ -246,7 +252,7 @@ func (h *Handler) CancelWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 // {
-// 	"exercises" : [
+// 	"workout" : [
 // 		{
 // 			"exercise_name" : "x",
 // 			"tracker" : [

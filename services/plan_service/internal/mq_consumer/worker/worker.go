@@ -2,11 +2,13 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"plan_service/internal/client"
-	"plan_service/internal/config"
 	"plan_service/internal/domain"
+	"plan_service/internal/mq_consumer/server"
 	"plan_service/internal/mq_consumer/types"
 	"plan_service/internal/repository"
+	"plan_service/internal/repository/cache"
 	"sync"
 
 	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
@@ -18,6 +20,7 @@ import (
 
 type worker struct {
 	id         int
+	cache      *cache.Cache
 	db         *repository.Db
 	logger     *logger.MyLogger
 	jobsChan   <-chan types.Data
@@ -25,27 +28,27 @@ type worker struct {
 	exerclient client.ExerClientIface
 }
 
-func StartWorkers(config config.Config) {
+func StartWorkers(server server.Server) {
 
-	for i := range config.NumberOfWorkers {
+	for i := range server.NumberOfWorkers {
 
 		worker := &worker{
 			id:         i + 1,
-			db:         config.Db,
-			logger:     config.Logger,
-			jobsChan:   config.JobsChan,
-			senderChan: config.SendersChan,
-			exerclient: config.ExerClient,
+			db:         server.Db,
+			logger:     server.Logger,
+			jobsChan:   server.JobsChan,
+			senderChan: server.SendersChan,
+			exerclient: server.ExerClient,
+			cache: server.Cache,
 		}
 
-		config.WorkerWg.Add(1)
-		go worker.Work(config.WorkerWg)
+		server.WorkerWg.Add(1)
+		go worker.Work(server.WorkerWg)
 	}
 
-	config.Logger.Log.Infow("workers have started", zap.Int("number of workers", config.NumberOfWorkers))
+	server.Logger.Log.Infow("workers have started", zap.Int("number of workers", server.NumberOfWorkers))
 
 }
-
 
 func (w *worker) Work(wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -110,8 +113,11 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 				continue
 			}
 
+			fmt.Println("worker got all the data")
+			
 			planId, err := w.db.PlanQueryRepo.GetPlanId(context.TODO(), domain.GetPlan{UserId: userId, PlanName: planName})
 			if err != nil {
+				fmt.Print("worker got an error %w", err)
 				w.senderChan <- mqTypes.Data{
 					DbId:          msg.DbId,
 					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
@@ -122,9 +128,10 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 				}
 				continue
 			}
-
+			fmt.Println("worker got the plan id")
+			
 			var exerciseIds []string
-
+			
 			for _, exerciseName := range newExercises {
 				in := exerpb.SendExerciseName{
 					UserId:       userId,
@@ -132,7 +139,8 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 				}
 				resp, err := w.exerclient.ExerciseExistsReturnId(context.TODO(), &in)
 				if err != nil {
-
+					fmt.Print("worker got an error %w", err)
+					
 					w.senderChan <- mqTypes.Data{
 						DbId:          msg.DbId,
 						TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
@@ -142,13 +150,16 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 						Err:           err,
 					}
 				}
-
+				
 				exerciseIds = append(exerciseIds, resp.ExerciseId)
 			}
-
+			
+			fmt.Println("worker got all the exercise ids")
+			
 			err = w.db.PlanExericseRepo.AddExercisesToPlan(context.TODO(), planId, &exerciseIds)
 			if err != nil {
-
+				fmt.Print("worker got an error %w", err)
+				
 				w.senderChan <- mqTypes.Data{
 					DbId:          msg.DbId,
 					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
@@ -158,8 +169,25 @@ func (w *worker) Work(wg *sync.WaitGroup) {
 					Err:           err,
 				}
 				continue
-
+				
 			}
+			fmt.Println("worker completed adding exercises to the plan")
+			
+			err = w.cache.UserPlan.DelUserPlan(context.TODO(), domain.GetPlan{UserId: userId, PlanName: planName})
+			if err != nil {
+				fmt.Print("worker got an error %w", err)
+				w.senderChan <- mqTypes.Data{
+					DbId:          msg.DbId,
+					TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+					SentBy:        msg.TargetService,
+					TaskStatus:    enum.TaskStatus_TASK_FAILED.String(),
+					TargetService: msg.SentBy,
+					Err:           err,
+				}
+			}
+			
+			fmt.Println("worker deleted the user plan in cache ")
+
 
 			w.senderChan <- mqTypes.Data{
 				DbId:          msg.DbId,

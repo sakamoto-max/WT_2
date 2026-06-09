@@ -57,9 +57,9 @@ func (s *Service) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartW
 		return nil, myerrors.BadReqErrMaker(ErrWorkoutOngoing)
 	}
 
-	r, err := s.planClient.GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: in.UserId, PlanName: in.PlanName})
+	plan, err := s.planClient.GetPlanByName(ctx, &planpb.GetPlanByNameReq{UserId: in.UserId, PlanName: in.PlanName})
 	if err != nil {
-		return nil, fmt.Errorf("error getting data from plan server : %w", err)
+		return nil, err
 	}
 
 	err = s.cache.CurrentPlan.SetUserCurrentPlanName(ctx, in.UserId, in.PlanName)
@@ -67,12 +67,12 @@ func (s *Service) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartW
 		return nil, err
 	}
 
-	err = s.cache.Plan.SetPlanWithExercises(ctx, in.UserId, in.PlanName, &r.ExerciseNames)
+	err = s.cache.Plan.SetPlanWithExercises(ctx, in.UserId, in.PlanName, &plan.ExerciseNames)
 	if err != nil {
 		return nil, err
 	}
 
-	trackerId, err = s.pg.Start.StartWorkout(ctx, domain.StartWorkout{UserId: in.UserId, PlanId: r.PlanId})
+	trackerId, err = s.pg.Start.StartWorkout(ctx, domain.StartWorkout{UserId: in.UserId, PlanId: plan.PlanId})
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (s *Service) StartWorkoutWithPlan(ctx context.Context, in *trackerpb.StartW
 	return &trackerpb.StartWorkoutWithPlanResp{
 		Message:         fmt.Sprintf("workout with plan %v has started", in.PlanName),
 		PlanName:        in.PlanName,
-		ExercisesInPlan: r.ExerciseNames,
+		ExercisesInPlan: plan.ExerciseNames,
 	}, nil
 }
 
@@ -265,6 +265,7 @@ func (s *Service) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (
 			if err != nil {
 				return nil, err
 			}
+
 		case false:
 			err := s.pg.End.EndWorkout(ctx, trackerId, data)
 			if err != nil {

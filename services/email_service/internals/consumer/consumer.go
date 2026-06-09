@@ -46,7 +46,10 @@ func (c *consumer) StartListening() {
 
 		data := convertIntoStruct(&msg.Body)
 
-		c.logger.Log.Infow("consumer has got data", zap.String("targer service", data.TargetService), zap.String("task name", data.TaskName))
+		c.logger.Log.Infow("consumer has got data", 
+			zap.String("targer service", data.TargetService), 	
+			zap.String("task name", data.TaskName),
+		)
 
 		c.jobs <- data
 	}

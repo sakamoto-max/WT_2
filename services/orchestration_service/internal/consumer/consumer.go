@@ -12,7 +12,7 @@ import (
 )
 
 type consumer struct {
-	resultQueue *mq.MessageQueue
+	resultQueue mq.QueueIface
 	logger      *logger.MyLogger
 	jobs        chan<- types.Data
 }
@@ -24,12 +24,12 @@ func StartConsumer(server server.Server) {
 		jobs:        server.JobsChan,
 	}
 
-	go c.StartListening()
+	go c.Start()
 
 	server.Logger.Log.Infoln("consumer has started")
 }
 
-func (c *consumer) StartListening() {
+func (c *consumer) Start() {
 
 	msgsQueue, err := c.resultQueue.Consume()
 	if err != nil {
@@ -46,7 +46,11 @@ func (c *consumer) StartListening() {
 
 		_ = json.Unmarshal(msg.Body, &data)
 
-		c.logger.Log.Infow("consumer got data", zap.String("task name", data.TaskName), zap.String("sent by", data.SentBy), zap.String("task status", data.TaskStatus))
+		c.logger.Log.Infow("consumer got data",
+			zap.String("task name", data.TaskName),
+			zap.String("sent by", data.SentBy),
+			zap.String("task status", data.TaskStatus),
+		)
 
 		c.jobs <- types.Data{
 			DbId:          data.DbId,

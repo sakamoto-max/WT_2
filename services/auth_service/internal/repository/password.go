@@ -35,7 +35,7 @@ func (p *passDb) FetchUserPass(ctx context.Context, email string) (string, error
 	err := p.pg.QueryRow(ctx, query, pgx.NamedArgs{"email": email}).Scan(&hashedPass)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myErrs.ResourceNotFoundErrMaker(string(emailResource))
+			return "", myErrs.ResourceNotFoundErrMaker(string(userResource))
 		}
 		return "", myErrs.InternalServerErrMaker(fmt.Errorf("error getting hashed pass : %w", err))
 	}

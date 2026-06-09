@@ -712,8 +712,10 @@ func (x *GetExerciseNameResp) GetExerciseName() string {
 }
 
 type GetAllExercisesREq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` //
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BodyPart      string `protobuf:"bytes,2,opt,name=body_part,json=bodyPart,proto3" json:"body_part,omitempty"`
+	Equipment     string `protobuf:"bytes,3,opt,name=equipment,proto3" json:"equipment,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -751,6 +753,20 @@ func (*GetAllExercisesREq) Descriptor() ([]byte, []int) {
 func (x *GetAllExercisesREq) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetAllExercisesREq) GetBodyPart() string {
+	if x != nil {
+		return x.BodyPart
+	}
+	return ""
+}
+
+func (x *GetAllExercisesREq) GetEquipment() string {
+	if x != nil {
+		return x.Equipment
 	}
 	return ""
 }
@@ -935,9 +951,11 @@ const file_exercise_proto_rawDesc = "" +
 	"exerciseId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\":\n" +
 	"\x13GetExerciseNameResp\x12#\n" +
-	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\"-\n" +
+	"\rexercise_name\x18\x01 \x01(\tR\fexerciseName\"h\n" +
 	"\x12GetAllExercisesREq\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x85\x01\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tbody_part\x18\x02 \x01(\tR\bbodyPart\x12\x1c\n" +
+	"\tequipment\x18\x03 \x01(\tR\tequipment\"\x85\x01\n" +
 	"\x13GetAllExercisesResp\x12.\n" +
 	"\x13number_of_exercises\x18\x01 \x01(\x03R\x11numberOfExercises\x12>\n" +
 	"\rall_exericses\x18\x02 \x03(\v2\x19.exercise.OneExerciseRespR\fallExericses\"\xe6\x01\n" +

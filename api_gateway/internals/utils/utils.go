@@ -36,6 +36,11 @@ func DeletedNotFoundWriter(w http.ResponseWriter, resp any) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func DeletedNotFoundWriterNoResponse(w http.ResponseWriter) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+}
+
 func CreatedWriter(w http.ResponseWriter, resp any) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)

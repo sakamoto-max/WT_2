@@ -234,6 +234,8 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 		utils.InternalServerErr(w, err)
 	}
 
+
+
 	logger.Log.Infow("DELETE_EXERCISE_SUCCESSFULL", zap.String("REQ_ID", reqId))
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
@@ -246,12 +248,11 @@ func (h *Handler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 		PlanName: planName,
 	}
 
-	resp, err := h.planClient.DeletePlan(ctx, &in)
+	_, err = h.planClient.DeletePlan(ctx, &in)
 	if err != nil {
-		// utils.BadReq(w, err)
 		myerrors.ErrMatcher(w, err)
 		return
 	}
 
-	utils.OkRespWriter(w, resp)
+	utils.DeletedNotFoundWriterNoResponse(w)
 }

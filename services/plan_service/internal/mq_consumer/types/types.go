@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
@@ -12,6 +13,16 @@ type Data struct {
 	TaskName      string         `db:"task"`
 	Payload       map[string]any `db:"payload"`
 	TargetService string
+}
+
+func ToData(msg mqTypes.Data) Data {
+	return Data{
+		DbId:          msg.DbId,
+		SentBy:        msg.SentBy,
+		TaskName:      msg.TaskName,
+		Payload:       msg.Payload,
+		TargetService: msg.TargetService,
+	}
 }
 
 func (d *Data) GetUserId() (string, error) {

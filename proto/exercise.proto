@@ -102,7 +102,10 @@ message GetExerciseNameResp {
 
 //
 message GetAllExercisesREq {
-    string user_id = 1;    //
+    string user_id = 1;
+    //
+    string body_part = 2;
+    string equipment = 3;
 }
 
 message GetAllExercisesResp {

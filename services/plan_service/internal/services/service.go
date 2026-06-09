@@ -2,11 +2,15 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"plan_service/internal/domain"
+	"plan_service/internal/repository"
 	"strings"
-	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
+
+	"github.com/sakamoto-max/wt_2_pkg/myerrs"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
 )
 
 func (s *Service) CreatePlan(ctx context.Context, in *planpb.CreatePlanReq) (*planpb.CreatePlanResp, error) {
@@ -92,6 +96,8 @@ func (s *Service) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*
 
 func (s *Service) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.GetPlanByNameResp, error) {
 
+	fmt.Println("get plan by name called")
+
 	PlanId, ExerciseIds, err := s.cache.UserPlan.GetUserPlan(ctx, domain.ToGetPlan(in))
 	if err != nil || PlanId == "" {
 
@@ -126,6 +132,12 @@ func (s *Service) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
 	}
 
+	fmt.Println("plan in plan", planpb.GetPlanByNameResp{
+		PlanName:      in.PlanName,
+		PlanId:        PlanId,
+		ExerciseNames: allExerciseNames,
+	})
+
 	return &planpb.GetPlanByNameResp{
 		PlanName:      in.PlanName,
 		PlanId:        PlanId,
@@ -158,12 +170,28 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 
 	err = s.pg.PlanExericseRepo.AddExercisesToPlan(ctx, PlanId, &exerciseIds)
 	if err != nil {
+		var dbErr *repository.DbErr
+		if errors.As(err, &dbErr) {
+			exerId := dbErr.GetExerciseId()
+			resp, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{UserId: in.UserId, ExerciseId: exerId})
+			if err != nil {
+				return nil, myerrs.InternalServerErrMaker(err)
+			}
+
+			return nil, myerrs.AlreadyExitsErrMaker(fmt.Sprintf("exercise %s", resp.ExerciseName))
+		}
+
+		return nil, err
+	}
+
+	allExerciseIds, err := s.pg.PlanQueryRepo.GetAllExercisesByPlanID(ctx, PlanId)
+	if err != nil {
 		return nil, err
 	}
 
 	var allExerciseNames []string
 
-	for _, exerciseId := range exerciseIds {
+	for _, exerciseId := range *allExerciseIds {
 
 		r, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: in.UserId})
 		if err != nil {
@@ -171,6 +199,10 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 		}
 
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
+	}
+
+	if err = s.cache.UserPlan.DelUserPlan(ctx, domain.GetPlan{UserId: in.UserId, PlanName: in.PlanName}); err != nil {
+		return nil, err
 	}
 
 	return &planpb.PlanResp{
@@ -247,9 +279,14 @@ func (s *Service) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanRe
 		return nil, err
 	}
 
+	allExerciseIds, err := s.pg.PlanQueryRepo.GetAllExercisesByPlanID(ctx, PlanId)
+	if err != nil {
+		return nil, err
+	}
+
 	var allExerciseNames []string
 
-	for _, exerciseId := range exerciseIds {
+	for _, exerciseId := range *allExerciseIds {
 
 		r, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: in.UserId})
 		if err != nil {
@@ -257,6 +294,10 @@ func (s *Service) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanRe
 		}
 
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
+	}
+
+	if err = s.cache.UserPlan.DelUserPlan(ctx, domain.GetPlan{UserId: in.UserId, PlanName: in.PlanName}); err != nil {
+		return nil, err
 	}
 
 	return &planpb.PlanResp{

@@ -24,9 +24,9 @@ type Server struct {
 	TrackerPool     *pgxpool.Pool
 	Db              *repository.Db
 	MqConn          *amqp091.Connection
-	PlanQueue       *queue.MessageQueue
-	EmailQueue      *queue.MessageQueue
-	ResultQueue     *queue.MessageQueue
+	PlanQueue       queue.QueueIface
+	EmailQueue      queue.QueueIface
+	ResultQueue     queue.QueueIface
 	JobsChan        chan types.Data
 	Ctx             context.Context
 	CtxCancel       context.CancelFunc

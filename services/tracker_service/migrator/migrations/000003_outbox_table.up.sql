@@ -3,7 +3,7 @@ CREATE TABLE outbox(
     target_service TEXT NOT NULL,
     created_by TEXT NOT NULL,
     task TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'not_completed',
+    status TEXT NOT NULL DEFAULT 'TASK_NOT_COMPLETED',
     payload JSONB NOT NULL,
     CREATED_AT TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     number_of_tries INTEGER DEFAULT 0,

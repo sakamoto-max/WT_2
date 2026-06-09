@@ -11,6 +11,7 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.ReqIdGenerator)
 	r.Use(middleware.Logger)
+
 	r.Get("/wt/health", h.GetHealth)
 
 	r.Post("/wt/user/signup", h.SignUp)
@@ -25,7 +26,7 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 	r.With(middleware.JwtMiddleware).Post("/wt/exercises", h.CreateExercise)
 	r.With(middleware.JwtMiddleware).Delete("/wt/exercises", h.DeleteExecise)
 
-	r.With(middleware.JwtMiddleware).Post("/wt/plans/create", h.CreatePlan)
+	r.With(middleware.JwtMiddleware).Post("/wt/plans", h.CreatePlan)
 	r.With(middleware.JwtMiddleware).Patch("/wt/plans/exercises", h.AddExercisesToPlan)
 	r.With(middleware.JwtMiddleware).Delete("/wt/plans/exercises", h.DeleteExerciseFromPlan)
 	r.With(middleware.JwtMiddleware).Get("/wt/plans", h.GetAllPlans)
@@ -39,3 +40,5 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	return r
 }
+
+// pagnation, filtering. search

@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 	"exercise_service/internal/domain"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"time"
 
 	"github.com/redis/go-redis/v9"

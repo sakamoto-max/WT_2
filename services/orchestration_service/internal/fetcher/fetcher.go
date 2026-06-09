@@ -25,7 +25,6 @@ func StartFetcher(server server.Server) {
 
 	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
 
-	// fetcher := fetcher.NewFetcher(server.Db, server.Logger, &targetServices, server.JobsChan, server.Ticker.C)
 	fetcher := fetcher{
 		db:             server.Db,
 		logger:         server.Logger,
@@ -54,9 +53,7 @@ func NewFetcher(db *repository.Db, logger *logger.MyLogger, targetServices *[]st
 func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 
 	defer wg.Done()
-
-	// p.logger.Log.Infoln("producer has started")
-
+	
 	for {
 		select {
 		case <-p.TickerChan:
@@ -86,12 +83,17 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 
 				for _, v := range *data {
 					if v.NoData {
-						p.logger.Log.Infow("no rows found", zap.String("service name", v.ServiceName))
+						p.logger.Log.Infow("no rows found", 
+							zap.String("service name", v.ServiceName),
+						)
 						continue
 					}
 
 					if v.Err != nil {
-						p.logger.Log.Errorw("failed to fetch data", zap.String("service name", v.ServiceName), zap.Error(v.Err))
+						p.logger.Log.Errorw("failed to fetch data", 
+							zap.String("service name", v.ServiceName), 
+							zap.Error(v.Err),
+						)
 						continue
 					}
 
@@ -101,6 +103,7 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 			close(DataChan)
 
 		case <-ctx.Done():
+		
 			return
 		}
 	}

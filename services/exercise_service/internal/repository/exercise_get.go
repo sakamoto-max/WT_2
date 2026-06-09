@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"exercise_service/internal/domain"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"fmt"
 	"time"
 
@@ -17,14 +17,14 @@ type exerciseGetDB struct {
 	pg *pgxpool.Pool
 }
 
-func (d *exerciseGetDB) GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error) {
+func (d *exerciseGetDB) GetAllExercises(ctx context.Context, payload mappings.GetAllExercises) (*[]domain.Exercise, error) {
 
 	query := `
 		SELECT 
 			EXERCISES.ID, 
 			EXERCISES.NAME, 
 			BODY_PARTS.NAME, 
-			EQUIPMENT.NAME ,
+			EQUIPMENT.NAME,
 			created_at,
 			updated_at
 		FROM 
@@ -44,18 +44,30 @@ func (d *exerciseGetDB) GetAllExercises(ctx context.Context, userId string) (*[]
 		ON 
 			EXERCISES.ID = TABLE_B.EXERCISE_ID
 		WHERE 
-			(CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL;
+			(CREATED_BY IS NULL OR CREATED_BY = @userId) AND TABLE_B.EXERCISE_ID IS NULL
 	`
 
-	var allExercises []domain.Exercise
+	if payload.BodyPart != "" {
+		query += ` AND BODY_PARTS.NAME = @bodypart`
+	}
 
-	rows, err := d.pg.Query(ctx, query, pgx.NamedArgs{"userId": userId})
+	if payload.Equipment != "" {
+		query += ` AND EQUIPMENT.NAME = @equipment`
+	}
+
+	
+	rows, err := d.pg.Query(ctx, query, pgx.NamedArgs{
+		"userId":    payload.UserId,
+		"bodypart":  payload.BodyPart,
+		"equipment": payload.Equipment,
+	})
 	if err != nil {
-
+		
 		err := fmt.Errorf("error getting all exercises from DB : %w\n", err)
-
+		
 		return nil, myerrs.InternalServerErrMaker(err)
 	}
+	var allExercises []domain.Exercise
 
 	var id string
 	var exerciseName string
@@ -81,6 +93,26 @@ func (d *exerciseGetDB) GetAllExercises(ctx context.Context, userId string) (*[]
 		}
 
 		allExercises = append(allExercises, exercise)
+	}
+
+
+
+	if len(allExercises) == 0 {
+		
+		stmt := "exercises"
+		
+		if payload.BodyPart != "" {
+			stmt += fmt.Sprintf(" with body part %s,", payload.BodyPart)
+		}
+		
+		if payload.Equipment != "" {
+			stmt += fmt.Sprintf(" with equipment name %s", payload.Equipment)
+		}
+		
+		// stmt += " not found"
+		
+		return nil, myerrs.ResourceNotFoundErrMaker(stmt)
+
 	}
 
 	return &allExercises, nil

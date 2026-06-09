@@ -16,7 +16,6 @@ type Data struct {
 	Err           error          `json:"err"`
 }
 
-
 func (d *Data) GetEmail() (string, error) {
 	email, ok := d.Payload[enum.QueueFields_EMAIL.String()].(string)
 	if !ok {
@@ -24,5 +23,25 @@ func (d *Data) GetEmail() (string, error) {
 	}
 
 	return email, nil
+}
 
+func (d Data) Failed(err error) Data {
+	return Data{
+		DbId:          d.DbId,
+		TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+		Status:        enum.TaskStatus_TASK_FAILED.String(),
+		SentBy:        d.TargetService,
+		TargetService: d.SentBy,
+		Err:           err,
+	}
+}
+
+func (d Data) Succeded() Data {
+	return Data{
+		DbId:          d.DbId,
+		TaskName:      enum.TaskName_UPDATE_VALUE_IN_DB.String(),
+		Status:        enum.TaskStatus_TASK_COMPLETED.String(),
+		SentBy:        d.TargetService,
+		TargetService: d.SentBy,
+	}
 }

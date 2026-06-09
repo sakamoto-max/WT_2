@@ -8,7 +8,6 @@ type StartWorkout struct {
 }
 
 type Tracker struct {
-	// PlanId int `json:"plan_id"`
 	UserResponse bool      `json:"user_response,omitempty"`
 	Workout      []Workout `json:"workout"`
 }

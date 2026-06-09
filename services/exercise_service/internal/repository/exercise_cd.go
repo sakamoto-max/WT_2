@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -38,7 +38,7 @@ func (d *exerciseCD) CreateExercise(ctx context.Context, payload mappings.Create
 	err = trnx.QueryRow(ctx, query, pgx.NamedArgs{"name": payload.BodyPartName}).Scan(&bodyPartId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", myerrs.ResourceNotFoundErrMaker("body_part")
+			return "", myerrs.ResourceNotFoundErrMaker(fmt.Sprintf("body part %s", payload.BodyPartName))
 		}
 
 		err := fmt.Errorf("error getting id of body_part : %w\n", err)
@@ -70,7 +70,7 @@ func (d *exerciseCD) CreateExercise(ctx context.Context, payload mappings.Create
 		var pgErr *pgConn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			switch pgErr.ConstraintName {
-			case "users_name_key":
+			case "one_user_one_exercise":
 				return "", myerrs.AlreadyExitsErrMaker(payload.ExerciseName)
 			}
 		}
@@ -107,7 +107,7 @@ func (d *exerciseCD) DeleteExecise(ctx context.Context, payload mappings.DeleteE
 				name = @name AND (created_by IS NULL OR created_by = @userId) `
 
 	var exerciseId uuid.UUID
-	var createdBy *int
+	var createdBy *string
 	err = trnx.QueryRow(ctx, query, pgx.NamedArgs{"name": payload.ExerciseName, "userId": payload.UserId}).Scan(&exerciseId, &createdBy)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

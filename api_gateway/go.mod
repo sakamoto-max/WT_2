@@ -7,7 +7,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/sakamoto-max/wt_2_proto v0.0.0-20260429101209-7b83eb96794e
+	github.com/sakamoto-max/wt_2_proto v1.2.0
 	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.80.0
 )

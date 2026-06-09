@@ -21,9 +21,8 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			err.AppErrWriter(w)
 			return
 		}
-		// t := jwt.JwtToken{}
+		
 		claims, err := jwt.ValidateToken(token)
-		// claims, err := t.ValidateToken(token)
 		if err != nil {
 			switch {
 			case errors.Is(err, jwt.ErrTokenMalformed):

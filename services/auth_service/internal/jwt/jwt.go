@@ -27,7 +27,7 @@ func GenerateAccessToken(userId string, roleId string) (string, error) {
 	j.claims.RoleId = roleId
 	j.claims.RegisteredClaims = jwt.RegisteredClaims{
 		Issuer:    "workout-tracker",
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 120)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j.claims)

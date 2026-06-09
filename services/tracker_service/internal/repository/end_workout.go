@@ -125,9 +125,10 @@ func (d *endWorkoutRepo) EndWorkoutWithOutbox(ctx context.Context, userId string
 	}
 
 	query = `
-		INSERT INTO outbox (target_service,	task, payload)
+		INSERT INTO outbox (target_service, created_by, task, payload)
 		VALUES (
 			@target_service,
+			@createdBy,
 			@task,
 			@payload
 		)
@@ -150,6 +151,7 @@ func (d *endWorkoutRepo) EndWorkoutWithOutbox(ctx context.Context, userId string
 		"target_service": enum.ServiceName_PLAN_SERVICE.String(),
 		"task":           enum.TaskName_UPDATE_PLAN.String(),
 		"payload":        jsonData,
+		"createdBy" : enum.ServiceName_TRACKER_SERVICE.String(),
 	})
 
 	if err != nil {

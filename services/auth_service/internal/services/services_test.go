@@ -1,15 +1,12 @@
 package services
 
 import (
-	// "auth_service/internal/domain/user"
-
 	"auth_service/internal/repository"
 	"auth_service/internal/repository/cache"
 	"auth_service/internal/repository/cache/cachemock"
 	"auth_service/internal/repository/mock"
 	"context"
 	"testing"
-
 	"github.com/sakamoto-max/wt_2_proto/shared/auth"
 	"github.com/stretchr/testify/assert"
 )

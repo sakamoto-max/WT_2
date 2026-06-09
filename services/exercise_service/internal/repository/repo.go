@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"exercise_service/internal/domain"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,7 +19,7 @@ type Db struct {
 	}
 	ExerciseGet interface {
 		GetExerciseByName(ctx context.Context, payload mappings.GetExerciseByName) (*domain.Exercise, error)
-		GetAllExercises(ctx context.Context, userId string) (*[]domain.Exercise, error)
+		GetAllExercises(ctx context.Context, paylaod mappings.GetAllExercises) (*[]domain.Exercise, error)
 		GetExerciseNameByID(ctx context.Context, exerciseId string) (string, error)
 		ExerciseExistsReturnId(ctx context.Context, payload mappings.ExerciseExistsReturnId) (string, error)
 	}

@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 	"fmt"
 
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
@@ -34,7 +34,10 @@ func (s *Service) GetOneExercise(ctx context.Context, in *exerpb.SendExerciseNam
 	}, nil
 }
 func (s *Service) GetAllExercises(ctx context.Context, in *exerpb.GetAllExercisesREq) (*exerpb.GetAllExercisesResp, error) {
-	allExercises, err := s.pg.ExerciseGet.GetAllExercises(ctx, in.UserId)
+
+
+
+	allExercises, err := s.pg.ExerciseGet.GetAllExercises(ctx, mappings.ToGetAllExercises(in))
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +56,8 @@ func (s *Service) GetAllExercises(ctx context.Context, in *exerpb.GetAllExercise
 
 		resp.AllExericses = append(resp.AllExericses, &eachExer)
 	}
+
+	resp.NumberOfExercises = int64(len(*allExercises))
 
 	return &resp, nil
 }
@@ -78,7 +83,9 @@ func (s *Service) DeleteExercise(ctx context.Context, in *exerpb.SendExerciseNam
 		return nil, err
 	}
 
-	return &exerpb.DeleteExerciseResp{}, nil
+	return &exerpb.DeleteExerciseResp{
+		Message: fmt.Sprintf("exercise %s is deleted", in.ExerciseName),
+	}, nil
 }
 func (s *Service) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName) (*exerpb.ExerciseExistsReturnIdResp, error) {
 	exerciseId, err := s.pg.ExerciseGet.ExerciseExistsReturnId(ctx, mappings.ToExerciseExistsReturnId(in))

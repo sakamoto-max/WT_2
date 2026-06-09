@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
+
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/middleware"
-	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/models"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/utils"
+	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
+	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	"go.uber.org/zap"
 )
 
@@ -136,14 +137,16 @@ func (h *Handler) GetAllExercises(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.InternalServerErr(w, err)
 	}
-	
+
+	equipment := r.URL.Query().Get("equipment")
+	bodyPart := r.URL.Query().Get("bodypart")
 
 	logger.Log.Infow("GET_ALL_EXERCISES_CALLED", zap.String("REQ_ID", reqId))
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*3)
 	defer cancel()
 
-	in := exerpb.GetAllExercisesREq{UserId: claims.UserId}
+	in := exerpb.GetAllExercisesREq{UserId: claims.UserId, BodyPart: bodyPart, Equipment: equipment}
 
 	res, err := h.exerClient.GetAllExercises(ctx, &in)
 	if err != nil {

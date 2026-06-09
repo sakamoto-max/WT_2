@@ -27,7 +27,7 @@ type Cache struct {
 	UserPlan interface {
 		SetUserPlan(ctx context.Context, payload domain.Plan)
 		GetUserPlan(ctx context.Context, payload domain.GetPlan) (string, *[]string, error)
-		DelUserPlan(ctx context.Context, payload domain.GetPlan)
+		DelUserPlan(ctx context.Context, payload domain.GetPlan) (error)
 	}
 }
 

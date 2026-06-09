@@ -3,7 +3,7 @@ package cachemock
 import (
 	"context"
 	"exercise_service/internal/domain"
-	"exercise_service/mappings"
+	"exercise_service/internal/mappings"
 
 	// "exercise_service/internal/domain/exercise"
 	"fmt"
