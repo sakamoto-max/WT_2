@@ -2,30 +2,35 @@ package database
 
 import (
 	"context"
-	"fmt"
+	"orchestration_service/internal/config"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
-func NewPool(connString string) (*pgxpool.Pool, error) {
-	pgConfig, err := pgxpool.ParseConfig(connString)
+func NewPgConn(connStr string, config config.Config) *pgxpool.Pool {
+
+	pgConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse the connection string : %w", err)
+		config.Logger.Log.Fatalw("failed to parse pgConfig", zap.Error(err))
 	}
 
 	pgConfig.MaxConns = 10
-	pgConfig.MaxConnLifetime = time.Minute * 10
+	pgConfig.MaxConnLifetime = time.Duration(time.Minute * 10)
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), pgConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create pool : %w", err)
+		config.Logger.Log.Fatalw("error creating the postgres pool", zap.Error(err))
 	}
 
-	err = pool.Ping(context.Background())
+	ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	err = pool.Ping(ctxForPing)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ping the db : %w", err)
+		config.Logger.Log.Fatalw("failed to ping to pg", zap.Error(err))
 	}
 
-	return pool, nil
+	return pool
 }

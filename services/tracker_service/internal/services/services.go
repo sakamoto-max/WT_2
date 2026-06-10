@@ -30,7 +30,7 @@ func (s *Service) StartEmptyWorkout(ctx context.Context, in *trackerpb.StartEmpt
 
 	r, err := s.planClient.GetEmptyPlanId(ctx, &planpb.SendUserID{UserId: in.UserId})
 	if err != nil {
-		return nil, fmt.Errorf("error getting data from plan server : %w", err)
+		return nil, err
 	}
 
 	if trackerId, err = s.pg.Start.StartWorkout(ctx, domain.StartWorkout{UserId: in.UserId, PlanId: r.EmptyPlanId}); err != nil {
@@ -122,7 +122,6 @@ func (s *Service) EndWorkout(ctx context.Context, in *trackerpb.EndWorkoutReq) (
 
 		resp, err := s.exerClient.ExerciseExistsReturnId(ctx, &in)
 		if err != nil {
-
 			return nil, err
 		}
 

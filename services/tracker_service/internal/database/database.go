@@ -3,19 +3,28 @@ package database
 import (
 	"context"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
+	"tracker_service/internal/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
-func NewPgConn() (*pgxpool.Pool, error) {
+func NewPgConn(config config.Config) *pgxpool.Pool {
 
-	pgConfig, err := pgxpool.ParseConfig(os.Getenv("POSTGRES_CONN"))
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
+		config.Db.PgUser,
+		config.Db.PgPass,
+		config.Db.PgHost,
+		config.Db.PgPort,
+		config.Db.PgDatabaseName,
+		config.Db.PgSSLMode,
+	)
+
+	pgConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse pgConfig : %w", err)
+		config.Logger.Log.Fatalw("failed to parse pgConfig", zap.Error(err))
 	}
 
 	pgConfig.MaxConns = 10
@@ -23,7 +32,7 @@ func NewPgConn() (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), pgConfig)
 	if err != nil {
-		return nil, fmt.Errorf("error creating the postgres pool : %w\n", err)
+		config.Logger.Log.Fatalw("error creating the postgres pool", zap.Error(err))
 	}
 
 	ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -31,31 +40,36 @@ func NewPgConn() (*pgxpool.Pool, error) {
 
 	err = pool.Ping(ctxForPing)
 	if err != nil {
-		return nil, fmt.Errorf("Pg conn failed : %w", err)
+		config.Logger.Log.Fatalw("failed to ping to pg", zap.Error(err))
 	}
 
-	return pool, nil
+	return pool
 }
 
-func NewRedisConn() (*redis.Client, error) {
+func NewRedisConn(config config.Config) *redis.Client {
 
-	database := os.Getenv("REDIS_DB")
-	db, _ := strconv.Atoi(database)
+	redisConnStr := fmt.Sprintf("redis://%s:%s@%s:%s/%s",
+		config.Cache.RedisUserName,
+		config.Cache.RedisPass,
+		config.Cache.RedisHost,
+		config.Cache.RedisPort,
+		config.Cache.RedisDb,
+	)
 
-	ops := redis.Options{
-		Addr:     os.Getenv("REDIS_ADDR"),
-		Password: os.Getenv("REDIS_PASS"),
-		DB:       db,
+	ops, err := redis.ParseURL(redisConnStr)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to parse redis connection url", zap.Error(err))
 	}
-	client := redis.NewClient(&ops)
+
+	client := redis.NewClient(ops)
 
 	ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*1)
 	defer cancel()
 
-	err := client.Ping(ctxForPing).Err()
+	err = client.Ping(ctxForPing).Err()
 	if err != nil {
-		return nil, fmt.Errorf("error creating redis client : %w\n", err)
+		config.Logger.Log.Fatalw("failed to ping redis", zap.Error(err))
 	}
 
-	return client, nil
+	return client
 }

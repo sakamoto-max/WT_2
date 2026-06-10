@@ -11,7 +11,7 @@ import (
 )
 
 type consumer struct {
-	emailQueue *queue.MessageQueue
+	emailQueue queue.QueueIface
 	logger     *logger.MyLogger
 	jobs       chan<- types.Data
 }

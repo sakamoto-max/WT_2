@@ -1,11 +1,12 @@
 package server
 
 import (
+	"email_service/internals/config"
 	"email_service/internals/database"
 	"email_service/internals/repostitory"
 	"email_service/internals/services"
 	"email_service/internals/types"
-	"os"
+	"fmt"
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,8 +22,8 @@ type Server struct {
 	PgPool          *pgxpool.Pool
 	Db              *repostitory.Db
 	MqConn          *amqp091.Connection
-	EmailQueue      *queue.MessageQueue
-	ResQueue        *queue.MessageQueue
+	EmailQueue      queue.QueueIface
+	ResQueue        queue.QueueIface
 	Service         *services.Service
 	SenderChan      chan types.Data
 	JobsChan        chan types.Data
@@ -32,38 +33,44 @@ type Server struct {
 	NumberOfWorkers int
 }
 
-func NewSever() Server {
-	logger := logger.NewLogger()
-	defer logger.Log.Sync()
-	// db
-	pool := database.NewDb(os.Getenv("POSTGRES_CONN"), logger)
+func NewSever(config config.Config) Server {
 
-	db := repostitory.RegisterDb(pool, logger)
+	pool := database.NewPgConn(config)
 
-	logger.Log.Infoln("connected to the database")
-	// mq
-	conn := queue.NewConn()
-	logger.Log.Infoln("connected to the rabbit mq")
+	db := repostitory.RegisterDb(pool, config.Logger)
+
+	config.Logger.Log.Infoln("connected to the database")
+
+	mqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/",
+		config.Mq.UserName,
+		config.Mq.Pass,
+		config.Mq.Host,
+		config.Mq.Port,
+	)
+	conn, err := queue.NewConn(mqURL)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to open rabbimq connection", zap.Error(err))
+	}
+
+	config.Logger.Log.Infoln("connected to the rabbit mq")
 
 	emailQueue := queue.NewMessageQueue(conn, enum.QueueName_EMAIL_QUEUE.String())
 
 	resQueue := queue.NewMessageQueue(conn, enum.QueueName_RESULT_QUEUE.String())
 	// service
-	service := services.NewService(logger)
+	service := services.NewService(config.Logger)
 
-	numberOfSenders := 5
-	numberOfWorkers := 5
 	// sender chan
-	senderChan := make(chan types.Data, numberOfSenders*2)
+	senderChan := make(chan types.Data, config.Consumer.NumberOfSenders*2)
 	// jobs chan
-	jobsChan := make(chan types.Data, numberOfWorkers*2)
+	jobsChan := make(chan types.Data, config.Consumer.NumberOfWorkers*2)
 
 	var senderWg sync.WaitGroup
 
 	var workerWg sync.WaitGroup
 
 	return Server{
-		Logger:          logger,
+		Logger:          config.Logger,
 		PgPool:          pool,
 		Db:              db,
 		MqConn:          conn,
@@ -74,8 +81,8 @@ func NewSever() Server {
 		SenderChan:      senderChan,
 		WorkersWg:       &workerWg,
 		SendersWg:       &senderWg,
-		NumberOfSenders: numberOfSenders,
-		NumberOfWorkers: numberOfWorkers,
+		NumberOfSenders: config.Consumer.NumberOfSenders,
+		NumberOfWorkers: config.Consumer.NumberOfWorkers,
 	}
 }
 
@@ -84,13 +91,10 @@ func (s Server) Shutdown(signal string) {
 	s.Logger.Log.Infow("shutdown signal received", zap.String("signal", signal))
 
 	// close consumer -> close the emailqueue
-	err := s.EmailQueue.Ch.Close()
-	if err != nil {
-		s.Logger.Log.Errorw("falied to close the email queue channel", zap.Error(err))
-	}
-
+	s.EmailQueue.Close()
 	s.Logger.Log.Infoln("consumer have stopped")
 	// close worker
+
 	close(s.JobsChan)
 	s.WorkersWg.Wait()
 

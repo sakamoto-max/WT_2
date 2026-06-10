@@ -15,9 +15,30 @@ func Load(fileName string) {
 }
 
 func Validate() {
-	_, ok := os.LookupEnv("POSTGRES_CONN")
+
+	_, ok := os.LookupEnv("PG_USER")
 	if !ok {
-		log.Fatalf("unable to find env POSTGRES_CONN")
+		log.Fatalf("unable to find env PG_USER")
+	}
+	_, ok = os.LookupEnv("PG_PASS")
+	if !ok {
+		log.Fatalf("unable to find env PG_PASS")
+	}
+	_, ok = os.LookupEnv("PG_HOST")
+	if !ok {
+		log.Fatalf("unable to find env PG_HOST")
+	}
+	_, ok = os.LookupEnv("PG_ADDRESS")
+	if !ok {
+		log.Fatalf("unable to find env PG_ADDRESS")
+	}
+	_, ok = os.LookupEnv("PG_DATABASE_NAME")
+	if !ok {
+		log.Fatalf("unable to find env PG_DATABASE_NAME")
+	}
+	_, ok = os.LookupEnv("PG_SSL_MODE")
+	if !ok {
+		log.Fatalf("unable to find env PG_SSL_MODE")
 	}
 	_, ok = os.LookupEnv("REDIS_ADDR")
 	if !ok {

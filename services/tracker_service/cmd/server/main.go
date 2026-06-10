@@ -1,19 +1,13 @@
 package main
 
 import (
-	"os"
 	"tracker_service/internal/bootstrap"
-	"tracker_service/internal/env"
+	"tracker_service/internal/config"
 )
 
 func main() {
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../../.env")
-	}
+	config := config.LoadConfig()
 
-	env.LookUp()
-
-	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
+	app := bootstrap.NewApp(config)
 	app.Run()
 }

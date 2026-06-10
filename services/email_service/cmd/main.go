@@ -1,32 +1,20 @@
 package main
 
 import (
+	"email_service/internals/config"
 	"email_service/internals/consumer"
-	"email_service/internals/env"
 	"email_service/internals/sender"
 	"email_service/internals/server"
 	"email_service/internals/worker"
 	"os"
 	"os/signal"
-	// "github.com/sakamoto-max/rabbit_mq/types"
-	// "go.uber.org/zap"
-)
-
-const (
-	NumberOfWorkers = 5
-	NumberOfSenders = 5
 )
 
 func main() {
 
-	// env
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../.env")
-	}
-	env.LookUp()
-
-	server := server.NewSever()
+	config := config.LoadConfig()
+	
+	server := server.NewSever(config)
 
 	//	senders
 	go sender.StartSenders(server)

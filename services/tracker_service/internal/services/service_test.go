@@ -13,7 +13,6 @@ import (
 	"github.com/go-openapi/testify/assert"
 	trackerpb "github.com/sakamoto-max/wt_2_proto/shared/tracker"
 )
-
 func Test_GetHealth(t *testing.T) {
 
 	tests := []struct {

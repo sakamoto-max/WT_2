@@ -5,10 +5,12 @@ import (
 	"os"
 	"os/signal"
 	"plan_service/internal/client"
+	"plan_service/internal/config"
 	"plan_service/internal/database"
-	"plan_service/internal/repository/cache"
 	"plan_service/internal/repository"
+	"plan_service/internal/repository/cache"
 	"plan_service/internal/services"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
@@ -18,63 +20,47 @@ import (
 )
 
 type app struct {
-	addr        string
 	service     *services.Service
 	logger      *logger.MyLogger
 	pool        *pgxpool.Pool
 	redisClient *redis.Client
-	exerConn        *grpc.ClientConn
+	exerConn    *grpc.ClientConn
+	config      config.Config
 }
 
-func NewApp(addr string) *app {
+func NewApp(config config.Config) *app {
 
 	logger := logger.NewLogger()
 
-	pool, err := database.NewPgConn()
-	if err != nil {
-		logger.Log.Fatalw("failed to open postgres pool", zap.Error(err))
-	}
+	pool := database.NewPgConn(config)
+	config.Logger.Log.Infoln("connected to postgres")
 
-	redisClient, err := database.NewRedisConn()
-	if err != nil {
-		logger.Log.Fatalw("failed to open redis client", zap.Error(err))
-	}
+	redisClient := database.NewRedisConn(config)
+	config.Logger.Log.Infoln("connected to redis")
 
 	pg := repository.NewDb(pool)
 	cache := cache.NewCache(redisClient)
 
-	exerConn := client.NewEmptyClient().OpenConnection(os.Getenv("EXERCISE_GRPC_SERVER_ADDR"))
-	exerClient := exerConn.CreateExerciseClient()
+	exerConn := client.NewConn(config.OtherServices.ExerServiceHost, config.OtherServices.ExerServiceAddr, config.Logger)
+	exerClient := client.CreateExerciseClient(exerConn)
+	config.Logger.Log.Infoln("connected to exercise client")
 
 	service := services.NewService(pg, cache, exerClient)
-	// handler := handler.NewHandler(service, logger)
 
 	return &app{
-		addr:    addr,
-		service: service,
-		logger:  logger,
-		pool: pool,
+		service:     service,
+		logger:      logger,
+		pool:        pool,
 		redisClient: redisClient,
-		exerConn: exerConn.Conn,
+		exerConn:    exerConn,
+		config:      config,
 	}
 
 }
 
 func (a *app) Run() {
 
-	defer func(){
-		err := a.redisClient.Close()
-		if err != nil {
-			a.logger.Log.Infow("failed to close redis client", zap.Error(err))
-		}
-		a.exerConn.Close()
-		if err != nil {
-			a.logger.Log.Infow("failed to close exer grpc conn", zap.Error(err))
-		}
-		a.pool.Close()
-	}()
-
-	lis, err := net.Listen("tcp", a.addr)
+	lis, err := net.Listen("tcp", a.config.Server.GrpcServerAddr)
 	if err != nil {
 		a.logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
@@ -86,7 +72,7 @@ func (a *app) Run() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	go func() {
-		a.logger.Log.Infof("grpc server has started at %v", a.addr)
+		a.logger.Log.Infow("grpc server has started", zap.String("addr", a.config.Server.GrpcServerAddr))
 		if err := grpcServer.Serve(lis); err != nil {
 			sigChan <- os.Interrupt
 			a.logger.Log.Fatalf("error listening to the grpc server : %v", err)
@@ -97,6 +83,16 @@ func (a *app) Run() {
 	a.logger.Log.Infof("shutdown signal received : %v", sig.String())
 
 	grpcServer.GracefulStop()
+	a.logger.Log.Infoln("grpc server is closed")
 
-	a.logger.Log.Infof("server is closed")
+	a.redisClient.Close()
+	a.logger.Log.Infoln("redis client is closed")
+
+	a.exerConn.Close()
+	a.logger.Log.Infoln("exercise service connection is closed")
+
+	a.pool.Close()
+	a.logger.Log.Infoln("postgres connection is closed")
+
+	a.logger.Log.Infof("server has shutdown")
 }

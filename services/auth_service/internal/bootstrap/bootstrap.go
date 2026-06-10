@@ -1,11 +1,10 @@
 package bootstrap
 
 import (
+	"auth_service/internal/config"
 	"auth_service/internal/database"
 	"auth_service/internal/repository"
 	"auth_service/internal/repository/cache"
-
-	// "auth_service/internal/repository/cache"
 	"auth_service/internal/services"
 	"net"
 	"os"
@@ -20,36 +19,32 @@ import (
 )
 
 type app struct {
-	Addr        string
 	service     *services.Service
 	Logger      *logger.MyLogger
 	pool        *pgxpool.Pool
 	redisClient *redis.Client
+	config      config.Config
 }
 
-func NewApp(addr string) *app {
+func NewApp(config config.Config) *app {
 
 	logger := logger.NewLogger()
 
-	pool, err := database.NewPgConn()
-	if err != nil {
-		logger.Log.Fatalw("failed to connet to postgres db", zap.Error(err))
-	}
+	pool := database.NewPgConn(config)
 
-	redisClient, err := database.NewRedisConn()
-	if err != nil {
-		logger.Log.Fatalw("failed to make redis client", zap.Error(err))
-	}
+	logger.Log.Infoln("connected to postgres")
 
-	d := repository.NewDb2(pool)
-	// cache := cache.NewCache(redisClient)
+	redisClient := database.NewRedisConn(config)
+
+	logger.Log.Infoln("connected to redis")
+
+	d := repository.RegisterDB(pool)
 	cache := cache.NewCache(redisClient)
 
 	service := services.NewService(d, cache)
-	// handler := handler.NewHandler(service, logger)
-
 	return &app{
-		Addr:        addr,
+
+		config:      config,
 		service:     service,
 		Logger:      logger,
 		redisClient: redisClient,
@@ -69,10 +64,12 @@ func (a *app) Run() {
 
 	defer a.pool.Close()
 
-	lis, err := net.Listen("tcp", a.Addr)
+	lis, err := net.Listen("tcp", a.config.Server.GrpcServerAddr)
 	if err != nil {
 		a.Logger.Log.Fatalf("failed to listen to tcp : %v", err)
 	}
+
+	a.Logger.Log.Infoln("started tcp connection")
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, a.service)
@@ -81,7 +78,7 @@ func (a *app) Run() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	go func() {
-		a.Logger.Log.Infof("grpc server has started at %v", a.Addr)
+		a.Logger.Log.Infow("grpc server has started", zap.String("addr", a.config.Server.GrpcServerAddr))
 		if err := grpcServer.Serve(lis); err != nil {
 			sigChan <- os.Interrupt
 			a.Logger.Log.Fatalf("error listening to the grpc server : %v", err)

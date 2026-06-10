@@ -19,7 +19,7 @@ import (
 type Sender struct {
 	id         int
 	logger     *logger.MyLogger
-	resQueue   *queue.MessageQueue
+	resQueue   queue.QueueIface
 	senderChan <-chan types.Data
 	db         *repostitory.Db
 }

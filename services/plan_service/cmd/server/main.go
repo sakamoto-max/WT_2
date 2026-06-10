@@ -1,21 +1,22 @@
 package main
 
 import (
-	"os"
 	"plan_service/internal/bootstrap"
-	"plan_service/internal/env"
+	"plan_service/internal/config"
 )
 
 func main() {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../../.env")
-	}
+	// stage := os.Getenv("STAGE")
+	// if stage == "" {
+	// 	env.Load("../../.env")
+	// }
 
-	env.LookupForApi()
+	// env.LookupForApi()
 
-	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
+	config := config.LoadConfig()
+
+	app := bootstrap.NewApp(config)
 	app.Run()
 
 }

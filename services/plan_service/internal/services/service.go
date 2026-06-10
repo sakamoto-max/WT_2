@@ -96,8 +96,6 @@ func (s *Service) GetAllPlans(ctx context.Context, in *planpb.GetAllPlansReq) (*
 
 func (s *Service) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq) (*planpb.GetPlanByNameResp, error) {
 
-	fmt.Println("get plan by name called")
-
 	PlanId, ExerciseIds, err := s.cache.UserPlan.GetUserPlan(ctx, domain.ToGetPlan(in))
 	if err != nil || PlanId == "" {
 
@@ -131,12 +129,6 @@ func (s *Service) GetPlanByName(ctx context.Context, in *planpb.GetPlanByNameReq
 
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
 	}
-
-	fmt.Println("plan in plan", planpb.GetPlanByNameResp{
-		PlanName:      in.PlanName,
-		PlanId:        PlanId,
-		ExerciseNames: allExerciseNames,
-	})
 
 	return &planpb.GetPlanByNameResp{
 		PlanName:      in.PlanName,
@@ -175,7 +167,7 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 			exerId := dbErr.GetExerciseId()
 			resp, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{UserId: in.UserId, ExerciseId: exerId})
 			if err != nil {
-				return nil, myerrs.InternalServerErrMaker(err)
+				return nil, err
 			}
 
 			return nil, myerrs.AlreadyExitsErrMaker(fmt.Sprintf("exercise %s", resp.ExerciseName))
@@ -195,7 +187,7 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 
 		r, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: in.UserId})
 		if err != nil {
-			return nil, fmt.Errorf("error getting data from exercise grpc server : %w", err)
+			return nil, err
 		}
 
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
@@ -268,7 +260,7 @@ func (s *Service) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanRe
 
 		r, err := s.gClient.ExerciseExistsReturnId(ctx, &exerpb.SendExerciseName{ExerciseName: v, UserId: in.UserId})
 		if err != nil {
-			return nil, fmt.Errorf("error getting data from exercise server : %w", err)
+			return nil, err
 		}
 
 		exerciseIds = append(exerciseIds, r.ExerciseId)
@@ -290,7 +282,7 @@ func (s *Service) DeleteExercisesFromPlan(ctx context.Context, in *planpb.PlanRe
 
 		r, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: in.UserId})
 		if err != nil {
-			return nil, fmt.Errorf("error getting data from exercise grpc server : %w", err)
+			return nil, err
 		}
 
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)

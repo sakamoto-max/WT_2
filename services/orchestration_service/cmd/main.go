@@ -1,8 +1,8 @@
 package main
 
 import (
+	"orchestration_service/internal/config"
 	"orchestration_service/internal/consumer"
-	"orchestration_service/internal/env"
 	"orchestration_service/internal/fetcher"
 	"orchestration_service/internal/server"
 	"orchestration_service/internal/workers"
@@ -12,13 +12,9 @@ import (
 
 func main() {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../.env")
-	}
-	env.LookUp()
+	config := config.LoadConfig()
 
-	server := server.NewServer()
+	server := server.NewServer(config)
 
 	go consumer.StartConsumer(server)
 	go fetcher.StartFetcher(server)

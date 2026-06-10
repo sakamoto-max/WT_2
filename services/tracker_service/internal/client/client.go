@@ -19,15 +19,7 @@ type client struct {
 	ExerClient  exerpb.ExerciseServiceClient
 }
 
-type Client struct {
-	Conn *grpc.ClientConn
-}
-
-func NewEmptyClient() *Client {
-	return &Client{}
-}
-
-func (c *Client) OpenConnection(targetServiceAddr string) *Client {
+func OpenConnection(targetServiceAddr string) *grpc.ClientConn {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -36,22 +28,17 @@ func (c *Client) OpenConnection(targetServiceAddr string) *Client {
 		log.Fatalf("failed to create the client : %v", err)
 	}
 
-	return &Client{Conn: conn}
+	return conn
 }
 
-func (c *Client) CreatePlanClient() PlanClientIFace {
-	planClient := planpb.NewPlanServiceClient(c.Conn)
+func CreatePlanClient(conn *grpc.ClientConn) PlanClientIFace {
+	planClient := planpb.NewPlanServiceClient(conn)
 	return planClient
 }
-func (c *Client) CreateExerciseClient() ExerClientIface {
-	exerClient := exerpb.NewExerciseServiceClient(c.Conn)
+func CreateExerciseClient(conn *grpc.ClientConn) ExerClientIface {
+	exerClient := exerpb.NewExerciseServiceClient(conn)
 	return exerClient
 }
-
-// func (c *client) Close() {
-// 	c.ConnForExer.Close()
-// 	c.ConnForPlan.Close()
-// }
 
 type PlanClientIFace interface {
 	GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID, opts ...grpc.CallOption) (*planpb.EmptyPlanIdResp, error)
@@ -65,9 +52,7 @@ type ExerClientIface interface {
 	ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName, opts ...grpc.CallOption) (*exerpb.ExerciseExistsReturnIdResp, error)
 }
 
-
 // exerciseExistsReturnsId
-
 
 // type planClient struct {
 // 	client planpb.PlanServiceClient

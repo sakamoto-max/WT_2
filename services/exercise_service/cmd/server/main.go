@@ -2,19 +2,13 @@ package main
 
 import (
 	"exercise_service/internal/bootstrap"
-	"exercise_service/internal/env"
-	"os"
+	"exercise_service/internal/config"
 )
 
 func main() {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../../.env")
-	}
+	config := config.LoadConfig()
 
-	env.LookUp()
-
-	app := bootstrap.NewApp(os.Getenv("GRPC_SERVER_ADDR"))
+	app := bootstrap.NewApp(config)
 	app.Run()
 }

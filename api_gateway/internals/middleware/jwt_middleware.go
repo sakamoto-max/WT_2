@@ -17,7 +17,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("access-token")
 		if token == "" {
-			err := myerrors.NewAppErr(jwt.ErrTokenIsMissing, http.StatusBadRequest)
+			err := myerrors.NewAppErr(jwt.ErrTokenIsMissing, http.StatusUnauthorized)
 			err.AppErrWriter(w)
 			return
 		}
@@ -26,17 +26,16 @@ func JwtMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			switch {
 			case errors.Is(err, jwt.ErrTokenMalformed):
-				err := myerrors.NewAppErr(jwt.ErrTokenMalformed, http.StatusBadRequest)
+				err := myerrors.NewAppErr(jwt.ErrTokenMalformed, http.StatusUnauthorized)
 				err.AppErrWriter(w)
 			case errors.Is(err, jwt.ErrTokenInvalid):
-				fmt.Printf("error : %v\n", err)
-				err := myerrors.NewAppErr(jwt.ErrTokenInvalid, http.StatusBadRequest)
+				err := myerrors.NewAppErr(jwt.ErrTokenInvalid, http.StatusUnauthorized)
 				err.AppErrWriter(w)
 			case errors.Is(err, jwt.ErrTokenExpired):
-				err := myerrors.NewAppErr(jwt.ErrTokenExpired, http.StatusBadRequest)
+				err := myerrors.NewAppErr(jwt.ErrTokenExpired, http.StatusUnauthorized)
 				err.AppErrWriter(w)
 			case errors.Is(err, jwt.ErrSignatureInvalid):
-				err := myerrors.NewAppErr(jwt.ErrSignatureInvalid, http.StatusBadRequest)
+				err := myerrors.NewAppErr(jwt.ErrSignatureInvalid, http.StatusUnauthorized)
 				err.AppErrWriter(w)
 			default:
 				utils.InternalServerErr(w, err)

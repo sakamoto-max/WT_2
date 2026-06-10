@@ -2,10 +2,11 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"orchestration_service/internal/config"
 	"orchestration_service/internal/database"
 	"orchestration_service/internal/repository"
 	"orchestration_service/internal/types"
-	"os"
 	"sync"
 	"time"
 
@@ -36,21 +37,45 @@ type Server struct {
 	NumberOfWorkers int
 }
 
-func NewServer() Server {
+func NewServer(config config.Config) Server {
 
 	logger := logger.NewLogger()
 
-	authPool, err := database.NewPool(os.Getenv("AUTH_POSTGRES_CONN"))
-	if err != nil {
-		logger.Log.Fatalw("failed to connect to auth pg", zap.Error(err))
-	}
+	authURl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
+		config.Dbs.Auth.PgUser,
+		config.Dbs.Auth.PgPass,
+		config.Dbs.Auth.PgHost,
+		config.Dbs.Auth.PgPort,
+		config.Dbs.Auth.PgDatabaseName,
+		config.Dbs.Auth.PgSSLMode,
+	)
 
-	trackerPool, err := database.NewPool(os.Getenv("TRACKER_POSTGRES_CONN"))
-	if err != nil {
-		logger.Log.Fatalw("failed to connect to tracker pg", zap.Error(err))
-	}
+	authPool := database.NewPgConn(authURl, config)
 
-	mqConn := mq.NewConn()
+	trackerURl := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
+		config.Dbs.Tracker.PgUser,
+		config.Dbs.Tracker.PgPass,
+		config.Dbs.Tracker.PgHost,
+		config.Dbs.Tracker.PgPort,
+		config.Dbs.Tracker.PgDatabaseName,
+		config.Dbs.Tracker.PgSSLMode,
+	)
+
+	trackerPool := database.NewPgConn(trackerURl, config)
+
+	config.Logger.Log.Infoln("connected to postgres")
+
+	mqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/",
+		config.Mq.MqUserName,
+		config.Mq.MqPass,
+		config.Mq.MqHostName,
+		config.Mq.MqPort,
+	)
+
+	mqConn, err := mq.NewConn(mqURL)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to connect to rabbit mq", zap.Error(err))
+	}
 
 	planQueue := mq.NewMessageQueue(mqConn, enum.QueueName_PLAN_QUEUE.String())
 
@@ -63,9 +88,9 @@ func NewServer() Server {
 
 	Db := repository.NewDb(authDb, trackerDb)
 
-	NumberOfWorkers := 5
+	// NumberOfWorkers := 5
 
-	jobs := make(chan types.Data, NumberOfWorkers*2)
+	jobs := make(chan types.Data, config.Consumer.NumberOfWorkers*2)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	var workerWg sync.WaitGroup
@@ -88,7 +113,7 @@ func NewServer() Server {
 		WorkersWg:       &workerWg,
 		FetcherWg:       &fetcherWg,
 		Ticker:          ticker,
-		NumberOfWorkers: NumberOfWorkers,
+		NumberOfWorkers: config.Consumer.NumberOfWorkers,
 	}
 }
 

@@ -39,7 +39,7 @@ type Db struct {
 	}
 }
 
-func NewDb2(pg *pgxpool.Pool) Db {
+func RegisterDB(pg *pgxpool.Pool) Db {
 	return Db{
 		Auth: &authDb{pg},
 		Password: NewPassDb(pg),
