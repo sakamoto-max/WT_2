@@ -40,5 +40,3 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	return r
 }
-
-// pagnation, filtering. search

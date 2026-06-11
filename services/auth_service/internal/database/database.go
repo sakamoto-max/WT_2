@@ -5,12 +5,12 @@ import (
 	"context"
 	"fmt"
 	"time"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/zap"
 )
 
-func NewPgConn(config config.Config) *pgxpool.Pool {
+func NewPgConn(config config.Config) (*pgxpool.Pool, error) {
 
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
 		config.Db.PgUser,
@@ -23,7 +23,7 @@ func NewPgConn(config config.Config) *pgxpool.Pool {
 
 	pgConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		config.Logger.Log.Fatalw("failed to parse pgConfig", zap.Error(err))
+		return nil, fmt.Errorf("failed to parse postgres url : %w", err)
 	}
 
 	pgConfig.MaxConns = 10
@@ -31,7 +31,7 @@ func NewPgConn(config config.Config) *pgxpool.Pool {
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), pgConfig)
 	if err != nil {
-		config.Logger.Log.Fatalw("error creating the postgres pool", zap.Error(err))
+		return nil, fmt.Errorf("failed to create postgres pool : %w", err)
 	}
 
 	ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -39,13 +39,13 @@ func NewPgConn(config config.Config) *pgxpool.Pool {
 
 	err = pool.Ping(ctxForPing)
 	if err != nil {
-		config.Logger.Log.Fatalw("failed to ping to pg", zap.Error(err))
+		return nil, fmt.Errorf("failed to ping to pg : %w", err)
 	}
 
-	return pool
+	return pool, nil
 }
 
-func NewRedisConn(config config.Config) *redis.Client {
+func NewRedisConn(config config.Config) (*redis.Client, error) {
 
 	redisConnStr := fmt.Sprintf("redis://%s:%s@%s:%s/%s",
 		config.Cache.RedisUserName,
@@ -57,7 +57,7 @@ func NewRedisConn(config config.Config) *redis.Client {
 
 	ops, err := redis.ParseURL(redisConnStr)
 	if err != nil {
-		config.Logger.Log.Fatalw("failed to parse redis connection url", zap.Error(err))
+		return nil, fmt.Errorf("failed to parse redis conn url : %w", err)
 	}
 
 	client := redis.NewClient(ops)
@@ -67,10 +67,10 @@ func NewRedisConn(config config.Config) *redis.Client {
 
 	err = client.Ping(ctxForPing).Err()
 	if err != nil {
-		config.Logger.Log.Fatalw("failed to ping redis", zap.Error(err))
+		return nil, fmt.Errorf("failed to ping redis : %w", err)
 	}
 
-	return client
+	return client, nil
 }
 
 // docker run -p 6001:6001 -e POSTGRES_CONN="postgresql://postgres:root@host.docker.internal:5432/auth?sslmode=disable" -e REDIS_ADDR="host.docker.internal:6379" -e REDIS_DB="0" -e SERVICE_NAME="auth_service" -e REDIS_PASS="" -e SECRET_KEY="asdfghjklazsxdc" -e GRPC_SERVER_ADDR="6001" -it auth_service

@@ -28,15 +28,19 @@ type app struct {
 
 func NewApp(config config.Config) *app {
 
-	logger := logger.NewLogger()
+	pool, err := database.NewPgConn(config)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to connect to postgres", zap.Error(err))
+	}
 
-	pool := database.NewPgConn(config)
+	config.Logger.Log.Infoln("connected to postgres")
 
-	logger.Log.Infoln("connected to postgres")
+	redisClient, err := database.NewRedisConn(config)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to connect to redis", zap.Error(err))
+	}
 
-	redisClient := database.NewRedisConn(config)
-
-	logger.Log.Infoln("connected to redis")
+	config.Logger.Log.Infoln("connected to redis")
 
 	d := repository.RegisterDB(pool)
 	cache := cache.NewCache(redisClient)
@@ -46,7 +50,7 @@ func NewApp(config config.Config) *app {
 
 		config:      config,
 		service:     service,
-		Logger:      logger,
+		Logger:      config.Logger,
 		redisClient: redisClient,
 		pool:        pool,
 	}

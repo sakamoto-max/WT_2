@@ -3,10 +3,10 @@ package mappings
 import pb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 
 type SignUp struct {
-	Name     string
-	Email    string
-	Password string
-	Role     string
+	Name     string `validate:"required"`
+	Email    string `validate:"required"`
+	Password string `validate:"required"`
+	Role     string `validate:"required"`
 }
 
 func ToUserSignUp(in *pb.UserSignUpReq) SignUp {
