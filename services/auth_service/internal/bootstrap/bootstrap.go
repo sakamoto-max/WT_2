@@ -47,7 +47,6 @@ func NewApp(config config.Config) *app {
 
 	service := services.NewService(d, cache)
 	return &app{
-
 		config:      config,
 		service:     service,
 		Logger:      config.Logger,

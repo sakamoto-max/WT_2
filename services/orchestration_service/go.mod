@@ -3,10 +3,11 @@ module orchestration_service
 go 1.25.4
 
 require (
+	github.com/go-openapi/testify v0.0.0-20251001202347-e909893202bd
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/rabbitmq/amqp091-go v1.11.0
-	github.com/sakamoto-max/rabbit_mq v1.3.2
+	github.com/sakamoto-max/rabbit_mq v1.3.3
 	github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba
 	github.com/sakamoto-max/wt_2_proto v1.1.9
 	go.uber.org/zap v1.28.0

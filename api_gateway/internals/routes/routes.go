@@ -40,3 +40,59 @@ func NewRouter(h *handlers.Handler) *chi.Mux {
 
 	return r
 }
+
+// {
+// 	"workout" : [
+// 		{
+// 			"exercise_name" : "push_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		},
+// 		{
+// 			"exercise_name" : "pull_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		},
+// 		{
+// 			"exercise_name" : "pull_ups",
+// 			"tracker" : [
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				},
+// 				{
+// 					"weight" : 10,
+// 					"reps" : 11
+// 				}
+// 			]
+// 		}
+// 	]
+// }

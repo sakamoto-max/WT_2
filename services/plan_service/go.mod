@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/redis/go-redis/v9 v9.18.0
-	github.com/sakamoto-max/rabbit_mq v1.3.1
+	github.com/sakamoto-max/rabbit_mq v1.3.3
 	github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba
 	github.com/sakamoto-max/wt_2_proto v1.1.9
 	github.com/stretchr/testify v1.11.1

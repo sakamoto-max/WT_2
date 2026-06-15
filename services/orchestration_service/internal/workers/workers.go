@@ -8,7 +8,6 @@ import (
 	"orchestration_service/internal/types"
 	"sync"
 	"time"
-
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
 	"github.com/sakamoto-max/wt_2_pkg/logger"

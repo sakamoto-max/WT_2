@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"plan_service/internal/mq_consumer/server"
 	"plan_service/internal/mq_consumer/types"
+	"sync"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
@@ -26,13 +27,15 @@ func StartConsumer(server server.Server) {
 		jobs:      server.JobsChan,
 	}
 
-	go consumer.Start(server.Ctx)
+	server.ConsumerWg.Add(1)
+	go consumer.Start(server.Ctx, server.ConsumerWg)
 
 	server.Logger.Log.Infoln("consumer has started")
 
 }
 
-func (c *consumer) Start(ctx context.Context) {
+func (c *consumer) Start(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	msgs, err := c.planQueue.Consume()
 	if err != nil {
@@ -45,7 +48,7 @@ func (c *consumer) Start(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case msg, ok := <-msgs:
-			
+
 			if !ok {
 				return
 			}

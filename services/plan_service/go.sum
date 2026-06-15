@@ -60,6 +60,8 @@ github.com/sakamoto-max/rabbit_mq v1.3.0 h1:1gwU9VYZAQzzDLZssN2H9kpkT1tFxzkEyDu4
 github.com/sakamoto-max/rabbit_mq v1.3.0/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
 github.com/sakamoto-max/rabbit_mq v1.3.1 h1:rLdYlfFAc3s25mnhNkQq6q/ZZY7Ug6sn6qIJz21cK3g=
 github.com/sakamoto-max/rabbit_mq v1.3.1/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
+github.com/sakamoto-max/rabbit_mq v1.3.3 h1:QGiYXEbXqsWfiK9TdISExPX2cUtQyyCzvfhe2I3nJp4=
+github.com/sakamoto-max/rabbit_mq v1.3.3/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba h1:ayEzn70puI4hjdMbWD3ON5eZy4LsmmmxllW1wV5x9C4=
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba/go.mod h1:iG7xX4nTbmew1MGAzL7ek8Cxlz6rxojuUDTKqQjYDCM=
 github.com/sakamoto-max/wt_2_proto v1.1.9 h1:3cE6Ls68ZEW2YpYxG84P3eMH7Ar1RKaqa1vorbHeUx0=

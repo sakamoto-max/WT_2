@@ -23,12 +23,10 @@ type fetcher struct {
 
 func StartFetcher(server server.Server) {
 
-	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
-
 	fetcher := fetcher{
 		db:             server.Db,
 		logger:         server.Logger,
-		targetServices: &targetServices,
+		targetServices: server.FetcherTargetServices,
 		jobsChan:       server.JobsChan,
 		TickerChan:     server.Ticker.C,
 	}
@@ -40,20 +38,10 @@ func StartFetcher(server server.Server) {
 	server.Logger.Log.Infoln("fetcher has started")
 }
 
-func NewFetcher(db *repository.Db, logger *logger.MyLogger, targetServices *[]string, jobsChan chan<- types.Data, tickerChan <-chan time.Time) *fetcher {
-	return &fetcher{
-		db:             db,
-		logger:         logger,
-		targetServices: targetServices,
-		jobsChan:       jobsChan,
-		TickerChan:     tickerChan,
-	}
-}
-
 func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 
 	defer wg.Done()
-	
+
 	for {
 		select {
 		case <-p.TickerChan:
@@ -82,17 +70,17 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 				data := <-DataChan
 
 				for _, v := range *data {
-					if v.NoData {
-						p.logger.Log.Infow("no rows found", 
+					if v.Err != nil {
+						p.logger.Log.Errorw("failed to fetch data",
 							zap.String("service name", v.ServiceName),
+							zap.Error(v.Err),
 						)
 						continue
 					}
 
-					if v.Err != nil {
-						p.logger.Log.Errorw("failed to fetch data", 
-							zap.String("service name", v.ServiceName), 
-							zap.Error(v.Err),
+					if v.NoData {
+						p.logger.Log.Infow("no rows found",
+							zap.String("service name", v.ServiceName),
 						)
 						continue
 					}
@@ -103,7 +91,7 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 			close(DataChan)
 
 		case <-ctx.Done():
-		
+
 			return
 		}
 	}

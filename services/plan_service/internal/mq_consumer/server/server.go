@@ -34,12 +34,12 @@ type Server struct {
 	SendersChan     chan mqTypes.Data
 	SenderWg        *sync.WaitGroup
 	WorkerWg        *sync.WaitGroup
+	ConsumerWg      *sync.WaitGroup
 	ExerConn        *grpc.ClientConn
 	ExerClient      client.ExerClientIface
 	NumberOfWorkers int
 	NumberOfSenders int
 	Cache           *cache.Cache
-	// config          config.Config
 }
 
 func NewServer(config config.Config) Server {
@@ -47,7 +47,7 @@ func NewServer(config config.Config) Server {
 	// logger := logger.NewLogger()
 
 	// make url := "amqp://guest:guest@localhost:5672/"
-	             // amqp://guest:guest@localhost:5673/
+	// amqp://guest:guest@localhost:5673/
 
 	mqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/",
 		config.Mq.MqUserName,
@@ -73,7 +73,6 @@ func NewServer(config config.Config) Server {
 	cache := cache.NewCache(redisClient)
 
 	db := repository.NewDb(pool)
-	// logger.Log.Infoln("connected to db")
 
 	// jobs chan
 
@@ -84,6 +83,7 @@ func NewServer(config config.Config) Server {
 
 	var workerWg sync.WaitGroup
 	var senderWg sync.WaitGroup
+	var consumerWg sync.WaitGroup
 
 	exerConn := client.NewConn(config.OtherServices.ExerServiceHost, config.OtherServices.ExerServiceAddr, config.Logger)
 	exerClient := client.CreateExerciseClient(exerConn)
@@ -104,6 +104,7 @@ func NewServer(config config.Config) Server {
 		SendersChan:     senderChan,
 		SenderWg:        &senderWg,
 		WorkerWg:        &workerWg,
+		ConsumerWg:      &consumerWg,
 		ExerConn:        exerConn,
 		ExerClient:      exerClient,
 		NumberOfWorkers: config.NumberOfWorkers,
@@ -116,7 +117,7 @@ func (c Server) ShutDown(signal string) {
 	c.Logger.Log.Infow("signal received", zap.String("signal", signal))
 
 	c.CtxCancel()
-
+	c.ConsumerWg.Wait()
 	c.Logger.Log.Infoln("consumer has closed")
 
 	close(c.JobsChan)

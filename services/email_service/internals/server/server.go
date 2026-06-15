@@ -20,7 +20,7 @@ import (
 type Server struct {
 	Logger          *logger.MyLogger
 	PgPool          *pgxpool.Pool
-	Db              *repostitory.Db
+	Db              repostitory.RepoIFace
 	MqConn          *amqp091.Connection
 	EmailQueue      queue.QueueIface
 	ResQueue        queue.QueueIface
@@ -29,6 +29,7 @@ type Server struct {
 	JobsChan        chan types.Data
 	WorkersWg       *sync.WaitGroup
 	SendersWg       *sync.WaitGroup
+	ConsumerWg      *sync.WaitGroup
 	NumberOfSenders int
 	NumberOfWorkers int
 }
@@ -69,6 +70,8 @@ func NewSever(config config.Config) Server {
 
 	var workerWg sync.WaitGroup
 
+	var consumerWg sync.WaitGroup
+
 	return Server{
 		Logger:          config.Logger,
 		PgPool:          pool,
@@ -79,6 +82,7 @@ func NewSever(config config.Config) Server {
 		Service:         service,
 		JobsChan:        jobsChan,
 		SenderChan:      senderChan,
+		ConsumerWg:      &consumerWg,
 		WorkersWg:       &workerWg,
 		SendersWg:       &senderWg,
 		NumberOfSenders: config.Consumer.NumberOfSenders,
@@ -92,6 +96,7 @@ func (s Server) Shutdown(signal string) {
 
 	// close consumer -> close the emailqueue
 	s.EmailQueue.Close()
+	s.ConsumerWg.Wait()
 	s.Logger.Log.Infoln("consumer have stopped")
 	// close worker
 

@@ -4,6 +4,7 @@ import (
 	"email_service/internals/server"
 	"email_service/internals/types"
 	"encoding/json"
+	"sync"
 
 	"github.com/sakamoto-max/rabbit_mq/queue"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
@@ -24,13 +25,16 @@ func StartConsumer(server server.Server) {
 		jobs:       server.JobsChan,
 	}
 
-	go consumer.StartListening()
+
+
+	server.ConsumerWg.Add(1)
+	go consumer.StartListening(server.ConsumerWg)
 
 	server.Logger.Log.Infoln("consumer has started")
-
 }
 
-func (c *consumer) StartListening() {
+func (c *consumer) StartListening(wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	msgs, err := c.emailQueue.Consume()
 	if err != nil {
@@ -46,8 +50,8 @@ func (c *consumer) StartListening() {
 
 		data := convertIntoStruct(&msg.Body)
 
-		c.logger.Log.Infow("consumer has got data", 
-			zap.String("targer service", data.TargetService), 	
+		c.logger.Log.Infow("consumer has got data",
+			zap.String("targer service", data.TargetService),
 			zap.String("task name", data.TaskName),
 		)
 

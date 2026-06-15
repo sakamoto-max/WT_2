@@ -20,21 +20,23 @@ import (
 )
 
 type Server struct {
-	Logger          *logger.MyLogger
-	AuthPool        *pgxpool.Pool
-	TrackerPool     *pgxpool.Pool
-	Db              *repository.Db
-	MqConn          *amqp091.Connection
-	PlanQueue       queue.QueueIface
-	EmailQueue      queue.QueueIface
-	ResultQueue     queue.QueueIface
-	JobsChan        chan types.Data
-	Ctx             context.Context
-	CtxCancel       context.CancelFunc
-	WorkersWg       *sync.WaitGroup
-	FetcherWg       *sync.WaitGroup
-	Ticker          *time.Ticker
-	NumberOfWorkers int
+	Logger                *logger.MyLogger
+	AuthPool              *pgxpool.Pool
+	TrackerPool           *pgxpool.Pool
+	Db                    *repository.Db
+	MqConn                *amqp091.Connection
+	PlanQueue             queue.QueueIface
+	EmailQueue            queue.QueueIface
+	ResultQueue           queue.QueueIface
+	JobsChan              chan types.Data
+	Ctx                   context.Context
+	CtxCancel             context.CancelFunc
+	ConsumerWg            *sync.WaitGroup
+	WorkersWg             *sync.WaitGroup
+	FetcherWg             *sync.WaitGroup
+	Ticker                *time.Ticker
+	NumberOfWorkers       int
+	FetcherTargetServices *[]string
 }
 
 func NewServer(config config.Config) Server {
@@ -95,25 +97,30 @@ func NewServer(config config.Config) Server {
 
 	var workerWg sync.WaitGroup
 	var fetcherWg sync.WaitGroup
+	var consumerWg sync.WaitGroup
 
 	ticker := time.NewTicker(time.Second * 30)
 
+	targetServices := []string{enum.ServiceName_AUTH_SERVICE.String(), enum.ServiceName_TRACKER_SERVICE.String()}
+
 	return Server{
-		Logger:          logger,
-		AuthPool:        authPool,
-		TrackerPool:     trackerPool,
-		Db:              &Db,
-		MqConn:          mqConn,
-		PlanQueue:       planQueue,
-		EmailQueue:      emailQueue,
-		ResultQueue:     resultQueue,
-		JobsChan:        jobs,
-		Ctx:             ctx,
-		CtxCancel:       cancel,
-		WorkersWg:       &workerWg,
-		FetcherWg:       &fetcherWg,
-		Ticker:          ticker,
-		NumberOfWorkers: config.Consumer.NumberOfWorkers,
+		Logger:                logger,
+		AuthPool:              authPool,
+		TrackerPool:           trackerPool,
+		Db:                    &Db,
+		MqConn:                mqConn,
+		PlanQueue:             planQueue,
+		EmailQueue:            emailQueue,
+		ResultQueue:           resultQueue,
+		JobsChan:              jobs,
+		Ctx:                   ctx,
+		CtxCancel:             cancel,
+		WorkersWg:             &workerWg,
+		FetcherWg:             &fetcherWg,
+		ConsumerWg:            &consumerWg,
+		Ticker:                ticker,
+		NumberOfWorkers:       config.Consumer.NumberOfWorkers,
+		FetcherTargetServices: &targetServices,
 	}
 }
 
@@ -127,6 +134,7 @@ func (s Server) Shutdown(signal string) {
 	s.Logger.Log.Infoln("producer have stopped")
 
 	s.MqConn.Close() // stops consumer
+	s.ConsumerWg.Wait()
 	s.Logger.Log.Infoln("consumer has closed")
 
 	close(s.JobsChan)

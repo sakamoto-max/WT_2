@@ -20,7 +20,11 @@ type Db struct {
 	logger *logger.MyLogger
 }
 
-func RegisterDb(pool *pgxpool.Pool, logger *logger.MyLogger) *Db {
+type RepoIFace interface {
+	PushToFailed(data types.Data, numberOfTries int, status string, Err error) error
+}
+
+func RegisterDb(pool *pgxpool.Pool, logger *logger.MyLogger) RepoIFace {
 	return &Db{
 		pg:     pool,
 		logger: logger,

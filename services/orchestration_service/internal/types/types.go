@@ -1,10 +1,9 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
-	"orchestration_service/internal/utils"
 	"time"
-	// "github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
 
 type Data struct {
@@ -23,10 +22,10 @@ type Data struct {
 
 func (d *Data) ConvertToBytes() (*[]byte, error) {
 
-	dataInBytes, err := utils.ConvertIntoBytes(d)
+	dataInBytes, err := json.Marshal(d)
 	if err != nil {
-		return nil, fmt.Errorf("error while converting data into bytes : %w", err)
+		return nil, fmt.Errorf("error in converting data into bytes : %w", err)
 	}
 
-	return dataInBytes, nil
+	return &dataInBytes, nil
 }

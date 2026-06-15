@@ -21,11 +21,11 @@ type Sender struct {
 	logger     *logger.MyLogger
 	resQueue   queue.QueueIface
 	senderChan <-chan types.Data
-	db         *repostitory.Db
+	db         repostitory.RepoIFace
 }
 
 func StartSenders(server server.Server) {
-
+	
 	for i := range server.NumberOfSenders {
 		sender := &Sender{
 			id:         i + 1,
@@ -37,7 +37,6 @@ func StartSenders(server server.Server) {
 
 		server.SendersWg.Add(1)
 		go sender.Start(server.SendersWg)
-
 	}
 	server.Logger.Log.Infow("senders have started", zap.Int("number of senders", server.NumberOfSenders))
 }
@@ -57,6 +56,7 @@ func (s *Sender) Start(wg *sync.WaitGroup) {
 			s.ExponentialBackOff(msg)
 			continue
 		}
+
 		s.logger.Log.Infow("sender have successfully pushed the data into result Queue",
 			zap.Int("sender Id", s.id),
 		)

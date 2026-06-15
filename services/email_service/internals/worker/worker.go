@@ -42,7 +42,6 @@ func (w *worker) Start(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
-
 		msg, ok := <-w.jobs
 
 		if !ok {

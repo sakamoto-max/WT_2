@@ -20,6 +20,4 @@ func Test_ToUserSignUp(t *testing.T) {
 	assert.Equal(t, resp.Email, in.Email)
 	assert.Equal(t, resp.Password, in.Password)
 	assert.Equal(t, resp.Role, in.Role)
-
-
 }

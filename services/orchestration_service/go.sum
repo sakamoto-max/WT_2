@@ -3,6 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gabriel-vasile/mimetype v1.4.13 h1:46nXokslUBsAJE/wMsp5gtO500a4F3Nkz9Ufpk2AcUM=
 github.com/gabriel-vasile/mimetype v1.4.13/go.mod h1:d+9Oxyo1wTzWdyVUPMmXFvp4F9tea18J8ufA774AB3s=
+github.com/go-openapi/testify v0.0.0-20251001202347-e909893202bd h1:+xqXbJEPxWM3YMAJ7yKV2FyqC/V/Dn8XggLC4tsMBXo=
+github.com/go-openapi/testify v0.0.0-20251001202347-e909893202bd/go.mod h1:Eo7DE2AKidl1U1diMDA05WiNks99vsR7HUun6G6Vob4=
 github.com/go-playground/assert/v2 v2.2.0 h1:JvknZsQTYeFEAhQwI4qEt9cyV5ONwRHC+lYKSsYSR8s=
 github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
@@ -29,10 +31,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rabbitmq/amqp091-go v1.11.0 h1:HxIctVm9Gid/Vtn706necmZ7Wj6pgGI2eqplRbEY8O8=
 github.com/rabbitmq/amqp091-go v1.11.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
-github.com/sakamoto-max/rabbit_mq v1.3.0 h1:1gwU9VYZAQzzDLZssN2H9kpkT1tFxzkEyDu4C5rY7ko=
-github.com/sakamoto-max/rabbit_mq v1.3.0/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
-github.com/sakamoto-max/rabbit_mq v1.3.2 h1:RYQP0cGydNx2nx+YwJQK181hwpVYbZMeSs7Kmlj9uS8=
-github.com/sakamoto-max/rabbit_mq v1.3.2/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
+github.com/sakamoto-max/rabbit_mq v1.3.3 h1:QGiYXEbXqsWfiK9TdISExPX2cUtQyyCzvfhe2I3nJp4=
+github.com/sakamoto-max/rabbit_mq v1.3.3/go.mod h1:bVVRb8LccqYx72JyIogpSkCTVLY+Pnx55fG0ZDM9a6s=
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba h1:ayEzn70puI4hjdMbWD3ON5eZy4LsmmmxllW1wV5x9C4=
 github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429114223-5f308609d5ba/go.mod h1:iG7xX4nTbmew1MGAzL7ek8Cxlz6rxojuUDTKqQjYDCM=
 github.com/sakamoto-max/wt_2_proto v1.1.9 h1:3cE6Ls68ZEW2YpYxG84P3eMH7Ar1RKaqa1vorbHeUx0=

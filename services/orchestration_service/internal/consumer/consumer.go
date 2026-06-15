@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	server "orchestration_service/internal/server"
 	"orchestration_service/internal/types"
+	"sync"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
@@ -24,12 +25,14 @@ func StartConsumer(server server.Server) {
 		jobs:        server.JobsChan,
 	}
 
-	go c.Start()
+	server.ConsumerWg.Add(1)
+	go c.Start(server.ConsumerWg)
 
 	server.Logger.Log.Infoln("consumer has started")
 }
 
-func (c *consumer) Start() {
+func (c *consumer) Start(wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	msgsQueue, err := c.resultQueue.Consume()
 	if err != nil {

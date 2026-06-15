@@ -15,6 +15,7 @@ require (
 require github.com/sakamoto-max/wt_2_pkg v0.0.0-20260429112504-ebf9f2fe5561
 
 require (
+	github.com/go-openapi/testify v0.0.0-20251001202347-e909893202bd // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
