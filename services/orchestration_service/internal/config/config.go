@@ -17,6 +17,7 @@ type Config struct {
 	Mq       MqConfig
 	Logger   *logger.MyLogger
 	Consumer ConsumerConfig
+	Cache    Cache
 }
 
 type MqConfig struct {
@@ -38,6 +39,14 @@ type DbConfig struct {
 	PgPort         string `validate:"required"`
 	PgDatabaseName string `validate:"required"`
 	PgSSLMode      string `validate:"required"`
+}
+
+type Cache struct {
+	UserName string `validate:"required"`
+	Password string `validate:"required"`
+	Host     string `validate:"required"`
+	Port     string `validate:"required"`
+	Db       string `validate:"required"`
 }
 
 type ConsumerConfig struct {
@@ -84,6 +93,14 @@ func LoadConfig() Config {
 		MqPort:     os.Getenv("MQ_PORT"),
 	}
 
+	cache := Cache{
+		UserName: os.Getenv("REDIS_USER_NAME"),
+		Host:     os.Getenv("REDIS_HOST"),
+		Port:     os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASS"),
+		Db:       os.Getenv("REDIS_DB"),
+	}
+
 	numberOfSendersStr := os.Getenv("NUMBER_OF_SENDERS")
 	numberOfSenders, err := strconv.Atoi(numberOfSendersStr)
 	if err != nil {
@@ -106,6 +123,7 @@ func LoadConfig() Config {
 		Dbs:      dbs,
 		Consumer: consumer,
 		Mq:       mqConfig,
+		Cache:    cache,
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())

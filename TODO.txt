@@ -5,12 +5,8 @@ change exponential backoff strategy
 
 
 
-
-
-
-
-
-
+// fails -> send back to queue -> try after a min 
+// 
 
 
 

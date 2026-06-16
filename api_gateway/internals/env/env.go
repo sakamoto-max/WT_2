@@ -3,9 +3,7 @@ package env
 import (
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
-	// "github.com/joho/godotenv"
 )
 
 func Load(fileName string) {

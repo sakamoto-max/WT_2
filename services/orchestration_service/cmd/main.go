@@ -17,8 +17,10 @@ func main() {
 	server := server.NewServer(config)
 
 	go consumer.StartConsumer(server)
+	go workers.StartWorkersForConsumer(server)
+
 	go fetcher.StartFetcher(server)
-	go workers.StartWorkers(server)
+	go workers.StartWorkersForFetcher(server)
 
 	sigChan := make(chan os.Signal, 1)
 

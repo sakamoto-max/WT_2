@@ -148,18 +148,18 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 
 		s.cache.PlanId.SetUserPlanId(ctx, domain.ToGetPlan(in), PlanId)
 	}
-
+	
 	var exerciseIds []string
 	for _, eachName := range in.ExerciseNames {
-
+		
 		r, err := s.gClient.ExerciseExistsReturnId(ctx, &exerpb.SendExerciseName{ExerciseName: eachName, UserId: in.UserId})
 		if err != nil {
 			return nil, err
 		}
-
+		
 		exerciseIds = append(exerciseIds, r.ExerciseId)
 	}
-
+	
 	err = s.pg.PlanExericseRepo.AddExercisesToPlan(ctx, PlanId, &exerciseIds)
 	if err != nil {
 		var dbErr *repository.DbErr
@@ -169,10 +169,10 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 			if err != nil {
 				return nil, err
 			}
-
+			
 			return nil, myerrs.AlreadyExitsErrMaker(fmt.Sprintf("exercise %s", resp.ExerciseName))
 		}
-
+		
 		return nil, err
 	}
 
@@ -182,25 +182,25 @@ func (s *Service) AddExercisesToPlan(ctx context.Context, in *planpb.PlanReq) (*
 	}
 
 	var allExerciseNames []string
-
+	
 	for _, exerciseId := range *allExerciseIds {
-
+		
 		r, err := s.gClient.GetExerciseName(ctx, &exerpb.SendExerciseID{ExerciseId: exerciseId, UserId: in.UserId})
 		if err != nil {
 			return nil, err
 		}
-
+		
 		allExerciseNames = append(allExerciseNames, r.ExerciseName)
 	}
-
+	
 	if err = s.cache.UserPlan.DelUserPlan(ctx, domain.GetPlan{UserId: in.UserId, PlanName: in.PlanName}); err != nil {
 		return nil, err
 	}
-
+	
 	return &planpb.PlanResp{
 		PlanName:      in.PlanName,
 		ExerciseNames: allExerciseNames,
-	}, nil
+		}, nil
 }
 
 func (s *Service) GetEmptyPlanId(ctx context.Context, in *planpb.SendUserID) (*planpb.EmptyPlanIdResp, error) {

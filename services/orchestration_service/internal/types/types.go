@@ -7,6 +7,9 @@ import (
 )
 
 type Data struct {
+	TaskId        string
+	WorkersTries  int
+	TimeOut       timeOut
 	DbId          string         `db:"id"`
 	TargetService string         `db:"target_service"`
 	CreatedBy     string         `db:"created_by"`
@@ -29,3 +32,32 @@ func (d *Data) ConvertToBytes() (*[]byte, error) {
 
 	return &dataInBytes, nil
 }
+
+func (d *Data) InitTimeOut() {
+	d.TimeOut = timeOut{
+		Level:    1,
+		Duration: time.Minute * 1,
+	}
+}
+
+func (d *Data) IncreaseTimeOut() {
+	d.TimeOut = timeOut{
+		Level:    d.TimeOut.Level + 1,
+		Duration: d.TimeOut.Duration * 2,
+	}
+}
+
+
+
+type timeOut struct {
+	Level    int
+	Duration time.Duration
+}
+
+// task Id -> gen random UUID, put it in context and send
+// if push failes -> send it back to the queue with a default timeout
+// when the worker receives the data check if it has timeout set in redis -> if not try to push it
+// if it has timer set -> skip it
+
+// if the push failes again -> double the timer
+// if the push failes after 5 tries -> task failed

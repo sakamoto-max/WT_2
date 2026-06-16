@@ -236,6 +236,10 @@ func Test_AddExercises(t *testing.T) {
 						Down: test.cacheDown,
 						Hit:  test.cacheHit,
 					},
+					UserPlan: &cachemock.UserPlan{
+						Down: test.cacheDown,
+						Hit: test.cacheHit,
+					},
 				},
 				gClient: &clientmock.ClientMock{
 					ServerIsDown:   test.clientDown,
@@ -305,6 +309,10 @@ func Test_DeleteExerciseFromPlan(t *testing.T) {
 					PlanId: &cachemock.PlanId{
 						Down: test.cacheDown,
 						Hit:  test.cacheHit,
+					},
+					UserPlan: &cachemock.UserPlan{
+						Down: test.cacheDown,
+						Hit: test.cacheHit,
 					},
 				},
 				gClient: &clientmock.ClientMock{

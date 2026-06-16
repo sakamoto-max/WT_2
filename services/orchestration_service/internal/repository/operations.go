@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/sakamoto-max/wt_2_proto/shared/enum"
 )
@@ -108,6 +109,7 @@ func (a *database) FetchData(ctx context.Context, wg *sync.WaitGroup, dataChan c
 		}
 
 		data := types.Data{
+			TaskId:        uuid.New().String(),
 			DbId:          dbId,
 			TargetService: TargetService,
 			CreatedBy:     CreatedBy,

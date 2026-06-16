@@ -5,6 +5,7 @@ import (
 	server "orchestration_service/internal/server"
 	"orchestration_service/internal/types"
 	"sync"
+	"time"
 
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	mqTypes "github.com/sakamoto-max/rabbit_mq/types"
@@ -22,7 +23,7 @@ func StartConsumer(server server.Server) {
 	c := consumer{
 		resultQueue: server.ResultQueue,
 		logger:      server.Logger,
-		jobs:        server.JobsChan,
+		jobs:        server.ConsumerJobsChan,
 	}
 
 	server.ConsumerWg.Add(1)
@@ -39,7 +40,16 @@ func (c *consumer) Start(wg *sync.WaitGroup) {
 		c.logger.Log.Fatalf("unable to open the consumer : %v", err)
 	}
 
+	// when consumer gets data -> he will send it to the consumer jobs chan
+	// and the consumer workers will pick up the job and complete it
+
 	for {
+
+		if len(c.jobs) == 10 {
+			time.Sleep(time.Second * 30)
+			continue
+		}
+
 		msg, ok := <-msgsQueue
 		if !ok {
 			return
@@ -66,3 +76,8 @@ func (c *consumer) Start(wg *sync.WaitGroup) {
 
 	}
 }
+
+// make a chan for consumer
+// if consumer gets data -> send it to its workers
+
+// the job if these workers is -> update the value in db

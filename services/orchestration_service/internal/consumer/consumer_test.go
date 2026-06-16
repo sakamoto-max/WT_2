@@ -31,7 +31,7 @@ func Test_StartConsumer(t *testing.T) {
 		Logger:      logger,
 		ResultQueue: &resultQueue,
 		ConsumerWg:  &wg,
-		JobsChan:    jobsChan,
+		ConsumerJobsChan:    jobsChan,
 	}
 
 	go StartConsumer(server)

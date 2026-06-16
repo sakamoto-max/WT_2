@@ -27,7 +27,7 @@ func StartFetcher(server server.Server) {
 		db:             server.Db,
 		logger:         server.Logger,
 		targetServices: server.FetcherTargetServices,
-		jobsChan:       server.JobsChan,
+		jobsChan:       server.FetcherJobsChan,
 		TickerChan:     server.Ticker.C,
 	}
 
@@ -45,6 +45,11 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-p.TickerChan:
+
+			if len(p.jobsChan) == 10 {
+				continue
+			}
+			
 			DataChan := make(chan *[]types.Data, len(*p.targetServices))
 
 			var fetchWg sync.WaitGroup
@@ -96,3 +101,7 @@ func (p *fetcher) Start(ctx context.Context, wg *sync.WaitGroup) {
 		}
 	}
 }
+
+
+// fetcher -> worker
+// consumer -> worker

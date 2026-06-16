@@ -43,7 +43,6 @@ type ExerClientMock struct{
 }
 
 func (e *ExerClientMock) ExerciseExistsReturnId(ctx context.Context, in *exerpb.SendExerciseName, opts ...grpc.CallOption) (*exerpb.ExerciseExistsReturnIdResp, error) {
-	fmt.Println("client started")
 	if e.Down {
 		fmt.Println("returnign err")
 		return nil, fmt.Errorf("client is down")
@@ -52,7 +51,6 @@ func (e *ExerClientMock) ExerciseExistsReturnId(ctx context.Context, in *exerpb.
 	if !e.ExerciseExists {
 		return nil, fmt.Errorf("exercise doesn't exist")
 	}
-	
-	fmt.Println("client ended")
+
 	return &exerpb.ExerciseExistsReturnIdResp{ExerciseId: "123"}, nil
 }

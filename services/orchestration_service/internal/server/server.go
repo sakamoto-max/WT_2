@@ -12,6 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/sakamoto-max/rabbit_mq/queue"
 	mq "github.com/sakamoto-max/rabbit_mq/queue"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
@@ -23,16 +24,20 @@ type Server struct {
 	Logger                *logger.MyLogger
 	AuthPool              *pgxpool.Pool
 	TrackerPool           *pgxpool.Pool
+	RedisClient           *redis.Client
 	Db                    *repository.Db
 	MqConn                *amqp091.Connection
 	PlanQueue             queue.QueueIface
 	EmailQueue            queue.QueueIface
 	ResultQueue           queue.QueueIface
-	JobsChan              chan types.Data
+	DeadLetterQueue       queue.QueueIface
+	FetcherJobsChan       chan types.Data
+	ConsumerJobsChan      chan types.Data
 	Ctx                   context.Context
 	CtxCancel             context.CancelFunc
 	ConsumerWg            *sync.WaitGroup
-	WorkersWg             *sync.WaitGroup
+	FetcherWorkersWg      *sync.WaitGroup
+	ConsumerWorkerWg      *sync.WaitGroup
 	FetcherWg             *sync.WaitGroup
 	Ticker                *time.Ticker
 	NumberOfWorkers       int
@@ -67,6 +72,11 @@ func NewServer(config config.Config) Server {
 
 	config.Logger.Log.Infoln("connected to postgres")
 
+	redisClient, err := database.NewRedisConn(config)
+	if err != nil {
+		config.Logger.Log.Fatalw("failed to connect to redis", zap.Error(err))
+	}
+
 	mqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/",
 		config.Mq.MqUserName,
 		config.Mq.MqPass,
@@ -85,17 +95,20 @@ func NewServer(config config.Config) Server {
 
 	resultQueue := mq.NewMessageQueue(mqConn, enum.QueueName_RESULT_QUEUE.String())
 
+	deadLetterQueue := mq.NewMessageQueue(mqConn, "deadLetterQueue")
+
 	authDb := repository.RegisterDb(authPool, enum.ServiceName_AUTH_SERVICE.String())
 	trackerDb := repository.RegisterDb(trackerPool, enum.ServiceName_TRACKER_SERVICE.String())
 
-	Db := repository.NewDb(authDb, trackerDb)
+	Db := repository.NewDb(authDb, trackerDb, redisClient)
 
-	// NumberOfWorkers := 5
+	fetcherJobs := make(chan types.Data, config.Consumer.NumberOfWorkers*2)
+	consumerJobs := make(chan types.Data, config.Consumer.NumberOfWorkers*2)
 
-	jobs := make(chan types.Data, config.Consumer.NumberOfWorkers*2)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	var workerWg sync.WaitGroup
+	var fetcherWorkersWg sync.WaitGroup
+	var consumerWorkersWg sync.WaitGroup
 	var fetcherWg sync.WaitGroup
 	var consumerWg sync.WaitGroup
 
@@ -107,15 +120,19 @@ func NewServer(config config.Config) Server {
 		Logger:                logger,
 		AuthPool:              authPool,
 		TrackerPool:           trackerPool,
+		RedisClient:           redisClient,
 		Db:                    &Db,
 		MqConn:                mqConn,
 		PlanQueue:             planQueue,
 		EmailQueue:            emailQueue,
 		ResultQueue:           resultQueue,
-		JobsChan:              jobs,
+		DeadLetterQueue:       deadLetterQueue,
+		FetcherJobsChan:       fetcherJobs,
+		ConsumerJobsChan:      consumerJobs,
 		Ctx:                   ctx,
 		CtxCancel:             cancel,
-		WorkersWg:             &workerWg,
+		FetcherWorkersWg:      &fetcherWorkersWg,
+		ConsumerWorkerWg:      &consumerWorkersWg,
 		FetcherWg:             &fetcherWg,
 		ConsumerWg:            &consumerWg,
 		Ticker:                ticker,
@@ -137,7 +154,12 @@ func (s Server) Shutdown(signal string) {
 	s.ConsumerWg.Wait()
 	s.Logger.Log.Infoln("consumer has closed")
 
-	close(s.JobsChan)
-	s.WorkersWg.Wait()
-	s.Logger.Log.Infoln("workers have stopped")
+	close(s.FetcherJobsChan)
+	s.FetcherWorkersWg.Wait()
+	s.Logger.Log.Infoln("fetcher workers have stopped")
+
+	close(s.ConsumerJobsChan)
+	s.ConsumerWorkerWg.Wait()
+	s.Logger.Log.Infoln("consumer workers have stopped")
+
 }

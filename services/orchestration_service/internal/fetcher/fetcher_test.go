@@ -36,7 +36,7 @@ func Test_StartFetcher(t *testing.T) {
 	server := server.Server{
 		Db:                    &db,
 		Logger:                logger,
-		JobsChan:              jobsChan,
+		FetcherJobsChan:       jobsChan,
 		FetcherTargetServices: &targetServices,
 		Ticker:                ticker,
 		FetcherWg:             &wg,
