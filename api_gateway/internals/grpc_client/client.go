@@ -29,28 +29,28 @@ func ConnectToClients(config config.Config) *GrpcClient {
 
 	authUrl := fmt.Sprintf("%v:%v", config.AuthServerConfig.Host, config.AuthServerConfig.Addr)
 
-	connForAuth, err := grpc.NewClient(authUrl)
+	connForAuth, err := grpc.NewClient(authUrl, opts...)
 	if err != nil {
 		config.Logger.Log.Fatalf("error creating auth client : %v", err)
 	}
 
 	planUrl := fmt.Sprintf("%v:%v", config.PlanServerConfig.Host, config.PlanServerConfig.Addr)
 
-	connForPlan, err := grpc.NewClient(planUrl)
+	connForPlan, err := grpc.NewClient(planUrl,opts...)
 	if err != nil {
 		config.Logger.Log.Fatalf("error creating plan client : %v", err)
 	}
 
 	exerUrl := fmt.Sprintf("%v:%v", config.ExerServerConfig.Host, config.ExerServerConfig.Addr)
 
-	connForExer, err := grpc.NewClient(exerUrl)
+	connForExer, err := grpc.NewClient(exerUrl,opts...)
 	if err != nil {
 		config.Logger.Log.Fatalf("error creating exer client : %v", err)
 	}
 
 	trackerUrl := fmt.Sprintf("%v:%v", config.TrackerServerConfig.Host, config.TrackerServerConfig.Addr)
 
-	connForTracker, err := grpc.NewClient(trackerUrl)
+	connForTracker, err := grpc.NewClient(trackerUrl,opts...)
 	if err != nil {
 		config.Logger.Log.Fatalf("error creating tracker client : %v", err)
 	}

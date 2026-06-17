@@ -43,7 +43,7 @@ type DbConfig struct {
 
 type Cache struct {
 	UserName string `validate:"required"`
-	Password string `validate:"required"`
+	Password string 
 	Host     string `validate:"required"`
 	Port     string `validate:"required"`
 	Db       string `validate:"required"`
@@ -100,6 +100,8 @@ func LoadConfig() Config {
 		Password: os.Getenv("REDIS_PASS"),
 		Db:       os.Getenv("REDIS_DB"),
 	}
+
+
 
 	numberOfSendersStr := os.Getenv("NUMBER_OF_SENDERS")
 	numberOfSenders, err := strconv.Atoi(numberOfSendersStr)

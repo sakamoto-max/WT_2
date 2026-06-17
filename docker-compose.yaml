@@ -32,7 +32,7 @@ services:
         condition: service_healthy
     command: [
       "-path", "/migrations",
-      "-database", "postgresql://postgres:root@postgres:5432/auth?sslmode=disable",
+      "-database", "postgresql://postgres:root@postgres:5432/wt_auth?sslmode=disable",
       "up"
     ]
   tracker-migrate:
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
     command: [
       "-path", "/migrations",
-      "-database", "postgresql://postgres:root@postgres:5432/tracker?sslmode=disable", "up"
+      "-database", "postgresql://postgres:root@postgres:5432/wt_tracker?sslmode=disable", "up"
     ]
   exercise-migrate:
     build: services/exercise_service/migrator
@@ -55,7 +55,7 @@ services:
         condition: service_healthy
     command: [
       "-path", "/migrations",
-      "-database", "postgresql://postgres:root@postgres:5432/exercise?sslmode=disable", "up"
+      "-database", "postgresql://postgres:root@postgres:5432/wt_exercises?sslmode=disable", "up"
     ]
   plan-migrate:
     build: services/plan_service/migrator
@@ -66,9 +66,20 @@ services:
         condition: service_healthy
     command: [
       "-path", "/migrations",
-      "-database", "postgresql://postgres:root@postgres:5432/plan?sslmode=disable", "up"
+      "-database", "postgresql://postgres:root@postgres:5432/wt_plan?sslmode=disable", "up"
     ]
   
+  email-migrate:
+    build: services/email_service/migrator
+    networks:
+      - wt
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: [
+      "-path", "/migrations",
+      "-database", "postgresql://postgres:root@postgres:5432/wt_email?sslmode=disable", "up"
+    ]
   redis:
     image: redis
     networks:
@@ -197,7 +208,7 @@ services:
     networks:
       - wt
     env_file:
-      - servies/orchestration_service/.env
+      - services/orchestration_service/.env
     depends_on:
       postgres:
         condition: service_healthy

@@ -7,13 +7,6 @@ import (
 
 func main() {
 
-	// stage := os.Getenv("STAGE")
-	// if stage == "" {
-	// 	env.Load("../../.env")
-	// }
-
-	// env.LookupForApi()
-
 	config := config.LoadConfig()
 
 	app := bootstrap.NewApp(config)

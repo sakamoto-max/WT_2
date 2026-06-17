@@ -12,6 +12,7 @@ import (
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/config"
 	grpcclient "github.com/sakamoto-max/wt_2/api_gateway/internals/grpc_client"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/handlers"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/jwt"
 	"github.com/sakamoto-max/wt_2/api_gateway/internals/routes"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 	"go.uber.org/zap"
@@ -29,6 +30,8 @@ func NewApp(config config.Config) *app {
 
 	client := grpcclient.ConnectToClients(config)
 
+	config.Logger.Log.Infoln("connected to grpc clients")
+
 	handler := handlers.NewHandler(
 		client.AuthClient,
 		client.PlanClient,
@@ -36,23 +39,25 @@ func NewApp(config config.Config) *app {
 		client.TrackClient,
 	)
 
+	jwt.JwtInit(config)
+
+	config.Logger.Log.Infoln("created handler")
+
 	router := routes.NewRouter(handler)
+
+	config.Logger.Log.Infoln("created router")
 
 	return &app{
 		addr: config.HttpServer.Addr,
 		config: config,
 		router: router,
 		clients: client,
+		logger: config.Logger,
 	}
 }
 
 func (h *app) Run() {
 
-	// logger.Log.Info("starting the server")
-
-	// logger.Log.Info("connected to the grpc clients")
-
-	// logger.Log.Info("created the handlers")
 
 	server := http.Server{
 		Addr:    h.addr,

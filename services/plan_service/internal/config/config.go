@@ -63,10 +63,6 @@ type ServerConfig struct {
 
 func LoadConfig() Config {
 
-	// stage := os.Getenv("STAGE")
-	// if stage == "" {
-	// 	env.Load("../../.env")
-	// }
 
 	logger := logger.NewLogger()
 
