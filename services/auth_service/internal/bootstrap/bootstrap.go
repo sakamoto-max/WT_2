@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"auth_service/internal/config"
 	"auth_service/internal/database"
+	"auth_service/internal/jwt"
 	"auth_service/internal/repository"
 	"auth_service/internal/repository/cache"
 	"auth_service/internal/services"
@@ -39,6 +40,8 @@ func NewApp(config config.Config) *app {
 	if err != nil {
 		config.Logger.Log.Fatalw("failed to connect to redis", zap.Error(err))
 	}
+
+	jwt.JwtInit(config)
 
 	config.Logger.Log.Infoln("connected to redis")
 
