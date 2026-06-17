@@ -13,11 +13,11 @@ func Test_GenerateAccessToken(t *testing.T) {
 	assert.NotEmpty(t, accessToken)
 }
 
-func Test_GenerateAccessTokenFastExp(t *testing.T) {
-	accessToken, err := GenerateAccessTokenFastExp("123", "456")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, accessToken)
-}
+// func Test_GenerateAccessTokenFastExp(t *testing.T) {
+// 	accessToken, err := GenerateAccessTokenFastExp("123", "456")
+// 	assert.NoError(t, err)
+// 	assert.NotEmpty(t, accessToken)
+// }
 
 func Test_GenerateRefreshToken(t *testing.T) {
 	refreshToken, err := GenerateRefreshToken("123", "456")

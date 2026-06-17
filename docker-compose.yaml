@@ -24,7 +24,7 @@ services:
       - POSTGRES_PASSWORD=root
 
   auth-migrate:
-    build: services\auth_service\migrator
+    build: services/auth_service/migrator
     networks:
       - wt
     depends_on:
@@ -36,7 +36,7 @@ services:
       "up"
     ]
   tracker-migrate:
-    build: services\tracker_service\migrator
+    build: services/tracker_service/migrator
     networks:
       - wt
     depends_on:
@@ -47,7 +47,7 @@ services:
       "-database", "postgresql://postgres:root@postgres:5432/tracker?sslmode=disable", "up"
     ]
   exercise-migrate:
-    build: services\exercise_service\migrator
+    build: services/exercise_service/migrator
     networks:
       - wt
     depends_on:
@@ -58,7 +58,7 @@ services:
       "-database", "postgresql://postgres:root@postgres:5432/exercise?sslmode=disable", "up"
     ]
   plan-migrate:
-    build: services\plan_service\migrator
+    build: services/plan_service/migrator
     networks:
       - wt
     depends_on:
@@ -97,19 +97,13 @@ services:
       retries: 5
       start_period: 30s
   auth:
-    build: services\auth_service
+    build: services/auth_service
     networks:
       - wt
     ports:
       - "6001:6001"
-    environment:
-      - GRPC_SERVER_ADDR=:6001
-      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/auth?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=0
-      - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
-      - SERVICE_NAME=auth_service
+    env_file:
+      - services/auth_service/.env
     depends_on:
       redis:
         condition: service_healthy
@@ -126,15 +120,8 @@ services:
       - wt
     ports:
       - "6002:6002"
-    environment:
-      - GRPC_SERVER_ADDR=:6002
-      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/plan?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=1
-      - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
-      - SERVICE_NAME=plan_service
-      - EXERCISE_GRPC_SERVER_ADDR=exercise:6003
+    env_file:
+      - services/plan_service/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,14 +137,8 @@ services:
     command: ./consumer
     networks:
       - wt
-    environment:
-      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/plan?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=1
-      - SERVICE_NAME=plan_service_consumer
-      - EXERCISE_GRPC_SERVER_ADDR=:6003
-      - MQ_URL=amqp://guest:guest@rabbitmq:5672/
+    env_file:
+      - services/plan_service/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -173,15 +154,8 @@ services:
       - wt
     ports:
       - 6003:6003
-    environment:
-      - GRPC_SERVER_ADDR=:6003
-      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/exercise?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=2
-      - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
-      - SERVICE_NAME=exercise_service
-      - MQ_URL=amqp://guest:guest@rabbitmq:5672/
+    env_file:
+      - services/exercise_service/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -197,17 +171,8 @@ services:
       - wt
     ports:
       - 6004:6004
-    environment:
-      - GRPC_SERVER_ADDR=:6004
-      - POSTGRES_CONN=postgresql://postgres:root@postgres:5432/tracker?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=4
-      - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
-      - GRPC_SERVER_ADDR=:6004
-      - SERVICE_NAME=tracker_service
-      - EXER_GRPC_SERVER_ADDR=exercise:6003
-      - PLAN_GRPC_SERVER_ADDR=plan:6002
+    env_file:
+      - services/tracker_service/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -220,6 +185,8 @@ services:
     build: services\email_service
     networks:
       - wt
+    env_file:
+      - services/email_service/.env
     environment:
       - MQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
@@ -229,13 +196,8 @@ services:
     build: services\orchestration_service
     networks:
       - wt
-    environment:
-      - AUTH_POSTGRES_CONN=postgresql://postgres:root@postgres:5432/auth?sslmode=disable
-      - REDIS_ADDR=redis:6379
-      - REDIS_PASS=
-      - REDIS_DB=3
-      - MQ_URL=amqp://guest:guest@rabbitmq:5672/
-      - TRACKER_POSTGRES_CONN=postgresql://postgres:root@postgres:5432/tracker?sslmode=disable
+    env_file:
+      - servies/orchestration_service/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -254,14 +216,8 @@ services:
       - wt
     ports: 
       - 5000:5000
-    environment:
-      - HTTP_SERVER_ADDR=:5000
-      - AUTH_GRPC_CLIENT_ADDR=auth:6001
-      - PLAN_GRPC_CLIENT_ADDR=plan:6002
-      - EXER_GRPC_CLIENT_ADDR=exercise:6003
-      - TRACKER_GRPC_CLIENT_ADDR=tracker:6004
-      - SECRET_KEY=56ekjafibaue2y8e730q8998q9h
-      - SERVICE_NAME=gateway
+    env_file:
+      - api_gateway/.env
     depends_on:
       postgres:
         condition: service_healthy

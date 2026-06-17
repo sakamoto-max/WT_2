@@ -48,10 +48,10 @@ func (t *TokenMock) GetRefreshToken(ctx context.Context, uuid string) (string, e
 		return "", nil
 	}
 
-	if t.RefreshExp {
-		refresh, _ := jwt.GenerateAccessTokenFastExp("123454321", "123456543")
-		return refresh, nil
-	}
+	// if t.RefreshExp {
+	// 	refresh, _ := jwt.GenerateAccessTokenFastExp("123454321", "123456543")
+	// 	return refresh, nil
+	// }
 
 	refresh, _ := jwt.GenerateRefreshToken("123456789765432", "2134567234567")
 	return refresh, nil

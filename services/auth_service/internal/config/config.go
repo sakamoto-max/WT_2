@@ -1,7 +1,7 @@
 package config
 
 import (
-	"auth_service/internal/env"
+	// "auth_service/internal/env"
 	"errors"
 	"log"
 	"os"
@@ -15,6 +15,7 @@ type Config struct {
 	Cache  CacheConfig
 	Server ServerConfig
 	Logger *logger.MyLogger
+	Auth   AuthConfig
 }
 
 type DbConfig struct {
@@ -39,12 +40,17 @@ type ServerConfig struct {
 	ServiceName    string `validate:"required"`
 }
 
+type AuthConfig struct {
+	SecretKey string `validate:"required"`
+}
+
+
 func LoadConfig() Config {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../../.env")
-	}
+	// stage := os.Getenv("STAGE")
+	// if stage == "" {
+	// env.Load("../../.env")
+	// }
 
 	logger := logger.NewLogger()
 
@@ -70,11 +76,16 @@ func LoadConfig() Config {
 		ServiceName:    os.Getenv("SERVICE_NAME"),
 	}
 
+	authConfig := AuthConfig{
+		SecretKey: os.Getenv("SECRET_KEY"),
+	}
+
 	config := Config{
 		Db:     dbConfig,
 		Server: serverConfig,
 		Cache:  cacheConfig,
 		Logger: logger,
+		Auth:   authConfig,
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())

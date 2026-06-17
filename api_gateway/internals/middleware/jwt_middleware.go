@@ -21,7 +21,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			err.AppErrWriter(w)
 			return
 		}
-		
+
 		claims, err := jwt.ValidateToken(token)
 		if err != nil {
 			switch {
@@ -50,8 +50,8 @@ func JwtMiddleware(next http.Handler) http.Handler {
 
 }
 
-func GetClaims(ctx context.Context) (*jwt.JwtClaims, error) {
-	claims, ok := ctx.Value(claimsContextKey).(*jwt.JwtClaims)
+func GetClaims(ctx context.Context) (*jwt.Claims, error) {
+	claims, ok := ctx.Value(claimsContextKey).(*jwt.Claims)
 	if !ok {
 		return nil, fmt.Errorf("error getting claims")
 	}

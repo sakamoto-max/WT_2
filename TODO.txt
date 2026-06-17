@@ -1,14 +1,13 @@
-complete the unit tests for orc services
-fetcher
-
-change exponential backoff strategy
-
-
-
-// fails -> send back to queue -> try after a min 
-// 
-
-
+DEPLOY :
+1. create instance
+2. ssh into it
+3. sudo apt update
+4. install docker -> sudo apt install docker.io 
+5. install docker compose -> sudo apt install docker-compose-plugin
+6. install git
+7. close the git repo
+8. create .env files
+9. 
 
 
 

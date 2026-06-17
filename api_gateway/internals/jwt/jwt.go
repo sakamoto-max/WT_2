@@ -3,16 +3,13 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
-
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/config"
 	myerrors "github.com/sakamoto-max/wt_2_pkg/my_errors"
 )
 
-type claimsContext string
-
-var Claimskey claimsContext
+var SECRETKEY string
 
 var (
 	ErrTokenExpired     = errors.New("token is expired, get a new access token at /refresh")
@@ -22,29 +19,27 @@ var (
 	ErrRefreshExpired   = errors.New("referesh token is expired, please login again")
 	ErrSignatureInvalid = errors.New("token's signature is invalid")
 )
-type jwtStruct struct {
-	claims JwtClaims
-}
 
-type JwtClaims struct {
+type Claims struct {
 	UserId string
 	RoleId string
 	jwt.RegisteredClaims
 }
 
 func GenerateAccessToken(userId string, roleId string) (string, error) {
-	j := jwtStruct{}
 
-	j.claims.UserId = userId
-	j.claims.RoleId = roleId
-	j.claims.RegisteredClaims = jwt.RegisteredClaims{
+	j := Claims{}
+
+	j.UserId = userId
+	j.RoleId = roleId
+	j.RegisteredClaims = jwt.RegisteredClaims{
 		Issuer:    "workout-tracker",
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j.claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j)
 
-	accessToken, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	accessToken, err := token.SignedString([]byte(SECRETKEY))
 	if err != nil {
 		return "", myerrors.InternalServerErrMaker(fmt.Errorf("error signing the refresh token %w\n", err))
 	}
@@ -54,18 +49,18 @@ func GenerateAccessToken(userId string, roleId string) (string, error) {
 
 func GenerateRefreshToken(userId string, roleId string) (string, error) {
 
-	j := jwtStruct{}
+	j := Claims{}
 
-	j.claims.UserId = userId
-	j.claims.RoleId = roleId
-	j.claims.RegisteredClaims = jwt.RegisteredClaims{
+	j.UserId = userId
+	j.RoleId = roleId
+	j.RegisteredClaims = jwt.RegisteredClaims{
 		Issuer:    "workout-tracker",
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 15)),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j.claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, j)
 
-	refreshToken, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	refreshToken, err := token.SignedString([]byte(SECRETKEY))
 	if err != nil {
 		return "", myerrors.InternalServerErrMaker(fmt.Errorf("error signing the refresh token %w\n", err))
 	}
@@ -73,12 +68,12 @@ func GenerateRefreshToken(userId string, roleId string) (string, error) {
 	return refreshToken, nil
 }
 
-func ValidateToken(myToken string) (*JwtClaims, error) {
+func ValidateToken(myToken string) (*Claims, error) {
 
-	claims := &JwtClaims{}
+	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(myToken, claims, func(t *jwt.Token) (any, error) {
-		return []byte(os.Getenv("SECRET_KEY")), nil
+		return []byte(SECRETKEY), nil
 	})
 
 	if err != nil {
@@ -98,4 +93,8 @@ func ValidateToken(myToken string) (*JwtClaims, error) {
 	}
 
 	return claims, nil
+}
+
+func JwtInit(config config.Config) {
+	SECRETKEY = config.AuthConfig.SecretKey
 }

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"email_service/internals/env"
+	// "email_service/internals/env"
 	"os"
 	"strconv"
 
@@ -39,10 +39,10 @@ type ConsumerConfig struct {
 
 func LoadConfig() Config {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../.env")
-	}
+	// stage := os.Getenv("STAGE")
+	// if stage == "" {
+	// 	env.Load("../.env")
+	// }
 
 	logger := logger.NewLogger()
 

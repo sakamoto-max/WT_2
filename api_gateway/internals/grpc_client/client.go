@@ -2,9 +2,7 @@ package grpcclient
 
 import (
 	"fmt"
-	"os"
-
-	"github.com/sakamoto-max/wt_2_pkg/logger"
+	"github.com/sakamoto-max/wt_2/api_gateway/internals/config"
 	authpb "github.com/sakamoto-max/wt_2_proto/shared/auth"
 	exerpb "github.com/sakamoto-max/wt_2_proto/shared/exercise"
 	planpb "github.com/sakamoto-max/wt_2_proto/shared/plan"
@@ -13,7 +11,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type grpcClient struct {
+type GrpcClient struct {
 	authConn  *grpc.ClientConn
 	planConn  *grpc.ClientConn
 	exerConn  *grpc.ClientConn
@@ -25,32 +23,36 @@ type grpcClient struct {
 	TrackClient trackpb.TrackerServiceClient
 }
 
-func NewgrpcClient() *grpcClient {
-	return &grpcClient{}
-}
-
-func (g *grpcClient) ConnectToClients(logger *logger.MyLogger) *grpcClient {
+func ConnectToClients(config config.Config) *GrpcClient {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	connForAuth, err := grpc.NewClient(os.Getenv("AUTH_GRPC_CLIENT_ADDR"), opts...)
+	authUrl := fmt.Sprintf("%v:%v", config.AuthServerConfig.Host, config.AuthServerConfig.Addr)
+
+	connForAuth, err := grpc.NewClient(authUrl)
 	if err != nil {
-		logger.Log.Fatalf("error creating auth client : %v", err)
+		config.Logger.Log.Fatalf("error creating auth client : %v", err)
 	}
 
-	connForPlan, err := grpc.NewClient(os.Getenv("PLAN_GRPC_CLIENT_ADDR"), opts...)
+	planUrl := fmt.Sprintf("%v:%v", config.PlanServerConfig.Host, config.PlanServerConfig.Addr)
+
+	connForPlan, err := grpc.NewClient(planUrl)
 	if err != nil {
-		logger.Log.Fatalf("error creating plan client : %v", err)
+		config.Logger.Log.Fatalf("error creating plan client : %v", err)
 	}
 
-	connForExer, err := grpc.NewClient(os.Getenv("EXER_GRPC_CLIENT_ADDR"), opts...)
+	exerUrl := fmt.Sprintf("%v:%v", config.ExerServerConfig.Host, config.ExerServerConfig.Addr)
+
+	connForExer, err := grpc.NewClient(exerUrl)
 	if err != nil {
-		logger.Log.Fatalf("error creating exer client : %v", err)
+		config.Logger.Log.Fatalf("error creating exer client : %v", err)
 	}
 
-	connForTracker, err := grpc.NewClient(os.Getenv("TRACKER_GRPC_CLIENT_ADDR"), opts...)
+	trackerUrl := fmt.Sprintf("%v:%v", config.TrackerServerConfig.Host, config.TrackerServerConfig.Addr)
+
+	connForTracker, err := grpc.NewClient(trackerUrl)
 	if err != nil {
-		logger.Log.Fatalf("error creating tracker client : %v", err)
+		config.Logger.Log.Fatalf("error creating tracker client : %v", err)
 	}
 
 	authClient := authpb.NewAuthServiceClient(connForAuth)
@@ -58,7 +60,7 @@ func (g *grpcClient) ConnectToClients(logger *logger.MyLogger) *grpcClient {
 	ExerClient := exerpb.NewExerciseServiceClient(connForExer)
 	TrackerClient := trackpb.NewTrackerServiceClient(connForTracker)
 
-	return &grpcClient{
+	return &GrpcClient{
 		authConn:  connForAuth,
 		planConn:  connForPlan,
 		exerConn:  connForExer,
@@ -71,7 +73,7 @@ func (g *grpcClient) ConnectToClients(logger *logger.MyLogger) *grpcClient {
 	}
 }
 
-func (g *grpcClient) Close() error {
+func (g *GrpcClient) Close() error {
 	if err := g.authConn.Close(); err != nil {
 		return fmt.Errorf("error occured while closing auth client : %w", err)
 	}

@@ -3,7 +3,7 @@ package config
 import (
 	"errors"
 	"log"
-	"orchestration_service/internal/env"
+	// "orchestration_service/internal/env"
 	"os"
 	"strconv"
 
@@ -56,10 +56,10 @@ type ConsumerConfig struct {
 
 func LoadConfig() Config {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../.env")
-	}
+	// stage := os.Getenv("STAGE")
+	// if stage == "" {
+	// 	env.Load("../.env")
+	// }
 
 	logger := logger.NewLogger()
 

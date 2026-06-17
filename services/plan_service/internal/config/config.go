@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
-	"plan_service/internal/env"
+	// "plan_service/internal/env"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -63,10 +63,10 @@ type ServerConfig struct {
 
 func LoadConfig() Config {
 
-	stage := os.Getenv("STAGE")
-	if stage == "" {
-		env.Load("../../.env")
-	}
+	// stage := os.Getenv("STAGE")
+	// if stage == "" {
+	// 	env.Load("../../.env")
+	// }
 
 	logger := logger.NewLogger()
 
