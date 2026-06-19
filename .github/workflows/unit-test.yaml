@@ -1,0 +1,25 @@
+name: unit-tests
+
+on:
+    push:
+        branches: 
+            - "main"
+
+jobs:
+    auth-unit-test:
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: "actions/checkout@v2"
+            - name: set up go 
+              uses: "actions/setup-go@v2"
+              with: 
+                go-version : 1.25.4
+            - name: test
+              run: |
+                echo "cd services"
+                echo "cd auth_service"
+                echo "starting test"
+                go test ./...
+                echo "end test"
+
+            
