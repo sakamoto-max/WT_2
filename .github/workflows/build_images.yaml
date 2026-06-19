@@ -56,8 +56,68 @@ jobs:
               run: |
                 docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
                 docker push likithh/postgres:latest
-            
-            
-                
+    build_auth_migrator_image:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: build docker image
+              working-directory: services/auth_service/migrator/
+              run: 
+                docker build . -t likithh/auth_migrator:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/auth_migrator:latest
+    build_plan_migrator_image:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: build docker image
+              working-directory: services/plan_service/migrator/
+              run: 
+                docker build . -t likithh/plan_migrator:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/plan_migrator:latest
+    build_tracker_migrator_image:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: build docker image
+              working-directory: services/tracker_service/migrator/
+              run: 
+                docker build . -t likithh/tracker_migrator:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/tracker_migrator:latest
+    build_exercise_migrator_image:
+        runs-on: ubuntu-latest 
+        steps: 
+            - uses: actions/checkout@v4
+            - name: build docker image
+              working-directory: services/exercise_service/migrator/
+              run: 
+                docker build . -t likithh/exercise_migrator:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/exercise_migrator:latest
+    build_email_migrator_image:
+        runs-on: ubuntu-latest 
+        steps: 
+            - uses: actions/checkout@v4
+            - name: build docker image
+              working-directory: services/email_service/migrator/
+              run: 
+                docker build . -t likithh/email_migrator:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/email_migrator:latest
 
 
