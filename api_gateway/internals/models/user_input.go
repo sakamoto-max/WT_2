@@ -6,17 +6,17 @@ import (
 
 type Reps struct {
 	Weight float32 `json:"weight"`
-	Reps   int `json:"reps"`
+	Reps   int     `json:"reps"`
 }
 
 type Workout struct {
-	ExerciseName string    `json:"exercise_name"`
-	RepsWeight []Reps `json:"tracker"`
+	ExerciseName string `json:"exercise_name" validate:"required"`
+	RepsWeight   []Reps `json:"tracker" validate:"required"`
 }
 
 type Tracker struct {
-	UserResponse string `json:"user_response"`
-	Workout []Workout `json:"workout"`
+	UserResponse string    `json:"user_response" validate:"required_if"`
+	Workout      []Workout `json:"workout"`
 }
 
 type Signup struct {
@@ -41,7 +41,7 @@ type ExerciseName struct {
 }
 
 type Exercise struct {
-	Id        string       `json:"id,omitempty"`
+	Id        string    `json:"id,omitempty"`
 	Name      string    `json:"name"`
 	BodyPart  string    `json:"body_part"`
 	Equipment string    `json:"equipment"`
@@ -50,12 +50,12 @@ type Exercise struct {
 }
 
 type AllExercisesResp struct {
-	NumberOfExercises int `json:"number_of_exercises"`
-	Exercises []Exercise `json:"all_exercises"`
+	NumberOfExercises int        `json:"number_of_exercises"`
+	Exercises         []Exercise `json:"all_exercises"`
 }
 
-type CreateExerResp struct{
-	Messsage string `json:"message"`
+type CreateExerResp struct {
+	Messsage string   `json:"message"`
 	Exercise Exercise `json:"exercise"`
 }
 

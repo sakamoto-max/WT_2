@@ -1,0 +1,30 @@
+name: build docker images
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                service:
+                    - auth_service
+                    - plan_service
+                    - email_service
+                    - orchestration_service
+                    - tracker_service
+                    - exercise_service
+        
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build the Docker image for ${{matrix.service}}
+              working-directory: services/${{matrix.service}}
+              run: docker build . -t likithh/${{matrix.service}}:latest
+            - name: push the image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/${{matrix.service}}:latest
+        
+
