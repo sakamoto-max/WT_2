@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"orchestration_service/internal/types"
 
@@ -37,6 +38,9 @@ func (c *Cache) SkipTask(ctx context.Context, data types.Data) (bool, error) {
 
 	err := c.redis.Get(ctx, key).Scan(&value)
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return false, nil
+		}
 		return false, fmt.Errorf("failed to get the value from redis : %w", err)
 	}
 

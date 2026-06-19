@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	// "tracker_service/internal/env"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 )
@@ -56,11 +55,8 @@ type ServerConfig struct {
 }
 
 func LoadConfig() Config {
-
-	// stage := os.Getenv("STAGE")
-	// if stage == "" {
-	// 	env.Load("../../.env")
-	// }
+	
+	// env.Load("../../.env")
 
 	logger := logger.NewLogger()
 

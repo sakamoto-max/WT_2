@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-playground/validator/v10"
+	// "github.com/sakamoto-max/wt_2/api_gateway/internals/env"
 	"github.com/sakamoto-max/wt_2_pkg/logger"
 )
 
@@ -34,6 +35,8 @@ type AuthConfig struct {
 }
 
 func LoadConfig() Config {
+
+	// env.Load("../../.env")
 
 	logger := logger.NewLogger()
 

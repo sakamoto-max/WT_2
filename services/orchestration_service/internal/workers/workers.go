@@ -79,6 +79,7 @@ func (w *worker) start(wg *sync.WaitGroup) {
 		if err != nil {
 			w.logger.Log.Errorw("failed to check if the task should be skipped or not",
 				zap.Int("worker id", w.id),
+				zap.Error(err),
 			)
 			continue
 		}

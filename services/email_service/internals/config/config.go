@@ -39,10 +39,7 @@ type ConsumerConfig struct {
 
 func LoadConfig() Config {
 
-	// stage := os.Getenv("STAGE")
-	// if stage == "" {
-	// 	env.Load("../.env")
-	// }
+	// env.Load("../.env")
 
 	logger := logger.NewLogger()
 

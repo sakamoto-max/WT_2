@@ -63,6 +63,7 @@ type ServerConfig struct {
 
 func LoadConfig() Config {
 
+	// env.Load("../../.env")
 
 	logger := logger.NewLogger()
 
