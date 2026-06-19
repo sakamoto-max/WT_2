@@ -1,11 +1,13 @@
 name: build docker images
 
 on:
-  push:
-    branches: [ "main" ]
-
+    workflow_run:
+        workflows: ["unit-test"]
+        types:
+            - completed
 jobs:
     build:
+        if: ${{github.event.workflow_run.conclusion == 'success'}}
         runs-on: ubuntu-latest
         strategy:
             matrix:
@@ -27,4 +29,35 @@ jobs:
                 docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
                 docker push likithh/${{matrix.service}}:latest
         
+    build_and_push_gateway_image:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: action/checkout@v4
+            - name: build image for gateway
+              working-directory: api_gateway/
+              run:
+                docker build . -t likithh/gateway:latest
+            - name: push the image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/gateway:latest
+
+    build_postgres_image:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: action/checkout@v4
+            - name: build docker image
+              working-directory: infrastructure/postgres/
+              run: 
+                docker build . -t likithh/postgres:latest
+            - name: push the docker image
+              run: |
+                docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
+                docker push likithh/postgres:latest
+            
+            
+                
+
 

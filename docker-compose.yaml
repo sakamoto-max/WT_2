@@ -4,9 +4,7 @@ networks:
 
 services:
   postgres:
-    build: 
-      context: .
-      dockerfile: Dockerfile.pg
+    build: infrastructure/postgres
     networks:
       - wt
     container_name: pg    
