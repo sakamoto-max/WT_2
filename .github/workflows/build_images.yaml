@@ -25,7 +25,7 @@ jobs:
               working-directory: services/${{matrix.service}}
               run: docker build . -t likithh/${{matrix.service}}:latest
             - name: push the image
-              run: 
+              run: |
                 docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
                 docker push likithh/${{matrix.service}}:latest
         
@@ -39,7 +39,7 @@ jobs:
               run:
                 docker build . -t likithh/gateway:latest
             - name: push the image
-              run: 
+              run: |
                 docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
                 docker push likithh/gateway:latest
 
@@ -53,7 +53,7 @@ jobs:
               run: 
                 docker build . -t likithh/postgres:latest
             - name: push the docker image
-              run: 
+              run: |
                 docker login -u likithh -p ${{secrets.DOCKER_ACCESS_TOKEN}}
                 docker push likithh/postgres:latest
             
